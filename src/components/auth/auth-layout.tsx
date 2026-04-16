@@ -4,7 +4,7 @@ import { GlobeIcon, GraduationCapIcon, LockOpenIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import Header from "../header/header";
+import Header from "@/components/header/header";
 
 interface AuthLayoutProps {
   children: ReactNode;

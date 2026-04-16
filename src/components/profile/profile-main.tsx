@@ -1,14 +1,15 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { opportunityQueryKeys } from "@/hooks/queries/opportunity-query-keys";
 import {
-  getInternationalFavorites,
-  getNationalFavorites,
-  removeInternationalFavorite,
-  removeNationalFavorite,
-} from "../../lib/opportunities-api";
+  useRemoveInternationalFavoriteMutation,
+  useRemoveNationalFavoriteMutation,
+} from "@/hooks/queries/use-opportunity-queries";
+import { useProfileFavorites } from "@/hooks/use-profile-favorites";
 import ProfileConfirmationPopup from "./profile-confirmation-popup";
 import ProfileOpportunities from "./profile-opportunities";
 import type { FavoriteOpportunity } from "./types";
@@ -20,77 +21,32 @@ interface ConfirmationState {
   name: string;
 }
 
-const dedupeFavoriteOpportunities = (
-  items: FavoriteOpportunity[]
-): FavoriteOpportunity[] => {
-  const itemsById = new Map<string, FavoriteOpportunity>();
-
-  for (const item of items) {
-    const current = itemsById.get(item.id);
-
-    if (!current || current.categoria === "internacional") {
-      itemsById.set(item.id, item);
-    }
-  }
-
-  return [...itemsById.values()];
-};
-
 const ProfileMain = () => {
+  const queryClient = useQueryClient();
+  const removeInternationalFavoriteMutation =
+    useRemoveInternationalFavoriteMutation();
+  const removeNationalFavoriteMutation = useRemoveNationalFavoriteMutation();
+
+  const favoritesQuery = useProfileFavorites();
+
   const [favoriteOpportunities, setFavoriteOpportunities] = useState<
     FavoriteOpportunity[]
   >([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"favorites">("favorites");
   const [confirmationPopup, setConfirmationPopup] =
     useState<ConfirmationState | null>(null);
 
-  const loadFavorites = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [international, national] = await Promise.all([
-        getInternationalFavorites(),
-        getNationalFavorites(),
-      ]);
-
-      const internationalFavorites: FavoriteOpportunity[] = international.map(
-        (op) => ({
-          id: op.id,
-          nome: op.nome,
-          imagem: op.imagem,
-          pais: op.pais,
-          prazoInscricao: op.prazoInscricao,
-          categoria: "internacional" as const,
-          detalhePath: `/oportunidades/internacionais/${op.id}`,
-        })
-      );
-
-      const nationalFavorites: FavoriteOpportunity[] = national.map((op) => ({
-        id: op.id,
-        nome: op.nome,
-        imagem: op.imagem,
-        pais: op.pais,
-        prazoInscricao: op.prazoInscricao,
-        categoria: "nacional" as const,
-        detalhePath: `/oportunidades/nacionais/${op.id}`,
-      }));
-
-      setFavoriteOpportunities(
-        dedupeFavoriteOpportunities([
-          ...internationalFavorites,
-          ...nationalFavorites,
-        ])
-      );
-    } catch {
-      toast("Erro ao carregar favoritos.");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (favoritesQuery.data) {
+      setFavoriteOpportunities(favoritesQuery.data);
     }
-  }, []);
+  }, [favoritesQuery.data]);
 
   useEffect(() => {
-    loadFavorites();
-  }, [loadFavorites]);
+    if (favoritesQuery.error) {
+      toast("Erro ao carregar favoritos.");
+    }
+  }, [favoritesQuery.error]);
 
   const handleRemoveFromList = (
     detalhePath: string,
@@ -101,18 +57,24 @@ const ProfileMain = () => {
     setConfirmationPopup({ detalhePath, name, id, categoria });
   };
 
-  const handleConfirmRemove = async () => {
+  const handleConfirmRemove = useCallback(async () => {
     if (!confirmationPopup) {
       return;
     }
+
     const { id, name, categoria } = confirmationPopup;
 
     try {
       if (categoria === "internacional") {
-        await removeInternationalFavorite(id);
+        await removeInternationalFavoriteMutation.mutateAsync(id);
       } else {
-        await removeNationalFavorite(id);
+        await removeNationalFavoriteMutation.mutateAsync(id);
       }
+
+      await queryClient.invalidateQueries({
+        queryKey: opportunityQueryKeys.profileFavorites(),
+      });
+
       setFavoriteOpportunities((prev) => {
         return prev.filter((fav) => {
           return !(fav.id === id && fav.categoria === categoria);
@@ -122,10 +84,16 @@ const ProfileMain = () => {
     } catch {
       toast("Erro ao remover favorito.");
     }
-    setConfirmationPopup(null);
-  };
 
-  if (loading) {
+    setConfirmationPopup(null);
+  }, [
+    confirmationPopup,
+    queryClient,
+    removeInternationalFavoriteMutation,
+    removeNationalFavoriteMutation,
+  ]);
+
+  if (favoritesQuery.isPending) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
         <p className="text-white/60 text-xl">Carregando favoritos...</p>

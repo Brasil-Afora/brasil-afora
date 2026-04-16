@@ -3,8 +3,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import FilterDropdown from "@/components/ui/filter-dropdown";
 import { Input } from "@/components/ui/input";
-import FilterDropdown from "../ui/filter-dropdown";
 import { FILTER_OPTIONS } from "./filter-options";
 
 type AccentColor = "amber" | "blue";

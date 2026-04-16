@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   InternationalOpportunity,
   NationalOpportunity,
-} from "../lib/opportunities-api";
+} from "@/lib/opportunities-api";
 import useSessionStorage from "./use-session-storage";
 
 type Opportunity = InternationalOpportunity | NationalOpportunity;

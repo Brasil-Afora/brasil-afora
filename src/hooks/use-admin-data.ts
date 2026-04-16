@@ -1,21 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSession } from "../lib/auth-client";
+import { useCallback, useMemo, useState } from "react";
 import {
-  createInternationalOpportunity,
-  createNationalOpportunity,
-  deleteInternationalOpportunity,
-  deleteNationalOpportunity,
-  getInternationalOpportunities,
-  getNationalOpportunities,
-  type InternationalOpportunity,
-  type InternationalOpportunityInput,
-  type NationalOpportunity,
-  type NationalOpportunityInput,
-  updateInternationalOpportunity,
-  updateNationalOpportunity,
-} from "../lib/opportunities-api";
+  useCreateInternationalOpportunityMutation,
+  useCreateNationalOpportunityMutation,
+  useDeleteInternationalOpportunityMutation,
+  useDeleteNationalOpportunityMutation,
+  useInternationalOpportunitiesQuery,
+  useNationalOpportunitiesQuery,
+  useUpdateInternationalOpportunityMutation,
+  useUpdateNationalOpportunityMutation,
+} from "@/hooks/queries/use-opportunity-queries";
+import { useSession } from "@/lib/auth-client";
+import type {
+  InternationalOpportunity,
+  InternationalOpportunityInput,
+  NationalOpportunity,
+  NationalOpportunityInput,
+} from "@/lib/opportunities-api";
 
 interface FeedbackState {
   message: string;
@@ -85,13 +87,26 @@ const splitRequirements = (value: string): string[] =>
 
 function useAdminData() {
   const { data: session, isPending: isSessionPending } = useSession();
-  const [isLoading, setIsLoading] = useState(true);
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
 
-  const [internationalList, setInternationalList] = useState<
-    InternationalOpportunity[]
-  >([]);
-  const [nationalList, setNationalList] = useState<NationalOpportunity[]>([]);
+  const internationalQuery = useInternationalOpportunitiesQuery();
+  const nationalQuery = useNationalOpportunitiesQuery();
+
+  const createInternationalMutation =
+    useCreateInternationalOpportunityMutation();
+  const updateInternationalMutation =
+    useUpdateInternationalOpportunityMutation();
+  const deleteInternationalMutation =
+    useDeleteInternationalOpportunityMutation();
+
+  const createNationalMutation = useCreateNationalOpportunityMutation();
+  const updateNationalMutation = useUpdateNationalOpportunityMutation();
+  const deleteNationalMutation = useDeleteNationalOpportunityMutation();
+
+  const internationalList: InternationalOpportunity[] =
+    internationalQuery.data ?? [];
+  const nationalList: NationalOpportunity[] = nationalQuery.data ?? [];
+  const isLoading = internationalQuery.isPending || nationalQuery.isPending;
 
   const [internationalForm, setInternationalForm] =
     useState<InternationalOpportunityInput>(initialInternationalForm);
@@ -112,29 +127,17 @@ function useAdminData() {
 
   const loadData = useCallback(async () => {
     try {
-      setIsLoading(true);
-      setFeedback(null);
-
-      const [international, national] = await Promise.all([
-        getInternationalOpportunities(),
-        getNationalOpportunities(),
+      await Promise.all([
+        internationalQuery.refetch(),
+        nationalQuery.refetch(),
       ]);
-
-      setInternationalList(international);
-      setNationalList(national);
     } catch {
       setFeedback({
         type: "error",
         message: "Nao foi possivel carregar os dados administrativos.",
       });
-    } finally {
-      setIsLoading(false);
     }
-  }, []);
-
-  useEffect(() => {
-    loadData().catch(() => undefined);
-  }, [loadData]);
+  }, [internationalQuery, nationalQuery]);
 
   const resetInternationalForm = useCallback(() => {
     setEditingInternationalId(null);
@@ -226,13 +229,16 @@ function useAdminData() {
       try {
         setFeedback(null);
         if (editingInternationalId) {
-          await updateInternationalOpportunity(editingInternationalId, payload);
+          await updateInternationalMutation.mutateAsync({
+            id: editingInternationalId,
+            payload,
+          });
           setFeedback({
             type: "success",
             message: "Oportunidade internacional editada com sucesso.",
           });
         } else {
-          await createInternationalOpportunity(payload);
+          await createInternationalMutation.mutateAsync(payload);
           setFeedback({
             type: "success",
             message: "Oportunidade internacional adicionada com sucesso.",
@@ -254,10 +260,12 @@ function useAdminData() {
       }
     },
     [
+      createInternationalMutation,
       editingInternationalId,
       internationalForm,
       loadData,
       resetInternationalForm,
+      updateInternationalMutation,
     ]
   );
 
@@ -274,13 +282,16 @@ function useAdminData() {
       try {
         setFeedback(null);
         if (editingNationalId) {
-          await updateNationalOpportunity(editingNationalId, payload);
+          await updateNationalMutation.mutateAsync({
+            id: editingNationalId,
+            payload,
+          });
           setFeedback({
             type: "success",
             message: "Oportunidade nacional editada com sucesso.",
           });
         } else {
-          await createNationalOpportunity(payload);
+          await createNationalMutation.mutateAsync(payload);
           setFeedback({
             type: "success",
             message: "Oportunidade nacional adicionada com sucesso.",
@@ -301,13 +312,20 @@ function useAdminData() {
         return false;
       }
     },
-    [editingNationalId, loadData, nationalForm, resetNationalForm]
+    [
+      createNationalMutation,
+      editingNationalId,
+      loadData,
+      nationalForm,
+      resetNationalForm,
+      updateNationalMutation,
+    ]
   );
 
   const handleDeleteInternational = useCallback(
     async (id: string) => {
       try {
-        await deleteInternationalOpportunity(id);
+        await deleteInternationalMutation.mutateAsync(id);
         setFeedback({
           type: "success",
           message: "Oportunidade internacional removida.",
@@ -326,13 +344,18 @@ function useAdminData() {
         });
       }
     },
-    [editingInternationalId, loadData, resetInternationalForm]
+    [
+      deleteInternationalMutation,
+      editingInternationalId,
+      loadData,
+      resetInternationalForm,
+    ]
   );
 
   const handleDeleteNational = useCallback(
     async (id: string) => {
       try {
-        await deleteNationalOpportunity(id);
+        await deleteNationalMutation.mutateAsync(id);
         setFeedback({
           type: "success",
           message: "Oportunidade nacional removida.",
@@ -351,7 +374,7 @@ function useAdminData() {
         });
       }
     },
-    [editingNationalId, loadData, resetNationalForm]
+    [deleteNationalMutation, editingNationalId, loadData, resetNationalForm]
   );
 
   return {

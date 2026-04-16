@@ -2,15 +2,13 @@
 
 import { ShieldUserIcon } from "lucide-react";
 import { useState } from "react";
-import useAdminData, {
-  type NationalFormState,
-} from "../../hooks/use-admin-data";
+import { FILTER_OPTIONS } from "@/components/opportunities/filter-options";
+import ConfirmationModal from "@/components/ui/confirmation-modal";
+import useAdminData, { type NationalFormState } from "@/hooks/use-admin-data";
 import type {
   InternationalOpportunityInput,
   NationalOpportunityInput,
-} from "../../lib/opportunities-api";
-import { FILTER_OPTIONS } from "../opportunities/filter-options";
-import ConfirmationModal from "../ui/confirmation-modal";
+} from "@/lib/opportunities-api";
 import AdminFeedback from "./admin-feedback";
 import AdminOpportunityForm from "./admin-opportunity-form";
 import AdminRecordsList from "./admin-records-list";

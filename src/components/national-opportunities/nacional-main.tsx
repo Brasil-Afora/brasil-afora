@@ -2,12 +2,12 @@
 
 import { TrophyIcon } from "lucide-react";
 import { useMemo } from "react";
-import { useOportunidadesNacionais } from "../../hooks/use-oportunidades-nacionais";
-import useOpportunityFilters from "../../hooks/use-opportunity-filters";
-import type { AppliedFilter } from "../opportunities/opportunities-main-layout";
-import OpportunitiesMainLayout from "../opportunities/opportunities-main-layout";
-import OpportunityList from "../opportunities/opportunity-list";
-import type { OpportunityCardConfig } from "../opportunities/types";
+import type { AppliedFilter } from "@/components/opportunities/opportunities-main-layout";
+import OpportunitiesMainLayout from "@/components/opportunities/opportunities-main-layout";
+import OpportunityList from "@/components/opportunities/opportunity-list";
+import type { OpportunityCardConfig } from "@/components/opportunities/types";
+import { useOportunidadesNacionais } from "@/hooks/use-oportunidades-nacionais";
+import useOpportunityFilters from "@/hooks/use-opportunity-filters";
 import NacionalFilter from "./nacional-filter";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 

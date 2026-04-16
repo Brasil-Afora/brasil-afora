@@ -11,13 +11,15 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import useSessionStorage from "../../hooks/use-session-storage";
 import {
-  getInternationalOpportunities,
-  getNationalOpportunities,
-  type InternationalOpportunity,
-  type NationalOpportunity,
-} from "../../lib/opportunities-api";
+  useInternationalOpportunitiesQuery,
+  useNationalOpportunitiesQuery,
+} from "@/hooks/queries/use-opportunity-queries";
+import useSessionStorage from "@/hooks/use-session-storage";
+import type {
+  InternationalOpportunity,
+  NationalOpportunity,
+} from "@/lib/opportunities-api";
 import WorldMap from "./world-map";
 
 type OpportunitySource = "internacional" | "nacional";
@@ -210,39 +212,38 @@ const agruparOportunidadesPorPais = (
 };
 
 const WorldMapPage = () => {
+  const internationalQuery = useInternationalOpportunitiesQuery();
+  const nationalQuery = useNationalOpportunitiesQuery();
+
   const [oportunidades, setOportunidades] = useState<MapOpportunity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [clickedCountryData, setClickedCountryData] =
     useSessionStorage<CountryData | null>("mapClickedCountry", null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage("");
-        const [internationalData, nationalData] = await Promise.all([
-          getInternationalOpportunities(),
-          getNationalOpportunities(),
-        ]);
+    const internationalData = internationalQuery.data ?? [];
+    const nationalData = nationalQuery.data ?? [];
 
-        const mergedData: MapOpportunity[] = [
-          ...internationalData.map((item) =>
-            toMapOpportunity(item, "internacional")
-          ),
-          ...nationalData.map((item) => toMapOpportunity(item, "nacional")),
-        ];
+    const mergedData: MapOpportunity[] = [
+      ...internationalData.map((item) =>
+        toMapOpportunity(item, "internacional")
+      ),
+      ...nationalData.map((item) => toMapOpportunity(item, "nacional")),
+    ];
 
-        setOportunidades(mergedData);
-      } catch {
-        setErrorMessage("Nao foi possivel carregar os dados do mapa.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setOportunidades(mergedData);
+  }, [internationalQuery.data, nationalQuery.data]);
 
-    fetchData();
-  }, []);
+  useEffect(() => {
+    if (internationalQuery.error || nationalQuery.error) {
+      setErrorMessage("Nao foi possivel carregar os dados do mapa.");
+      return;
+    }
+
+    setErrorMessage("");
+  }, [internationalQuery.error, nationalQuery.error]);
+
+  const isLoading = internationalQuery.isPending || nationalQuery.isPending;
 
   const listaDePaisesComOportunidades = useMemo(
     () => agruparOportunidadesPorPais(oportunidades),

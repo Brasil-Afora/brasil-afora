@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { signIn, signUp } from "../../lib/auth-client";
+import { signIn, signUp } from "@/lib/auth-client";
 import AuthLayout from "./auth-layout";
 import {
   AuthButton,

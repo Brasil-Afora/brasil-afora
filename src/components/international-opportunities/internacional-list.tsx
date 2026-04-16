@@ -9,10 +9,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  getTimeRemaining,
-  getTimeRemainingBadgeClass,
-} from "../../lib/date-utils";
+import { getTimeRemaining, getTimeRemainingBadgeClass } from "@/lib/date-utils";
 import type { Opportunity } from "./types";
 
 interface InternacionalListProps {

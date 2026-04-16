@@ -1,7 +1,9 @@
 "use client";
 
+import { type QueryKey, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { opportunityQueryKeys } from "@/hooks/queries/opportunity-query-keys";
 import { useSession } from "@/lib/auth-client";
 
 interface FavoriteItem {
@@ -10,6 +12,7 @@ interface FavoriteItem {
 
 interface UseOpportunityFavoriteParams {
   addFavorite: (id: string) => Promise<void>;
+  favoritesQueryKey: QueryKey;
   getFavorites: () => Promise<FavoriteItem[]>;
   id: string;
   removeFavorite: (id: string) => Promise<void>;
@@ -43,38 +46,31 @@ const isUnauthorizedError = (error: unknown): boolean => {
 
 const useOpportunityFavorite = ({
   addFavorite,
+  favoritesQueryKey,
   getFavorites,
   id,
   removeFavorite,
   routePath,
 }: UseOpportunityFavoriteParams): UseOpportunityFavoriteResult => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: session, isPending: isSessionPending } = useSession();
+  const favoritesQuery = useQuery({
+    queryKey: favoritesQueryKey,
+    queryFn: getFavorites,
+  });
 
   const [isFavorited, setIsFavorited] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [popup, setPopup] = useState({ visible: false, message: "" });
 
   useEffect(() => {
-    let cancelled = false;
+    if (!favoritesQuery.data) {
+      return;
+    }
 
-    const checkFavoriteStatus = async () => {
-      try {
-        const favorites = await getFavorites();
-        if (!cancelled) {
-          setIsFavorited(favorites.some((favorite) => favorite.id === id));
-        }
-      } catch {
-        // Ignore errors when checking favorite status
-      }
-    };
-
-    checkFavoriteStatus();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [getFavorites, id]);
+    setIsFavorited(favoritesQuery.data.some((favorite) => favorite.id === id));
+  }, [favoritesQuery.data, id]);
 
   useEffect(() => {
     if (!popup.visible) {
@@ -107,6 +103,17 @@ const useOpportunityFavorite = ({
 
     try {
       await addFavorite(id);
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: opportunityQueryKeys.internationalFavorites(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: opportunityQueryKeys.nationalFavorites(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: opportunityQueryKeys.profileFavorites(),
+        }),
+      ]);
       setIsFavorited(true);
       setPopup({
         visible: true,
@@ -128,6 +135,7 @@ const useOpportunityFavorite = ({
     id,
     isFavorited,
     isSessionPending,
+    queryClient,
     redirectToLogin,
     session,
   ]);
@@ -135,6 +143,17 @@ const useOpportunityFavorite = ({
   const handleConfirmRemove = useCallback(async () => {
     try {
       await removeFavorite(id);
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: opportunityQueryKeys.internationalFavorites(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: opportunityQueryKeys.nationalFavorites(),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: opportunityQueryKeys.profileFavorites(),
+        }),
+      ]);
       setIsFavorited(false);
       setPopup({
         visible: true,
@@ -153,7 +172,7 @@ const useOpportunityFavorite = ({
     } finally {
       setShowConfirmation(false);
     }
-  }, [id, redirectToLogin, removeFavorite]);
+  }, [id, queryClient, redirectToLogin, removeFavorite]);
 
   const clearPopup = useCallback(() => {
     setPopup((prev) => ({ ...prev, visible: false }));

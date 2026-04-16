@@ -29,10 +29,7 @@ import useProfileOpportunities, {
   type ApplicationStatus,
   statusOptions,
 } from "@/hooks/use-profile-opportunities";
-import {
-  getTimeRemaining,
-  getTimeRemainingBadgeClass,
-} from "../../lib/date-utils";
+import { getTimeRemaining, getTimeRemainingBadgeClass } from "@/lib/date-utils";
 import type { FavoriteOpportunity } from "./types";
 
 const getDaysUntilDeadline = (deadlineString: string): number | null => {

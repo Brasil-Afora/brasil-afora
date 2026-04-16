@@ -20,18 +20,16 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { opportunityQueryKeys } from "@/hooks/queries/opportunity-query-keys";
+import { useNationalOpportunityByIdQuery } from "@/hooks/queries/use-opportunity-queries";
 import useOpportunityFavorite from "@/hooks/use-opportunity-favorite";
-import {
-  getTimeRemaining,
-  getTimeRemainingBadgeClass,
-} from "../../lib/date-utils";
+import { getTimeRemaining, getTimeRemainingBadgeClass } from "@/lib/date-utils";
 import {
   addNationalFavorite,
   getNationalFavorites,
-  getNationalOpportunityById,
   removeNationalFavorite,
-} from "../../lib/opportunities-api";
+} from "@/lib/opportunities-api";
 import NacionalConfirmationPopup from "./nacional-confirmation-popup";
 import type { Opportunity } from "./types";
 
@@ -46,49 +44,15 @@ const NACIONAL_ROUTE_PREFIX = "/oportunidades/nacionais";
 
 const NacionalInfo = ({ id }: NacionalInfoProps) => {
   const router = useRouter();
-  const [oportunidade, setOportunidade] = useState<Opportunity | undefined>(
-    undefined
-  );
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!id) {
-      return;
-    }
-    let cancelled = false;
-
-    const fetchData = async () => {
-      try {
-        const result = await getNationalOpportunityById(id);
-        if (!cancelled) {
-          if (result) {
-            setOportunidade(result);
-          } else {
-            setFetchError("Oportunidade não encontrada.");
-          }
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setFetchError(
-            err instanceof Error
-              ? err.message
-              : "Erro ao carregar oportunidade."
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
+  const opportunityQuery = useNationalOpportunityByIdQuery(id);
+  const oportunidade = useMemo<Opportunity | undefined>(() => {
+    return opportunityQuery.data ?? undefined;
+  }, [opportunityQuery.data]);
+  const loading = opportunityQuery.isPending;
+  const fetchError =
+    opportunityQuery.error instanceof Error
+      ? opportunityQuery.error.message
+      : null;
 
   const [activeTab, setActiveTab] = useState<ActiveTab>("sobre");
   const [heroImageFailed, setHeroImageFailed] = useState(false);
@@ -107,6 +71,7 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
     showConfirmation,
   } = useOpportunityFavorite({
     addFavorite: addNationalFavorite,
+    favoritesQueryKey: opportunityQueryKeys.nationalFavorites(),
     getFavorites: getNationalFavorites,
     id,
     removeFavorite: removeNationalFavorite,

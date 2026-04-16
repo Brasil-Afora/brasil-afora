@@ -1,6 +1,6 @@
 "use client";
 
-import useStaggeredAnimation from "../../hooks/use-staggered-animation";
+import useStaggeredAnimation from "@/hooks/use-staggered-animation";
 import OpportunityCard from "./opportunity-card";
 import type { Opportunity, OpportunityCardConfig } from "./types";
 

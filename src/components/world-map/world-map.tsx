@@ -11,7 +11,7 @@ import { memo, useState } from "react";
 import { GeoJSON, MapContainer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./WorldMap.css";
-import worldCountriesData from "../../utils/countries.geo.json";
+import worldCountriesData from "@/utils/countries.geo.json";
 
 interface InterchangeEntry {
   intercambios: unknown[];

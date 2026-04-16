@@ -2,12 +2,12 @@
 
 import { GlobeIcon } from "lucide-react";
 import { useMemo } from "react";
-import { useOportunidadesInternacionais } from "../../hooks/use-oportunidades-internacionais";
-import useOpportunityFilters from "../../hooks/use-opportunity-filters";
-import type { AppliedFilter } from "../opportunities/opportunities-main-layout";
-import OpportunitiesMainLayout from "../opportunities/opportunities-main-layout";
-import OpportunityList from "../opportunities/opportunity-list";
-import type { OpportunityCardConfig } from "../opportunities/types";
+import type { AppliedFilter } from "@/components/opportunities/opportunities-main-layout";
+import OpportunitiesMainLayout from "@/components/opportunities/opportunities-main-layout";
+import OpportunityList from "@/components/opportunities/opportunity-list";
+import type { OpportunityCardConfig } from "@/components/opportunities/types";
+import { useOportunidadesInternacionais } from "@/hooks/use-oportunidades-internacionais";
+import useOpportunityFilters from "@/hooks/use-opportunity-filters";
 import InternacionalFilter from "./internacional-filter";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 

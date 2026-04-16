@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { authClient } from "../../lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import AuthLayout from "./auth-layout";
 import { AuthButton, AuthError, AuthInput, AuthSuccess } from "./auth-ui";
 

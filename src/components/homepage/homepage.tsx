@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import useScrollReveal from "../../hooks/use-scroll-reveal";
+import useScrollReveal from "@/hooks/use-scroll-reveal";
 
 interface FeatureItem {
   description: string;

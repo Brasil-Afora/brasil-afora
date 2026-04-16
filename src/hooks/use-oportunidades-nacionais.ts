@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { Opportunity } from "../components/national-opportunities/types";
-import { getNationalOpportunities } from "../lib/opportunities-api";
+import { useMemo } from "react";
+import type { Opportunity } from "@/components/national-opportunities/types";
+import { useNationalOpportunitiesQuery } from "@/hooks/queries/use-opportunity-queries";
 
 interface UseOportunidadesNacionaisResult {
   data: Opportunity[];
@@ -12,40 +12,15 @@ interface UseOportunidadesNacionaisResult {
 
 export const useOportunidadesNacionais =
   (): UseOportunidadesNacionaisResult => {
-    const [data, setData] = useState<Opportunity[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const query = useNationalOpportunitiesQuery();
 
-    useEffect(() => {
-      let cancelled = false;
+    const data = useMemo<Opportunity[]>(() => {
+      return query.data ?? [];
+    }, [query.data]);
 
-      const fetchData = async () => {
-        try {
-          const result = await getNationalOpportunities();
-          if (!cancelled) {
-            setData(result);
-          }
-        } catch (err) {
-          if (!cancelled) {
-            setError(
-              err instanceof Error
-                ? err.message
-                : "Erro ao carregar oportunidades nacionais."
-            );
-          }
-        } finally {
-          if (!cancelled) {
-            setLoading(false);
-          }
-        }
-      };
-
-      fetchData();
-
-      return () => {
-        cancelled = true;
-      };
-    }, []);
-
-    return { data, loading, error };
+    return {
+      data,
+      loading: query.isPending,
+      error: query.error instanceof Error ? query.error.message : null,
+    };
   };

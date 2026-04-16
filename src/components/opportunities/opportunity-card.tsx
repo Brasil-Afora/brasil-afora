@@ -8,10 +8,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  getTimeRemaining,
-  getTimeRemainingBadgeClass,
-} from "../../lib/date-utils";
+import { getTimeRemaining, getTimeRemainingBadgeClass } from "@/lib/date-utils";
 import type { Opportunity, OpportunityCardConfig } from "./types";
 import {
   getOpportunityLocation,
