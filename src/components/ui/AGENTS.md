@@ -1,19 +1,20 @@
 # AGENTS - src/components/ui
 
-## Objetivo da pasta
-- Biblioteca de componentes de interface reutilizaveis baseada em shadcn/base-ui.
-- Esta pasta nao deve conter regra de negocio da aplicacao.
+## Folder purpose
 
-## Arquivos relevantes
-- button.tsx: botao com variantes e tamanhos.
-- alert-dialog.tsx / dialog.tsx: modais e confirmacoes.
-- input.tsx / textarea.tsx / field.tsx / label.tsx: base de formularios.
-- select.tsx / combobox.tsx / tabs.tsx / dropdown-menu.tsx: selecao e navegacao local.
-- sonner.tsx / toast.tsx: notificacoes.
-- confirmation-modal.tsx: wrapper de confirmacao com AlertDialog.
+Library of reusable UI components based on shadcn/base-ui. This folder should not contain business logic.
 
-## Regras para agentes
-- Evite adicionar import de hooks de negocio aqui.
-- Use semantic tokens e classes ja adotadas no projeto.
-- Preserve API publica de cada componente (props/export).
-- Antes de criar novo componente, valide se ja existe equivalente nesta pasta.
+## Rules for agents
+
+- Avoid importing business logic hooks here.
+- Use semantic tokens and classes already adopted in the project.
+- Preserve public API of each component (props/export).
+- Before creating a new component, validate if an equivalent already exists.
+
+## Architecture patterns
+
+- UI components are purely presentational and accept data via props.
+- Modal and dialog patterns use AlertDialog as the foundation.
+- Form components (input, textarea, field, label) provide a consistent foundation for forms across the app.
+- Notification system uses Sonner for toast notifications.
+- All components follow accessibility guidelines with proper semantic HTML.

@@ -1,12 +1,17 @@
 # AGENTS - src/components/homepage
 
-## Objetivo da pasta
-- Componente da pagina inicial do produto.
+## Folder purpose
 
-## Arquivo relevante
-- homepage.tsx: conteudo principal da home.
+Component for the product's home page landing.
 
-## Regras para agentes
-- Evite acoplar logica de negocio pesada na home.
-- Preserve visual atual e transicoes existentes.
-- Se adicionar secoes novas, mantenha consistencia tipografica e de espacamento.
+## Rules for agents
+
+- Avoid coupling heavy business logic to the home page.
+- Preserve current visuals and existing transitions.
+- When adding new sections, maintain consistency in typography and spacing.
+
+## Architecture patterns
+
+- Homepage acts as a marketing/landing page with minimal business logic.
+- Visual consistency and animation transitions should be maintained across updates.
+- New sections should follow existing typographic and spacing patterns.

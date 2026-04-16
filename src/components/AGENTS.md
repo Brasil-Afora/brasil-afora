@@ -1,23 +1,19 @@
 # AGENTS - src/components
 
-## Objetivo da pasta
-- Esta pasta concentra componentes React organizados por dominio funcional.
-- Cada subpasta deve manter responsabilidade propria (auth, admin, opportunities, profile, world-map, ui).
+## Folder purpose
 
-## Regras para agentes
-- Nao misture logica de dominios entre subpastas sem necessidade.
-- Prefira reutilizar componentes de src/components/ui antes de criar markup novo.
-- Mantenha contratos de props e tipos usados pelos componentes de pagina.
-- Sempre preservar classes visuais existentes ao migrar para shadcn.
+This folder concentrates React components organized by functional domain. Each subfolder maintains its own responsibility by domain (auth, admin, opportunities, profile, world-map, ui).
 
-## Subpastas
-- admin: painel administrativo.
-- auth: login, cadastro, reset e verificacao.
-- header: navegacao global.
-- homepage: landing/home.
-- international-opportunities: fluxo internacional.
-- national-opportunities: fluxo nacional.
-- opportunities: componentes compartilhados de listagem/filtro.
-- profile: favoritos e checklist do usuario.
-- ui: componentes shadcn/base reutilizaveis.
-- world-map: visualizacao em mapa.
+## Rules for agents
+
+- Don't mix domain logic across subfolders unnecessarily.
+- Prefer reusing components from src/components/ui before creating new markup.
+- Maintain prop contracts and types used by page components.
+- Always preserve existing visual classes when migrating to shadcn.
+
+## Architecture patterns
+
+- Component organization follows domain responsibility: each subfolder has clear ownership.
+- Reusable UI components live in the `ui` folder to avoid duplication.
+- Domain-specific components handle their own state and data integration.
+- Share types and contracts through local `types.ts` files within each domain.

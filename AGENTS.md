@@ -128,3 +128,44 @@ Biome's linter will catch most issues automatically. Focus your attention on:
 ---
 
 Most formatting and common issues are automatically fixed by Biome. Run `bun x ultracite fix` before committing to ensure compliance.
+
+---
+
+# Architecture and Logic
+
+## Layers
+
+- App Router separates responsibilities into three levels: UI (components and hooks), BFF (`/api`), and data access (`db` + Drizzle).
+- UI components don't know the details of fetch/DB; they consume domain hooks.
+- Route Handlers work as Next's internal BFF: they validate permissions, translate input/output, and delegate operations to Drizzle.
+
+## Data and caching
+
+- All opportunity and favorite reads use TanStack Query with query keys centralized by domain.
+- Mutations invalidate related keys to maintain consistency without coupling between screens.
+- Global Query Client configuration prioritizes reducing overfetch with `staleTime` and `gcTime`.
+- Domain hooks encapsulate `useQuery`/`useMutation`; components should avoid direct imperative fetch.
+
+## Authentication and authorization
+
+- Better Auth runs within Next itself via `app/api/auth/[...all]` with the client configured for the same host.
+- Server guards exist in two contexts: server-side pages (redirects to login/profile) and route handlers (401/403 responses).
+- Role rules: public catalog reads; favorites require a session; admin writes require `role=admin`.
+
+## Database and modeling
+
+- Drizzle uses typed schema in PostgreSQL with `snake_case` naming and adaptation to TypeScript objects.
+- Favorite tables use composite keys to prevent duplication by user/opportunity.
+- Database access stays in the server's Node runtime; no React client accessing the DB directly.
+
+## Contracts and mapping
+
+- UI contract remains in Portuguese and can differ from the contract persisted in the database.
+- Input/output mappings are concentrated in the opportunities API layer to preserve compatibility with the existing interface.
+- Normalization of dates, modality, and text fields happens before persistence to reduce data inconsistencies.
+
+## Safe evolution
+
+- Schema changes must maintain permission compatibility and cache invalidation in the same increment.
+- New data features should follow the flow: Drizzle schema → route handler → React Query hook → component.
+- Avoid duplicating business logic between components; prefer extracting to hooks/utilities in the domain layer.

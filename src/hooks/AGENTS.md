@@ -1,16 +1,26 @@
 # AGENTS - src/hooks
 
-## Objetivo da pasta
-- Hooks reutilizaveis para dados, estado local, animacoes e utilitarios de UI.
+## Folder purpose
 
-## Grupos de hooks
-- Dados: use-oportunidades-internacionais, use-oportunidades-nacionais, use-admin-data.
-- Estado persistente: use-local-storage, use-session-storage.
-- UI/interacao: use-click-outside, use-scroll-observer, use-scroll-reveal, use-staggered-animation.
-- Favoritos/filtros/toast: use-favorite-toggle, use-opportunity-filters, use-toast.
+Reusable hooks for data fetching, local state, animations, and UI utilities.
 
-## Regras para agentes
-- Mantenha hooks puros e sem efeitos colaterais ocultos.
-- Sempre revisar arrays de dependencias em useEffect/useCallback.
-- Nao acessar DOM diretamente quando houver hook utilitario existente.
-- Contratos de retorno dos hooks nao devem mudar sem ajustar consumidores.
+## Hook categories
+
+- **Data**: Domain hooks for fetching opportunities and admin data, typically wrapping TanStack Query
+- **Persistent state**: Hooks for local and session storage
+- **UI/Interaction**: Hooks for outside click detection, scroll observation, scroll reveal effects, and staggered animations
+- **Domain logic**: Hooks for favorite toggling, opportunity filtering, and toast notifications
+
+## Rules for agents
+
+- Keep hooks pure without hidden side effects.
+- Always review dependency arrays in useEffect/useCallback.
+- Don't access DOM directly when a utility hook already exists.
+- Hook return contracts should not change without updating all consumers.
+
+## Architecture patterns
+
+- Hooks abstract data fetching and caching through TanStack Query.
+- UI hooks provide reusable interaction patterns without business logic.
+- Domain hooks encapsulate business operations (favorites, filtering, notifications).
+- All hooks follow React best practices with proper dependency management.

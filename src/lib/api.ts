@@ -1,7 +1,5 @@
-import { buildBackendUrl } from "./backend";
-
 export async function apiFetch<T>(path: string): Promise<T> {
-  const response = await fetch(buildBackendUrl(path), {
+  const response = await fetch(path, {
     credentials: "include",
   });
   if (!response.ok) {

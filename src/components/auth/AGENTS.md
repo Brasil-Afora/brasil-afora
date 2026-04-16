@@ -1,21 +1,19 @@
 # AGENTS - src/components/auth
 
-## Objetivo da pasta
-- Implementar fluxos de autenticacao e telas relacionadas.
-- Integracao principal com src/lib/auth-client.ts.
+## Folder purpose
 
-## Arquivos relevantes
-- auth-layout.tsx: estrutura visual das paginas de autenticacao.
-- auth-ui.tsx: campos/botoes de auth (baseados em shadcn).
-- sign-in-page.tsx: login.
-- sign-up-page.tsx: cadastro.
-- forgot-password-page.tsx: solicitacao de reset.
-- reset-password-page.tsx: redefinicao de senha.
-- verify-email-page.tsx: validacao e reenvio de email.
-- As protecoes de rota ficam no App Router via server/session guards.
+Implements authentication flows and related screens. Primary integration with src/lib/auth-client.ts.
 
-## Regras para agentes
-- Manter redirecionamentos coerentes com rotas do App Router do Next.js.
-- Formularios devem usar react-hook-form quando aplicavel.
-- Nao duplicar chamadas de auth; reutilize funcoes de auth-client.
-- Preserve mensagens de erro/sucesso em portugues.
+## Rules for agents
+
+- Maintain coherent redirects with Next.js App Router routes.
+- Forms should use react-hook-form when applicable.
+- Don't duplicate auth calls; reuse functions from auth-client.
+- Preserve error/success messages in Portuguese.
+
+## Architecture patterns
+
+- Authentication flows use centralized auth-client utilities to avoid duplication.
+- Forms follow a consistent pattern with react-hook-form for validation and submission.
+- Route protections are enforced at the App Router level via server/session guards.
+- All error handling and user feedback is localized for consistency.

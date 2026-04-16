@@ -1,18 +1,19 @@
 # AGENTS - src/components/admin
 
-## Objetivo da pasta
-- Tela administrativa para criar, editar e remover oportunidades.
-- Trabalha com modos de formulario e listagem de registros.
+## Folder purpose
 
-## Arquivos relevantes
-- admin-page.tsx: pagina principal do painel.
-- admin-tabs.tsx: alternancia entre internacional e nacional.
-- admin-opportunity-form.tsx: formulario principal (campos e texto).
-- admin-records-list.tsx: listagem com acoes de editar/excluir.
-- admin-feedback.tsx: mensagens de retorno no fluxo admin.
+Admin screen for creating, editing, and removing opportunities. Works with form modes and record listing.
 
-## Regras para agentes
-- Mantenha compatibilidade com tipos e dados vindos dos hooks/admin data.
-- Nao remover campos sem validar impacto no backend.
-- Preservar tema de cor por contexto (blue internacional, amber nacional).
-- Formularios desta pasta devem continuar compatveis com react-hook-form.
+## Rules for agents
+
+- Maintain compatibility with types and data from admin hooks.
+- Don't remove fields without validating backend impact.
+- Preserve color theming by context (blue for international, amber for national).
+- Forms in this folder must remain compatible with react-hook-form.
+
+## Architecture patterns
+
+- Admin panel uses tab-based navigation to separate international and national opportunities.
+- Forms handle both create and edit modes with consistent validation.
+- Record listing provides inline actions for edit and delete operations.
+- Color context distinguishes between international (blue) and national (amber) opportunity types.

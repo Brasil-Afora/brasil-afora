@@ -1,14 +1,18 @@
 # AGENTS - src/components/header
 
-## Objetivo da pasta
-- Fornecer navegacao global desktop/mobile e acesso de conta.
-- Integrar estado de sessao no cabecalho.
+## Folder purpose
 
-## Arquivo relevante
-- header.tsx: menu principal, dropdown de perfil, menu mobile, logout.
+Provides global navigation for desktop/mobile and account access. Integrates session state into the header.
 
-## Regras para agentes
-- Preserve comportamento responsivo (desktop vs mobile).
-- Nao quebrar fluxo de logout e redirecionamento para /login.
-- Links devem permanecer alinhados as rotas existentes do app.
-- Ao alterar itens de menu, revisar condicao de role admin.
+## Rules for agents
+
+- Preserve responsive behavior (desktop vs mobile).
+- Don't break logout flow and redirect to /login.
+- Links must remain aligned with existing app routes.
+- When modifying menu items, review admin role conditions.
+
+## Architecture patterns
+
+- Header component composes main navigation menu, profile dropdown, and mobile menu.
+- Logout flow should maintain consistent redirect behavior across all navigation surfaces.
+- Menu items should be conditional based on authentication and user role.

@@ -1,16 +1,19 @@
 # AGENTS - src/components/profile
 
-## Objetivo da pasta
-- Fluxo de perfil e favoritos do usuario, incluindo checklist por oportunidade.
+## Folder purpose
 
-## Arquivos relevantes
-- profile-main.tsx: pagina principal do perfil e tabs.
-- profile-opportunities.tsx: cards de favoritos, status e checklist.
-- profile-confirmation-popup.tsx: confirmacao de remocao.
-- types.ts: tipos locais para favoritos.
+User profile flow and favorites, including checklist workflow for each opportunity.
 
-## Regras para agentes
-- Nao quebrar persistencia local (status/checklist/pin).
-- Preserve confirmacoes antes de acoes destrutivas.
-- Mantenha compatibilidade com links de detalhes de oportunidades.
-- Qualquer alteracao de estado deve respeitar IDs de oportunidade como chave.
+## Rules for agents
+
+- Don't break local persistence (status/checklist/pin).
+- Preserve confirmations before destructive actions.
+- Maintain compatibility with opportunity detail links.
+- Any state changes must respect opportunity IDs as the key.
+
+## Architecture patterns
+
+- Profile page uses tab-based navigation to organize user content.
+- Favorite opportunities display with status indicators and checklist functionality.
+- Confirmation popups safeguard against accidental removal of favorites.
+- Local storage persistence maintains user's checklist and pin status across sessions.

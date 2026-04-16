@@ -1,13 +1,13 @@
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { buildBackendUrl } from "@/lib/backend";
+import { auth } from "@/lib/auth";
 
 interface SessionUser {
   email?: string;
   id: string;
   image?: string | null;
   name?: string;
-  role?: string;
+  role?: string | null;
 }
 
 interface SessionPayload {
@@ -15,38 +15,10 @@ interface SessionPayload {
   user?: SessionUser;
 }
 
-const parseSessionPayload = (payload: unknown): SessionPayload | null => {
-  if (!payload || typeof payload !== "object") {
-    return null;
-  }
-
-  const directPayload = payload as SessionPayload;
-  if (directPayload.user?.id) {
-    return directPayload;
-  }
-
-  const nestedPayload = (payload as { data?: SessionPayload }).data;
-  if (nestedPayload?.user?.id) {
-    return nestedPayload;
-  }
-
-  return null;
-};
-
 export const getServerSession = async (): Promise<SessionPayload | null> => {
-  const cookieHeader = (await cookies()).toString();
-
-  const response = await fetch(buildBackendUrl("/auth/get-session"), {
-    cache: "no-store",
-    headers: cookieHeader ? { cookie: cookieHeader } : undefined,
-  });
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const payload = parseSessionPayload(await response.json());
-  return payload;
+  const requestHeaders = await headers();
+  const session = await auth.api.getSession({ headers: requestHeaders });
+  return session;
 };
 
 export const requireUserSession = async (redirectTo = "/login") => {
