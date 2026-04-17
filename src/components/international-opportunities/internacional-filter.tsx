@@ -192,7 +192,6 @@ const InternacionalFilter = ({
   return (
     <div className="flex flex-col gap-2 font-inter">
       <FilterDropdown
-        accentColor="blue"
         cols={2}
         label="Tipo de Programa"
         onChange={(value) => handleCheckboxChange("tipo", value)}
@@ -202,7 +201,6 @@ const InternacionalFilter = ({
       />
 
       <FilterDropdown
-        accentColor="blue"
         cols={1}
         label="Nível de Ensino"
         onChange={(value) => handleCheckboxChange("nivelEnsino", value)}
@@ -212,7 +210,6 @@ const InternacionalFilter = ({
       />
 
       <FilterDropdown
-        accentColor="blue"
         cols={2}
         label="Países de Destino"
         onChange={(value) => handleCheckboxChange("pais", value)}
@@ -224,7 +221,6 @@ const InternacionalFilter = ({
       />
 
       <FilterDropdown
-        accentColor="blue"
         cols={2}
         label="Idiomas"
         onChange={(value) => handleCheckboxChange("requisitosIdioma", value)}
@@ -234,7 +230,6 @@ const InternacionalFilter = ({
       />
 
       <FilterDropdown
-        accentColor="blue"
         cols={1}
         label="Taxa de Aplicação"
         onChange={(value) => handleCheckboxChange("taxaAplicacao", value)}
@@ -244,7 +239,6 @@ const InternacionalFilter = ({
       />
 
       <FilterDropdown
-        accentColor="blue"
         cols={1}
         label="Tipo de Bolsa"
         onChange={(value) => handleCheckboxChange("tipoBolsa", value)}

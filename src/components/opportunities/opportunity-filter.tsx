@@ -109,7 +109,6 @@ function OpportunityFilter<T extends Filters>({
   return (
     <div className="flex flex-col gap-2 font-inter" ref={filterRef}>
       <FilterDropdown
-        accentColor={accentColor}
         cols={2}
         label="Tipo de Programa"
         onChange={(value) => handleCheckboxChange("tipo" as keyof T, value)}
@@ -123,7 +122,6 @@ function OpportunityFilter<T extends Filters>({
       />
 
       <FilterDropdown
-        accentColor={accentColor}
         cols={1}
         label="Nível de Ensino"
         onChange={(value) =>
@@ -137,7 +135,6 @@ function OpportunityFilter<T extends Filters>({
       {type === "international" && isInternationalFilters(filtros) && (
         <>
           <FilterDropdown
-            accentColor={accentColor}
             cols={2}
             label="Países de Destino"
             onChange={(value) => handleCheckboxChange("pais" as keyof T, value)}
@@ -149,7 +146,6 @@ function OpportunityFilter<T extends Filters>({
           />
 
           <FilterDropdown
-            accentColor={accentColor}
             cols={2}
             label="Idiomas"
             onChange={(value) =>
@@ -163,7 +159,6 @@ function OpportunityFilter<T extends Filters>({
       )}
 
       <FilterDropdown
-        accentColor={accentColor}
         cols={1}
         label="Taxa de Aplicação"
         onChange={(value) =>
@@ -176,7 +171,6 @@ function OpportunityFilter<T extends Filters>({
 
       {type === "international" && isInternationalFilters(filtros) && (
         <FilterDropdown
-          accentColor={accentColor}
           cols={1}
           label="Tipo de Bolsa"
           onChange={(value) =>
@@ -190,7 +184,6 @@ function OpportunityFilter<T extends Filters>({
 
       {type === "national" && !isInternationalFilters(filtros) && (
         <FilterDropdown
-          accentColor={accentColor}
           cols={1}
           label="Modalidade"
           onChange={(value) =>

@@ -74,7 +74,6 @@ const NacionalFilter = ({
   return (
     <div className="flex flex-col gap-2 font-inter">
       <FilterDropdown
-        accentColor="amber"
         cols={2}
         label="Tipo de Programa"
         onChange={(value) => handleCheckboxChange("tipo", value)}
@@ -84,7 +83,6 @@ const NacionalFilter = ({
       />
 
       <FilterDropdown
-        accentColor="amber"
         cols={1}
         label="Nível de Ensino"
         onChange={(value) => handleCheckboxChange("nivelEnsino", value)}
@@ -94,7 +92,6 @@ const NacionalFilter = ({
       />
 
       <FilterDropdown
-        accentColor="amber"
         cols={1}
         label="Taxa de Aplicação"
         onChange={(value) => handleCheckboxChange("taxaAplicacao", value)}
@@ -104,7 +101,6 @@ const NacionalFilter = ({
       />
 
       <FilterDropdown
-        accentColor="amber"
         cols={1}
         label="Modalidade"
         onChange={(value) => handleCheckboxChange("modalidade", value)}

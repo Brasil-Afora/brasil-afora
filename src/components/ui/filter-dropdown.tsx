@@ -17,10 +17,7 @@ import {
 } from "@/components/ui/combobox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-type AccentColor = "amber" | "blue";
-
 interface FilterDropdownProps {
-  accentColor?: AccentColor;
   cols?: 1 | 2;
   label: string;
   onChange: (value: string) => void;
@@ -31,15 +28,6 @@ interface FilterDropdownProps {
   selected: string[];
 }
 
-const getAccentClasses = (color: AccentColor) => ({
-  label: color === "blue" ? "text-blue-400" : "text-amber-500",
-  focus: color === "blue" ? "focus:ring-blue-500" : "focus:ring-amber-500",
-  checkbox:
-    color === "blue"
-      ? "text-blue-500 focus:ring-blue-500"
-      : "text-amber-500 focus:ring-amber-500",
-});
-
 const FilterDropdown = ({
   label,
   placeholder,
@@ -47,11 +35,9 @@ const FilterDropdown = ({
   selected,
   onChange,
   cols = 1,
-  accentColor = "blue",
   searchable = false,
   searchPlaceholder = "Pesquisar...",
 }: FilterDropdownProps) => {
-  const accent = getAccentClasses(accentColor);
   const [searchValue, setSearchValue] = useState("");
 
   const selectedOptions = useMemo(() => new Set(selected), [selected]);
@@ -116,10 +102,12 @@ const FilterDropdown = ({
     }
   };
 
-  const dropdownButtonClasses = `p-2 rounded bg-slate-950 text-white border border-slate-900 hover:text-white focus:text-white aria-expanded:text-white focus:outline-none focus:ring-1 ${accent.focus} h-10 w-full flex justify-between items-center cursor-pointer text-sm`;
+  const dropdownButtonClasses =
+    "p-2 rounded bg-slate-950 text-white border border-slate-900 hover:text-white focus:text-white aria-expanded:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 h-10 w-full flex justify-between items-center cursor-pointer text-sm";
   const dropdownMenuClasses =
     "z-20 w-full rounded-lg border border-slate-950 bg-slate-900 p-3 text-white shadow-xl";
-  const checkboxClasses = `rounded ${accent.checkbox} bg-slate-950 border-slate-900`;
+  const checkboxClasses =
+    "rounded text-blue-500 focus:ring-blue-500 bg-slate-950 border-slate-900";
   const maxVisibleItems = cols === 2 ? 12 : 8;
   const shouldUseScrollArea = visibleOptions.length > maxVisibleItems;
 
@@ -149,7 +137,7 @@ const FilterDropdown = ({
   return (
     <div className="relative w-full">
       <p className="mb-1 block text-white text-xs">
-        <span className={accent.label}>{label}</span>
+        <span className="text-blue-400">{label}</span>
       </p>
 
       <Combobox
