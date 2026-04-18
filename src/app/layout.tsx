@@ -1,3 +1,4 @@
+import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import { Bebas_Neue, Geist, Geist_Mono } from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
@@ -39,6 +40,7 @@ export default function RootLayout({
         <QueryProvider>{children}</QueryProvider>
         <Toaster />
       </body>
+      <GoogleAnalytics gaId="G-TCGX1Z935P" />
     </html>
   );
 }
