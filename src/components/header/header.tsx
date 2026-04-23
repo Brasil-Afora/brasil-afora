@@ -16,8 +16,12 @@ import useHeaderState from "@/hooks/use-header-state";
 
 const getHeaderBackgroundClass = (
   scrolled: boolean,
-  _transparent: boolean
+  keepTransparent: boolean
 ): string => {
+  if (keepTransparent) {
+    return "bg-transparent";
+  }
+
   return scrolled ? "bg-slate-900 shadow-md" : "bg-transparent";
 };
 
@@ -58,7 +62,13 @@ const Header = ({ transparent = false }: HeaderProps) => {
     toggleProfileMenu,
   } = useHeaderState();
 
-  const headerBgClass = getHeaderBackgroundClass(scrolled, transparent);
+  const isProfileRoute =
+    pathname === "/perfil" || pathname.startsWith("/perfil/");
+  const shouldKeepTransparent = isProfileRoute || (transparent && !scrolled);
+  const headerBgClass = getHeaderBackgroundClass(
+    scrolled,
+    shouldKeepTransparent
+  );
 
   const getNavLinkClasses = (isActive: boolean) => {
     const activeClass = isActive ? "text-amber-500" : "text-white";

@@ -25,7 +25,7 @@ const featuresData: FeatureItem[] = [
     icon: GlobeIcon,
     title: "Mundo & Brasil",
     description:
-      "Oportunidades internacionais e nacionais centralizadas em um só mapa.",
+      "Oportunidades internacionais e nacionais centralizadas em um só lugar.",
   },
   {
     icon: GraduationCapIcon,
