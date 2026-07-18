@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { opportunities } from "@/db/schema/opportunities";
+import { isValidDateOnly } from "@/server/date-only-validation";
 import { requireAdminInRoute } from "@/server/route-auth";
 
 export const dynamic = "force-dynamic";
@@ -66,7 +67,19 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = (await request.json()) as Record<string, unknown>;
-    await db.insert(opportunities).values(normalizeOpportunityInput(body));
+    const payload = normalizeOpportunityInput(body);
+
+    if (!isValidDateOnly(payload.applicationDeadline)) {
+      return NextResponse.json(
+        {
+          message:
+            "Application deadline must be a valid date in YYYY-MM-DD format.",
+        },
+        { status: 400 }
+      );
+    }
+
+    await db.insert(opportunities).values(payload);
 
     return NextResponse.json(
       { message: "Opportunity created successfully." },

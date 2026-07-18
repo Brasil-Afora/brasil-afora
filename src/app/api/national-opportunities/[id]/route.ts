@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { nationalOpportunities } from "@/db/schema/national-opportunities";
+import { isValidDateOnly } from "@/server/date-only-validation";
 import { requireAdminInRoute } from "@/server/route-auth";
 
 export const dynamic = "force-dynamic";
@@ -76,6 +77,19 @@ export async function PUT(
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const payload = buildUpdatePayload(body);
+
+    if (
+      payload.applicationDeadline !== undefined &&
+      !isValidDateOnly(payload.applicationDeadline)
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "Application deadline must be a valid date in YYYY-MM-DD format.",
+        },
+        { status: 400 }
+      );
+    }
 
     if (Object.keys(payload).length > 0) {
       await db
