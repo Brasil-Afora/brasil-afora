@@ -103,6 +103,7 @@ const TEXT_KEY_MAP: Record<string, string> = {
   taxa: "taxaAplicacao",
   tipobolsa: "tipoBolsa",
   bolsa: "tipoBolsa",
+  coberturabolsa: "coberturaBolsa",
   coberturaabolsa: "coberturaBolsa",
   cobertura: "coberturaBolsa",
   custosextras: "custosExtras",
