@@ -55,9 +55,6 @@ const useHeaderState = (): UseHeaderStateResult => {
   const isAdmin =
     ((session?.user as { role?: string } | undefined)?.role ?? "") === "admin";
 
-  const shouldPrefetchSession =
-    pathname.startsWith("/perfil") || pathname.startsWith("/admin");
-
   const loadSession = useCallback(async () => {
     if (isSessionLoadingRef.current) {
       return;
@@ -136,12 +133,8 @@ const useHeaderState = (): UseHeaderStateResult => {
   }, []);
 
   useEffect(() => {
-    if (!shouldPrefetchSession) {
-      return;
-    }
-
     triggerSessionLoad();
-  }, [shouldPrefetchSession, triggerSessionLoad]);
+  }, [triggerSessionLoad]);
 
   const navLinks = useMemo(
     () => [
