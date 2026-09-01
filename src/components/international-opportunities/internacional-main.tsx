@@ -9,6 +9,9 @@ import type { OpportunityCardConfig } from "@/components/opportunities/types";
 import { useOportunidadesInternacionais } from "@/hooks/use-oportunidades-internacionais";
 import useOpportunityFilters from "@/hooks/use-opportunity-filters";
 import InternacionalFilter from "./internacional-filter";
+import InternacionalShowcase, {
+  INTERNATIONAL_SHOWCASE_COUNT,
+} from "./internacional-showcase";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 
 const initialFiltros: OpportunitiesFiltros = {
@@ -127,10 +130,14 @@ const InternacionalMain = () => {
       onApplyMobileFilters={handleApplyMobileFilters}
       onClearFilters={handleClearFilters}
       onRemoveFilter={handleRemoveFilter}
-      resultCount={filteredData.length}
+      resultCount={
+        filteredData.length +
+        (isFilterActive ? 0 : INTERNATIONAL_SHOWCASE_COUNT)
+      }
       subtitle="Explore bolsas de estudo, summer camps e intercâmbios ao redor do mundo."
       title="Oportunidades Internacionais"
     >
+      {!isFilterActive && <InternacionalShowcase />}
       <OpportunityList config={cardConfig} data={filteredData} />
     </OpportunitiesMainLayout>
   );
