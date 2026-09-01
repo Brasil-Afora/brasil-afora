@@ -58,6 +58,7 @@ const useOpportunityFavorite = ({
   const favoritesQuery = useQuery({
     queryKey: favoritesQueryKey,
     queryFn: getFavorites,
+    enabled: Boolean(session) && !isSessionPending,
   });
 
   const [isFavorited, setIsFavorited] = useState(false);
