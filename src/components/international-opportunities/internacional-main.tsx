@@ -6,12 +6,15 @@ import type { AppliedFilter } from "@/components/opportunities/opportunities-mai
 import OpportunitiesMainLayout from "@/components/opportunities/opportunities-main-layout";
 import OpportunityList from "@/components/opportunities/opportunity-list";
 import type { OpportunityCardConfig } from "@/components/opportunities/types";
+import VerifiedOpportunitiesSection from "@/components/opportunities/verified-opportunities-section";
+import {
+  VERIFIED_OPPORTUNITIES_DATE,
+  verifiedInternationalOpportunities,
+} from "@/data/verified-opportunities";
 import { useOportunidadesInternacionais } from "@/hooks/use-oportunidades-internacionais";
 import useOpportunityFilters from "@/hooks/use-opportunity-filters";
+import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
 import InternacionalFilter from "./internacional-filter";
-import InternacionalShowcase, {
-  INTERNATIONAL_SHOWCASE_COUNT,
-} from "./internacional-showcase";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 
 const initialFiltros: OpportunitiesFiltros = {
@@ -52,6 +55,14 @@ const InternacionalMain = () => {
     initialFiltros,
     "internacionalFiltros",
     "international"
+  );
+
+  const verifiedOpportunities = useMemo(
+    () =>
+      verifiedInternationalOpportunities.filter((opportunity) =>
+        isOpportunityDeadlineOpen(opportunity.prazoInscricao)
+      ),
+    []
   );
 
   const appliedFilters: AppliedFilter[] = useMemo(() => {
@@ -130,11 +141,16 @@ const InternacionalMain = () => {
       onApplyMobileFilters={handleApplyMobileFilters}
       onClearFilters={handleClearFilters}
       onRemoveFilter={handleRemoveFilter}
-      resultCount={filteredData.length + INTERNATIONAL_SHOWCASE_COUNT}
+      resultCount={filteredData.length + verifiedOpportunities.length}
       subtitle="Explore bolsas de estudo, summer camps e intercâmbios ao redor do mundo."
       title="Oportunidades Internacionais"
     >
-      <InternacionalShowcase />
+      <VerifiedOpportunitiesSection
+        config={cardConfig}
+        data={verifiedOpportunities}
+        description="Elegibilidade, prazos e links oficiais conferidos para estudantes do Brasil. Estas oportunidades ficam em destaque mesmo quando os filtros do catálogo antigo estão ativos."
+        verifiedLabel={`Verificadas em ${VERIFIED_OPPORTUNITIES_DATE.split("-").reverse().join("/")}`}
+      />
       <OpportunityList config={cardConfig} data={filteredData} />
     </OpportunitiesMainLayout>
   );

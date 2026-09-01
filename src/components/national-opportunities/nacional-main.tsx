@@ -6,8 +6,15 @@ import type { AppliedFilter } from "@/components/opportunities/opportunities-mai
 import OpportunitiesMainLayout from "@/components/opportunities/opportunities-main-layout";
 import OpportunityList from "@/components/opportunities/opportunity-list";
 import type { OpportunityCardConfig } from "@/components/opportunities/types";
+import VerifiedOpportunitiesSection from "@/components/opportunities/verified-opportunities-section";
+import {
+  isVerifiedNationalOpportunityName,
+  VERIFIED_OPPORTUNITIES_DATE,
+  verifiedNationalOpportunities,
+} from "@/data/verified-opportunities";
 import { useOportunidadesNacionais } from "@/hooks/use-oportunidades-nacionais";
 import useOpportunityFilters from "@/hooks/use-opportunity-filters";
+import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
 import NacionalFilter from "./nacional-filter";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 
@@ -46,6 +53,22 @@ const NacionalMain = () => {
     initialFiltros,
     "nacionalFiltros",
     "national"
+  );
+
+  const catalogData = useMemo(
+    () =>
+      filteredData.filter(
+        (opportunity) => !isVerifiedNationalOpportunityName(opportunity.nome)
+      ),
+    [filteredData]
+  );
+
+  const verifiedOpportunities = useMemo(
+    () =>
+      verifiedNationalOpportunities.filter((opportunity) =>
+        isOpportunityDeadlineOpen(opportunity.prazoInscricao)
+      ),
+    []
   );
 
   const appliedFilters: AppliedFilter[] = useMemo(() => {
@@ -118,11 +141,17 @@ const NacionalMain = () => {
       onApplyMobileFilters={handleApplyMobileFilters}
       onClearFilters={handleClearFilters}
       onRemoveFilter={handleRemoveFilter}
-      resultCount={filteredData.length}
+      resultCount={catalogData.length + verifiedOpportunities.length}
       subtitle="Encontre olimpíadas, feiras científicas e projetos de liderança no Brasil."
       title="Oportunidades Nacionais"
     >
-      <OpportunityList config={cardConfig} data={filteredData} />
+      <VerifiedOpportunitiesSection
+        config={cardConfig}
+        data={verifiedOpportunities}
+        description="Oportunidades nacionais com inscrições abertas e participação confirmada para estudantes no Brasil. Prazos e regras foram conferidos nas páginas oficiais."
+        verifiedLabel={`Verificadas em ${VERIFIED_OPPORTUNITIES_DATE.split("-").reverse().join("/")}`}
+      />
+      <OpportunityList config={cardConfig} data={catalogData} />
     </OpportunitiesMainLayout>
   );
 };

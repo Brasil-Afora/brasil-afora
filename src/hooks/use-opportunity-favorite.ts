@@ -12,6 +12,7 @@ interface FavoriteItem {
 
 interface UseOpportunityFavoriteParams {
   addFavorite: (id: string) => Promise<void>;
+  enabled?: boolean;
   favoritesQueryKey: QueryKey;
   getFavorites: () => Promise<FavoriteItem[]>;
   id: string;
@@ -46,6 +47,7 @@ const isUnauthorizedError = (error: unknown): boolean => {
 
 const useOpportunityFavorite = ({
   addFavorite,
+  enabled = true,
   favoritesQueryKey,
   getFavorites,
   id,
@@ -58,6 +60,7 @@ const useOpportunityFavorite = ({
   const favoritesQuery = useQuery({
     queryKey: favoritesQueryKey,
     queryFn: getFavorites,
+    enabled: enabled && Boolean(session) && !isSessionPending,
   });
 
   const [isFavorited, setIsFavorited] = useState(false);
@@ -91,6 +94,10 @@ const useOpportunityFavorite = ({
   }, [routePath, router]);
 
   const handleFavoriteToggle = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     if (!(session || isSessionPending)) {
       redirectToLogin();
       return;
@@ -132,6 +139,7 @@ const useOpportunityFavorite = ({
     }
   }, [
     addFavorite,
+    enabled,
     id,
     isFavorited,
     isSessionPending,
@@ -141,6 +149,11 @@ const useOpportunityFavorite = ({
   ]);
 
   const handleConfirmRemove = useCallback(async () => {
+    if (!enabled) {
+      setShowConfirmation(false);
+      return;
+    }
+
     try {
       await removeFavorite(id);
       await Promise.all([
@@ -172,7 +185,7 @@ const useOpportunityFavorite = ({
     } finally {
       setShowConfirmation(false);
     }
-  }, [id, queryClient, redirectToLogin, removeFavorite]);
+  }, [enabled, id, queryClient, redirectToLogin, removeFavorite]);
 
   const clearPopup = useCallback(() => {
     setPopup((prev) => ({ ...prev, visible: false }));

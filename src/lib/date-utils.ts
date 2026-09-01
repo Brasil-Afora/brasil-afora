@@ -39,6 +39,11 @@ export function getTimeRemaining(deadlineString: string): string | null {
   return "Prazo encerrado";
 }
 
+export function isOpportunityDeadlineOpen(deadlineString: string): boolean {
+  const daysRemaining = getDaysRemaining(deadlineString);
+  return daysRemaining !== null && daysRemaining >= 0;
+}
+
 export function getTimeRemainingBadgeClass(deadlineString: string): string {
   const daysRemaining = getDaysRemaining(deadlineString);
 

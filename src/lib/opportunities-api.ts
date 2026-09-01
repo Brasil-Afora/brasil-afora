@@ -1,3 +1,8 @@
+import {
+  getVerifiedInternationalOpportunityById,
+  getVerifiedNationalOpportunityById,
+} from "@/data/verified-opportunities";
+
 interface OpportunityRecord {
   ageRange: string;
   applicationDeadline: string | Date;
@@ -111,6 +116,7 @@ export type NationalOpportunityInput = Omit<NationalOpportunity, "id">;
 
 const SPECIFIC_REQUIREMENTS_SPLIT_REGEX = /\r?\n|;|\|/;
 const BR_DATE_IN_TEXT_REGEX = /\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/;
+const DATE_ONLY_REGEX = /^(\d{4})-(\d{2})-(\d{2})/;
 const MULTISPACE_REGEX = /\s+/g;
 const SHORT_DESCRIPTION_MAX_LENGTH = 220;
 const DEFAULT_OPPORTUNITY_IMAGE_URL =
@@ -127,6 +133,14 @@ class ApiRequestError extends Error {
 }
 
 const toDateString = (value: string | Date): string => {
+  if (typeof value === "string") {
+    const dateOnlyMatch = DATE_ONLY_REGEX.exec(value);
+    if (dateOnlyMatch) {
+      const [, year, month, day] = dateOnlyMatch;
+      return `${day}/${month}/${year}`;
+    }
+  }
+
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
     return "";
@@ -461,6 +475,11 @@ export const getInternationalOpportunities = async (): Promise<
 export const getInternationalOpportunityById = async (
   id: string
 ): Promise<InternationalOpportunity | null> => {
+  const verifiedOpportunity = getVerifiedInternationalOpportunityById(id);
+  if (verifiedOpportunity) {
+    return verifiedOpportunity;
+  }
+
   const data = await fetchFromApi<{ opportunity: OpportunityRecord | null }>(
     `/api/opportunities/${id}`
   );
@@ -484,6 +503,11 @@ export const getNationalOpportunities = async (): Promise<
 export const getNationalOpportunityById = async (
   id: string
 ): Promise<NationalOpportunity | null> => {
+  const verifiedOpportunity = getVerifiedNationalOpportunityById(id);
+  if (verifiedOpportunity) {
+    return verifiedOpportunity;
+  }
+
   const data = await fetchFromApi<{
     nationalOpportunity: NationalOpportunityRecord | null;
   }>(`/api/national-opportunities/${id}`);
