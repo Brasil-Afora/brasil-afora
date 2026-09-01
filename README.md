@@ -2,6 +2,8 @@
 
 Platform for discovering international and national academic opportunities, with favorites, profile area, map visualization, and admin management.
 
+Live site: https://brasil-afora.vercel.app
+
 ## Tech stack
 
 - Next.js 16 (App Router) + React 19 + TypeScript
@@ -14,6 +16,7 @@ Platform for discovering international and national academic opportunities, with
 ## Main features
 
 - Public catalog for international and national opportunities
+- Curated showcase of verified international scholarships and programs
 - Opportunity detail pages
 - Favorite opportunities for authenticated users
 - Profile page for user favorites and checklist flows
