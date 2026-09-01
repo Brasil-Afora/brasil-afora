@@ -23,6 +23,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { isVerifiedInternationalOpportunityId } from "@/data/verified-opportunities";
 import { opportunityQueryKeys } from "@/hooks/queries/opportunity-query-keys";
 import { useInternationalOpportunityByIdQuery } from "@/hooks/queries/use-opportunity-queries";
 import useOpportunityFavorite from "@/hooks/use-opportunity-favorite";
@@ -59,6 +60,7 @@ interface InternacionalInfoProps {
 
 const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
   const router = useRouter();
+  const isVerifiedOpportunity = isVerifiedInternationalOpportunityId(id);
   const opportunityQuery = useInternationalOpportunityByIdQuery(id);
   const oportunidade = useMemo<Opportunity | undefined>(() => {
     return opportunityQuery.data ?? undefined;
@@ -86,6 +88,7 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
     showConfirmation,
   } = useOpportunityFavorite({
     addFavorite: addInternationalFavorite,
+    enabled: !isVerifiedOpportunity,
     favoritesQueryKey: opportunityQueryKeys.internationalFavorites(),
     getFavorites: getInternationalFavorites,
     id,
@@ -403,18 +406,25 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
                 {timeRemaining}
               </span>
             )}
-            <button
-              className={`inline-flex h-11 min-w-[248px] items-center justify-center rounded-full px-6 py-2 font-bold transition-colors duration-200 ${isFavorited ? "bg-blue-500 text-white" : "bg-slate-950 text-white hover:bg-slate-800"}`}
-              onClick={() => {
-                handleFavoriteToggle().catch(() => undefined);
-              }}
-              type="button"
-            >
-              <HeartIcon
-                className={`mr-2 h-4 w-4 ${isFavorited ? "text-white" : "text-blue-400"}`}
-              />
-              {isFavorited ? "Remover" : "Adicionar aos Favoritos"}
-            </button>
+            {isVerifiedOpportunity ? (
+              <span className="inline-flex h-11 min-w-[248px] items-center justify-center rounded-full border border-blue-400/25 bg-blue-500/10 px-6 py-2 font-bold text-blue-300">
+                <CheckIcon className="mr-2 h-4 w-4" /> Verificada para
+                estudantes do Brasil
+              </span>
+            ) : (
+              <button
+                className={`inline-flex h-11 min-w-[248px] items-center justify-center rounded-full px-6 py-2 font-bold transition-colors duration-200 ${isFavorited ? "bg-blue-500 text-white" : "bg-slate-950 text-white hover:bg-slate-800"}`}
+                onClick={() => {
+                  handleFavoriteToggle().catch(() => undefined);
+                }}
+                type="button"
+              >
+                <HeartIcon
+                  className={`mr-2 h-4 w-4 ${isFavorited ? "text-white" : "text-blue-400"}`}
+                />
+                {isFavorited ? "Remover" : "Adicionar aos Favoritos"}
+              </button>
+            )}
             <a
               className="inline-flex h-11 min-w-[248px] items-center justify-center gap-2 rounded-full bg-blue-500 px-6 py-2 font-bold text-white transition-colors duration-300 hover:bg-blue-600"
               href={oportunidade.linkOficial || "#"}

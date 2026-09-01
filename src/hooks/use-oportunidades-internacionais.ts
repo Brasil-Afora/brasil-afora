@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { Opportunity } from "@/components/international-opportunities/types";
 import { useInternationalOpportunitiesQuery } from "@/hooks/queries/use-opportunity-queries";
+import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
 
 interface UseOportunidadesInternacionaisResult {
   data: Opportunity[];
@@ -15,7 +16,9 @@ export const useOportunidadesInternacionais =
     const query = useInternationalOpportunitiesQuery();
 
     const data = useMemo<Opportunity[]>(() => {
-      return query.data ?? [];
+      return (query.data ?? []).filter((opportunity) =>
+        isOpportunityDeadlineOpen(opportunity.prazoInscricao)
+      );
     }, [query.data]);
 
     return {

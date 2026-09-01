@@ -2,6 +2,7 @@
 
 import {
   CalendarDaysIcon,
+  CheckIcon,
   ChevronLeftIcon,
   CircleXIcon,
   ClipboardListIcon,
@@ -21,6 +22,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { isVerifiedNationalOpportunityId } from "@/data/verified-opportunities";
 import { opportunityQueryKeys } from "@/hooks/queries/opportunity-query-keys";
 import { useNationalOpportunityByIdQuery } from "@/hooks/queries/use-opportunity-queries";
 import useOpportunityFavorite from "@/hooks/use-opportunity-favorite";
@@ -44,6 +46,7 @@ const NACIONAL_ROUTE_PREFIX = "/oportunidades/nacionais";
 
 const NacionalInfo = ({ id }: NacionalInfoProps) => {
   const router = useRouter();
+  const isVerifiedOpportunity = isVerifiedNationalOpportunityId(id);
   const opportunityQuery = useNationalOpportunityByIdQuery(id);
   const oportunidade = useMemo<Opportunity | undefined>(() => {
     return opportunityQuery.data ?? undefined;
@@ -71,6 +74,7 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
     showConfirmation,
   } = useOpportunityFavorite({
     addFavorite: addNationalFavorite,
+    enabled: !isVerifiedOpportunity,
     favoritesQueryKey: opportunityQueryKeys.nationalFavorites(),
     getFavorites: getNationalFavorites,
     id,
@@ -374,18 +378,25 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
             </button>
           </div>
           <div className="flex w-full flex-col gap-4 md:w-auto md:flex-row md:items-center">
-            <button
-              className={`inline-flex h-11 min-w-[248px] items-center justify-center rounded-full px-6 py-2 font-bold transition-colors duration-200 ${isFavorited ? "bg-amber-500 text-black" : "bg-slate-950 text-white hover:bg-slate-800"}`}
-              onClick={() => {
-                handleFavoriteToggle().catch(() => undefined);
-              }}
-              type="button"
-            >
-              <HeartIcon
-                className={`mr-2 h-4 w-4 ${isFavorited ? "text-black" : "text-amber-500"}`}
-              />
-              {isFavorited ? "Remover" : "Adicionar aos Favoritos"}
-            </button>
+            {isVerifiedOpportunity ? (
+              <span className="inline-flex h-11 min-w-[248px] items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/10 px-6 py-2 font-bold text-amber-300">
+                <CheckIcon className="mr-2 h-4 w-4" /> Verificada para
+                estudantes do Brasil
+              </span>
+            ) : (
+              <button
+                className={`inline-flex h-11 min-w-[248px] items-center justify-center rounded-full px-6 py-2 font-bold transition-colors duration-200 ${isFavorited ? "bg-amber-500 text-black" : "bg-slate-950 text-white hover:bg-slate-800"}`}
+                onClick={() => {
+                  handleFavoriteToggle().catch(() => undefined);
+                }}
+                type="button"
+              >
+                <HeartIcon
+                  className={`mr-2 h-4 w-4 ${isFavorited ? "text-black" : "text-amber-500"}`}
+                />
+                {isFavorited ? "Remover" : "Adicionar aos Favoritos"}
+              </button>
+            )}
             <a
               className="inline-flex h-11 min-w-[248px] items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-2 font-bold text-black transition-colors duration-300 hover:bg-amber-600"
               href={oportunidade.linkOficial || "#"}
