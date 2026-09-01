@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const DEFAULT_SITE_URL = "http://localhost:3000";
+const DEFAULT_SITE_URL = "https://brasil-afora.vercel.app";
 const TRAILING_SLASH_PATTERN = /\/$/;
 
 const getSiteUrl = (): string => {

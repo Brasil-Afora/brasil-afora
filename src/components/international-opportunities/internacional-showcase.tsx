@@ -46,7 +46,8 @@ const InternacionalShowcase = () => {
           </h2>
           <p className="mt-1 max-w-2xl text-slate-400 text-sm">
             Uma seleção curta de programas com informações conferidas nas
-            páginas oficiais das instituições.
+            páginas oficiais das instituições. Estes destaques permanecem
+            visíveis e não são afetados pelos filtros do catálogo abaixo.
           </p>
         </div>
       </div>

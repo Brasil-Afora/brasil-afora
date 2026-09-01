@@ -130,14 +130,11 @@ const InternacionalMain = () => {
       onApplyMobileFilters={handleApplyMobileFilters}
       onClearFilters={handleClearFilters}
       onRemoveFilter={handleRemoveFilter}
-      resultCount={
-        filteredData.length +
-        (isFilterActive ? 0 : INTERNATIONAL_SHOWCASE_COUNT)
-      }
+      resultCount={filteredData.length + INTERNATIONAL_SHOWCASE_COUNT}
       subtitle="Explore bolsas de estudo, summer camps e intercâmbios ao redor do mundo."
       title="Oportunidades Internacionais"
     >
-      {!isFilterActive && <InternacionalShowcase />}
+      <InternacionalShowcase />
       <OpportunityList config={cardConfig} data={filteredData} />
     </OpportunitiesMainLayout>
   );

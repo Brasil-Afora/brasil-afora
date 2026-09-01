@@ -8,7 +8,7 @@ import "./globals.css";
 const SITE_TITLE = "Brasil Afora: encontre oportunidades acadêmicas";
 const SITE_DESCRIPTION =
   "Conecte-se às melhores oportunidades, bolsas e feiras, no Brasil e no mundo. Tudo em um só lugar para impulsionar seu futuro!";
-const FALLBACK_SITE_URL = "http://localhost:3000";
+const FALLBACK_SITE_URL = "https://brasil-afora.vercel.app";
 
 const getMetadataBase = (): URL => {
   const configuredUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
