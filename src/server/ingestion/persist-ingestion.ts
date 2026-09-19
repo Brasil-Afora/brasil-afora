@@ -78,6 +78,13 @@ export class IdempotencyConflictError extends Error {
   }
 }
 
+export class SourceDisabledError extends Error {
+  constructor(message = "Ingestion source is disabled by the server.") {
+    super(message);
+    this.name = "SourceDisabledError";
+  }
+}
+
 const stableJson = (value: unknown): string => {
   if (value === null || typeof value !== "object") {
     return JSON.stringify(value);
@@ -437,6 +444,15 @@ export const persistIngestion = (
     let round = requestedRound;
     const requestedDeadline = splitDeadline(request);
 
+    const registeredSources = await transaction
+      .select({ enabled: sources.enabled })
+      .from(sources)
+      .where(eq(sources.id, source.id))
+      .limit(1);
+    if (registeredSources[0]?.enabled === false) {
+      throw new SourceDisabledError();
+    }
+
     if (ingestion.organization) {
       const organization = ingestion.organization;
       await transaction
@@ -492,7 +508,6 @@ export const persistIngestion = (
         set: {
           adapterName: source.adapter_name,
           adapterVersion: source.adapter_version,
-          enabled: source.enabled,
           lastSuccessAt: new Date(snapshot.fetched_at),
         },
       });

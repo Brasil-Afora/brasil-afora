@@ -451,6 +451,23 @@ const createPersistenceTestDatabase = async () => {
   };
 };
 
+const registerSource = async (
+  client: PGlite,
+  enabled: boolean
+): Promise<void> => {
+  await client.query(
+    `
+      INSERT INTO sources (
+        id, name, base_url, source_type, authority_tier, language,
+        crawl_interval_hours, rate_limit_per_minute, concurrency_limit,
+        rendering_policy, enabled
+      ) VALUES ($1, 'Fonte oficial', 'https://example.org/', 'website', 90,
+        'pt-BR', 24, 10, 2, 'fallback', $2)
+    `,
+    [SOURCE_ID, enabled]
+  );
+};
+
 const makeObservationRequest = ({
   applicationUrl = "https://example.org/apply/2026",
   contentHash,
@@ -797,6 +814,54 @@ describe("structured rules", () => {
 });
 
 describe("transactional ingestion persistence", () => {
+  it("rejects ingestion when the server has disabled the source", async () => {
+    const { client, database } = await createPersistenceTestDatabase();
+    try {
+      await registerSource(client, false);
+      const request = ingestionRequestV1Schema.parse(makeValidRequest());
+
+      await expect(
+        persistIngestion(
+          database as unknown as Parameters<typeof persistIngestion>[0],
+          request
+        )
+      ).rejects.toMatchObject({ name: "SourceDisabledError" });
+
+      const state = await client.query<{ enabled: boolean; snapshots: number }>(`
+        SELECT
+          enabled,
+          (SELECT count(*)::int FROM snapshots) AS snapshots
+        FROM sources
+        WHERE id = '${SOURCE_ID}'
+      `);
+      expect(state.rows[0]).toEqual({ enabled: false, snapshots: 0 });
+    } finally {
+      await client.close();
+    }
+  });
+
+  it("keeps server enablement authoritative over a stale disabled payload", async () => {
+    const { client, database } = await createPersistenceTestDatabase();
+    try {
+      await registerSource(client, true);
+      const rawRequest = makeValidRequest();
+      rawRequest.ingestion.source.enabled = false;
+      const request = ingestionRequestV1Schema.parse(rawRequest);
+
+      await persistIngestion(
+        database as unknown as Parameters<typeof persistIngestion>[0],
+        request
+      );
+
+      const state = await client.query<{ enabled: boolean }>(`
+        SELECT enabled FROM sources WHERE id = '${SOURCE_ID}'
+      `);
+      expect(state.rows[0]).toEqual({ enabled: true });
+    } finally {
+      await client.close();
+    }
+  });
+
   it("BF-07 preserves exact producer deadline precision", async () => {
     const { client, database } = await createPersistenceTestDatabase();
     try {
