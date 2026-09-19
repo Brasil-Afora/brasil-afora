@@ -2,6 +2,10 @@
   "name": "brasil-afora-next",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "bun@1.3.14",
+  "engines": {
+    "node": "26.7.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -29,11 +33,11 @@
     "better-auth": "^1.6.25",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "drizzle-orm": "^1.0.0-beta.17-67b1795",
+    "drizzle-orm": "1.0.0-beta.9-e89174b",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.8.0",
     "next": "16.2.11",
-    "pg": "^8.20.0",
+    "pg": "8.20.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.72.1",
@@ -55,13 +59,13 @@
     "@types/pg": "^8.18.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "4.1.10",
     "babel-plugin-react-compiler": "1.0.0",
-    "drizzle-kit": "^1.0.0-beta.17-67b1795",
+    "drizzle-kit": "1.0.0-beta.9-e89174b",
     "tailwindcss": "^4",
-    "typescript": "^5",
+    "typescript": "5.9.3",
     "ultracite": "7.5.6",
-    "vitest": "^4.1.10"
+    "vitest": "4.1.10"
   },
   "overrides": {
     "esbuild": "^0.28.1",
