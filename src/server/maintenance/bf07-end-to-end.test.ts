@@ -20,9 +20,16 @@ import {
 } from "@/server/maintenance/recrawl-scheduler";
 import { getReviewQueue } from "@/server/review/review-queue";
 
-const PYTHON_REPO =
-  "/Users/fellipegoncalvesleite/Documents/Codex/2026-07-23/i-m-working-on-brasilfor-a";
-const PYTHON = `${PYTHON_REPO}/.venv/bin/python`;
+const requiredEnv = (name: string): string => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is required for the cross-language test suite`);
+  }
+  return value;
+};
+
+const PYTHON_REPO = requiredEnv("BRASIL_AFORA_PYTHON_REPO");
+const PYTHON = requiredEnv("BRASIL_AFORA_PYTHON");
 const temporaryDirectories: string[] = [];
 const CHECKPOINT_ROUTE_PATTERN =
   /^\/api\/v1\/maintenance\/recrawls\/([^/]+)\/checkpoint$/;
@@ -78,9 +85,9 @@ const runWorker = (
         "--registry",
         registryPath,
         "--taxonomy",
-        `${PYTHON_REPO}/config/categories.toml`,
+        join(PYTHON_REPO, "config/categories.toml"),
         "--facets",
-        `${PYTHON_REPO}/config/facets.toml`,
+        join(PYTHON_REPO, "config/facets.toml"),
         "--source-cohort",
         "bf07_e2e",
         "--limit",
@@ -92,7 +99,6 @@ const runWorker = (
           ...process.env,
           BRASIL_AFORA_INGESTION_TOKEN: "i".repeat(32),
           MAINTENANCE_WORKER_TOKEN: "m".repeat(32),
-          PYTHONPATH: `${PYTHON_REPO}/src`,
         },
       }
     );
@@ -128,7 +134,7 @@ describe("BF-07 registered-source worker end to end", () => {
     let fetchCount = 0;
     let checkpointIngestion: unknown = null;
     const fixtureHtml = readFileSync(
-      "/Users/fellipegoncalvesleite/Documents/Codex/2026-07-23/i-m-working-on-brasilfor-a/tests/fixtures/rich_scholarship.html",
+      join(PYTHON_REPO, "tests/fixtures/rich_scholarship.html"),
       "utf8"
     )
       .replaceAll("2026-08-31", "2026-09-30")
@@ -266,7 +272,7 @@ describe("BF-07 registered-source worker end to end", () => {
         {
           cwd: PYTHON_REPO,
           encoding: "utf8",
-          env: { ...process.env, PYTHONPATH: `${PYTHON_REPO}/src` },
+          env: process.env,
         }
       ).trim();
       const inserted = await client.query<{ id: string }>(
@@ -430,7 +436,7 @@ describe("BF-07 registered-source worker end to end", () => {
     let fetchCount = 0;
     let failNextIngestionResponse = true;
     const fixtureHtml = readFileSync(
-      "/Users/fellipegoncalvesleite/Documents/Codex/2026-07-23/i-m-working-on-brasilfor-a/tests/fixtures/rich_scholarship.html",
+      join(PYTHON_REPO, "tests/fixtures/rich_scholarship.html"),
       "utf8"
     )
       .replaceAll("2026-08-31", "2026-09-30")

@@ -50,13 +50,20 @@ import { submitReviewerCorrection } from "@/server/review/reviewer-corrections";
  * Page variants below are deterministic fixture mutations, never live facts.
  */
 
-const PYTHON_REPO =
-  "/Users/fellipegoncalvesleite/Documents/Codex/2026-07-23/i-m-working-on-brasilfor-a";
-const PYTHON = `${PYTHON_REPO}/.venv/bin/python`;
-const FIXTURES = `${PYTHON_REPO}/tests/fixtures/one_ufma`;
-const HOME = readFileSync(`${FIXTURES}/home_2026-09-19.html`, "utf8");
+const requiredEnv = (name: string): string => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is required for the cross-language test suite`);
+  }
+  return value;
+};
+
+const PYTHON_REPO = requiredEnv("BRASIL_AFORA_PYTHON_REPO");
+const PYTHON = requiredEnv("BRASIL_AFORA_PYTHON");
+const FIXTURES = join(PYTHON_REPO, "tests/fixtures/one_ufma");
+const HOME = readFileSync(join(FIXTURES, "home_2026-09-19.html"), "utf8");
 const REGULATION = readFileSync(
-  `${FIXTURES}/regulamento_2026-09-19.html`,
+  join(FIXTURES, "regulamento_2026-09-19.html"),
   "utf8"
 );
 const WORKER = "maintenance-worker";
@@ -332,9 +339,9 @@ const createPilot = async () => {
           "--registry",
           registryPath,
           "--taxonomy",
-          `${PYTHON_REPO}/config/categories.toml`,
+          join(PYTHON_REPO, "config/categories.toml"),
           "--facets",
-          `${PYTHON_REPO}/config/facets.toml`,
+          join(PYTHON_REPO, "config/facets.toml"),
           "--source-cohort",
           "bf10_one_pilot",
           "--request-interval-seconds",
@@ -346,7 +353,6 @@ const createPilot = async () => {
             ...process.env,
             BRASIL_AFORA_INGESTION_TOKEN: "i".repeat(32),
             MAINTENANCE_WORKER_TOKEN: "m".repeat(32),
-            PYTHONPATH: `${PYTHON_REPO}/src`,
           },
         }
       );

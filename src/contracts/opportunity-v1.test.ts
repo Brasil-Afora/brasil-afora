@@ -827,7 +827,10 @@ describe("transactional ingestion persistence", () => {
         )
       ).rejects.toMatchObject({ name: "SourceDisabledError" });
 
-      const state = await client.query<{ enabled: boolean; snapshots: number }>(`
+      const state = await client.query<{
+        enabled: boolean;
+        snapshots: number;
+      }>(`
         SELECT
           enabled,
           (SELECT count(*)::int FROM snapshots) AS snapshots

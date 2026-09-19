@@ -61,6 +61,9 @@ const getScholarshipTagClasses = (tipoBolsa: string): string => {
   }
 };
 
+const getQueryErrorMessage = (error: unknown): string | null =>
+  error instanceof Error ? error.message : null;
+
 interface InternacionalInfoProps {
   id: string;
 }
@@ -73,10 +76,7 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
     return opportunityQuery.data ?? undefined;
   }, [opportunityQuery.data]);
   const loading = opportunityQuery.isPending;
-  const fetchError =
-    opportunityQuery.error instanceof Error
-      ? opportunityQuery.error.message
-      : null;
+  const fetchError = getQueryErrorMessage(opportunityQuery.error);
 
   const [activeTab, setActiveTab] = useState<ActiveTab>("sobre");
   const [heroImageFailed, setHeroImageFailed] = useState(false);
