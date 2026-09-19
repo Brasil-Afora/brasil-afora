@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run",
+    "test": "vitest run && node --test src/data/showcase-opportunities.test.mjs",
     "test:watch": "vitest",
     "lint": "biome check",
     "format": "biome format --write",
