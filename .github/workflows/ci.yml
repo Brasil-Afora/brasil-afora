@@ -11,38 +11,76 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17@sha256:f4c66b820c6f974249089d3d16d86a3698eae11e8746eb6644b2271031e91232
+        env:
+          POSTGRES_DB: brasil_afora
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d brasil_afora"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       BETTER_AUTH_SECRET: build-only-secret-build-only-secret-123456
       BETTER_AUTH_URL: http://localhost:3000
-      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:1/brasil_afora
+      BRASIL_AFORA_PYTHON: ${{ github.workspace }}/.ci/brasil-afora-scraper/.venv/bin/python
+      BRASIL_AFORA_PYTHON_REPO: ${{ github.workspace }}/.ci/brasil-afora-scraper
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/brasil_afora
       GOOGLE_CLIENT_ID: build-only-client
       GOOGLE_CLIENT_SECRET: build-only-secret
       NEXT_PUBLIC_APP_URL: http://localhost:3000
-      NEXT_PUBLIC_STRUCTURED_OPPORTUNITIES: "true"
+      NEXT_PUBLIC_STRUCTURED_OPPORTUNITIES: "false"
       RESEND_API_KEY: re_build_only
       RESEND_FROM_EMAIL: Brasil Afora <noreply@example.org>
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - name: Checkout web source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Checkout exact scraper release
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Brasil-Afora/brasil-afora-scraper
+          ref: 307f306dc3edf18a997b2d27ddba2c6ee18b9bf1
+          path: .ci/brasil-afora-scraper
+      - name: Install exact Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 26.7.0
+      - name: Install exact Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: 1.3.14
-      - run: bun install --frozen-lockfile
+      - name: Install pinned uv
+        uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+        with:
+          version: "0.11.29"
+          enable-cache: true
+      - name: Install exact scraper environment
+        working-directory: .ci/brasil-afora-scraper
+        run: |
+          uv python install 3.14.7
+          uv sync --frozen --extra dev --no-editable
+      - name: Locked web install
+        run: bun install --frozen-lockfile
+      - name: Apply all migrations to disposable PostgreSQL 17
+        run: bun run db:migrate
       - name: Lint and format contract
         run: bun run check
       - name: Type check
-        run: bun x tsc --noEmit
-      - name: Contract, migration, repository, workflow, and frontend tests
+        run: bun run typecheck
+      - name: Full Vitest, migration, cross-language, and native data tests
         run: bun run test --coverage
-      - name: Production dependency audit
-        run: bun audit --production
       - name: Production build
         run: bun run build
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: coverage
           path: coverage
           if-no-files-found: warn
-

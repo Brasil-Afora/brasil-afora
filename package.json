@@ -12,6 +12,7 @@
     "start": "next start",
     "test": "vitest run && node --test src/data/showcase-opportunities.test.mjs",
     "test:watch": "vitest",
+    "typecheck": "next typegen && tsc --noEmit",
     "lint": "biome check",
     "format": "biome format --write",
     "check": "ultracite check",
