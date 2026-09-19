@@ -10,6 +10,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getTimeRemaining, getTimeRemainingBadgeClass } from "@/lib/date-utils";
+import {
+  formatLastVerifiedAt,
+  getOpportunityLifecycleBadgeClass,
+  getOpportunityLifecycleLabel,
+  shouldShowDeadlineCountdown,
+} from "@/lib/opportunity-lifecycle";
 import type { Opportunity } from "./types";
 
 interface InternacionalListProps {
@@ -55,9 +61,17 @@ const InternacionalList = ({ data }: InternacionalListProps) => {
       <div className="container mx-auto">
         <div className="grid grid-cols-1 gap-8 font-inter sm:grid-cols-2 lg:grid-cols-3">
           {data.map((oportunidade, index) => {
-            const timeRemaining = getTimeRemaining(oportunidade.prazoInscricao);
+            const timeRemaining = shouldShowDeadlineCountdown(oportunidade)
+              ? getTimeRemaining(oportunidade.prazoInscricao)
+              : null;
             const deadlineBadgeClass = getTimeRemainingBadgeClass(
               oportunidade.prazoInscricao
+            );
+            const lifecycleLabel = getOpportunityLifecycleLabel(oportunidade);
+            const lifecycleBadgeClass =
+              getOpportunityLifecycleBadgeClass(oportunidade);
+            const lastVerifiedAt = formatLastVerifiedAt(
+              oportunidade.lastVerifiedAt
             );
             const scholarshipClasses = getScholarshipTagClasses(
               oportunidade.tipoBolsa
@@ -74,6 +88,13 @@ const InternacionalList = ({ data }: InternacionalListProps) => {
                     className={`absolute top-4 right-4 z-10 rounded-full px-3 py-1 font-bold text-xs ${deadlineBadgeClass}`}
                   >
                     {timeRemaining}
+                  </div>
+                )}
+                {!timeRemaining && lifecycleLabel && (
+                  <div
+                    className={`absolute top-4 right-4 z-10 rounded-full px-3 py-1 font-bold text-xs ${lifecycleBadgeClass}`}
+                  >
+                    {lifecycleLabel}
                   </div>
                 )}
 
@@ -131,6 +152,11 @@ const InternacionalList = ({ data }: InternacionalListProps) => {
                         Duração: {oportunidade.duracao}
                       </span>
                     </div>
+                    {lastVerifiedAt && (
+                      <p className="mt-2 text-white/55 text-xs">
+                        Verificada em {lastVerifiedAt}
+                      </p>
+                    )}
                   </div>
                 </div>
               </Link>

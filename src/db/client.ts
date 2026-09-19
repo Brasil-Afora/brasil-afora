@@ -13,6 +13,8 @@ const pool =
     connectionString: env.DATABASE_URL,
   });
 
+export const pgPool = pool;
+
 if (process.env.NODE_ENV !== "production") {
   globalThis.__brasilAforaPgPool = pool;
 }

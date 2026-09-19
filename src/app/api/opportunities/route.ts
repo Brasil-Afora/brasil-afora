@@ -5,47 +5,6 @@ import { requireAdminInRoute } from "@/server/route-auth";
 
 export const dynamic = "force-dynamic";
 
-type OpportunityCreateInput = Omit<
-  typeof opportunities.$inferInsert,
-  "id" | "createdAt" | "updatedAt"
->;
-
-const normalizeOpportunityInput = (
-  raw: Record<string, unknown>
-): OpportunityCreateInput => {
-  const payload: OpportunityCreateInput = {
-    name: "",
-    image: "",
-    country: "",
-    city: "",
-    responsibleInstitution: "",
-    type: "",
-    description: "",
-    educationLevel: "",
-    ageRange: "",
-    languageRequirements: "",
-    specificRequirements: "",
-    applicationFee: "",
-    scholarshipType: "",
-    scholarshipCoverage: "",
-    extraCosts: "",
-    duration: "",
-    applicationDeadline: "",
-    selectionSteps: "",
-    applicationProcess: "",
-    officialLink: "",
-    contact: "",
-  };
-
-  for (const key of Object.keys(payload) as Array<
-    keyof OpportunityCreateInput
-  >) {
-    payload[key] = String(raw[key] ?? "") as OpportunityCreateInput[typeof key];
-  }
-
-  return payload;
-};
-
 export async function GET() {
   try {
     const data = await db.select().from(opportunities);
@@ -64,20 +23,22 @@ export async function POST(request: NextRequest) {
     return authResult.response;
   }
 
-  try {
-    const body = (await request.json()) as Record<string, unknown>;
-    await db.insert(opportunities).values(normalizeOpportunityInput(body));
-
-    return NextResponse.json(
-      { message: "Opportunity created successfully." },
-      { status: 201 }
-    );
-  } catch {
-    return NextResponse.json(
-      { message: "Failed to create opportunity." },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    {
+      error: {
+        code: "LEGACY_WRITE_DISABLED",
+        message:
+          "Direct public-table writes are disabled. Create a validated v1 draft, review its evidence, and publish it through the approval outbox.",
+      },
+    },
+    {
+      headers: {
+        Deprecation: "true",
+        Link: '</api/v1/ingestions>; rel="successor-version"',
+      },
+      status: 410,
+    }
+  );
 }
 
 export function PUT() {

@@ -24,6 +24,8 @@ export const useOportunidadesNacionais =
     return {
       data,
       loading: query.isPending,
-      error: query.error instanceof Error ? query.error.message : null,
+      error: query.error
+        ? "Não foi possível carregar as oportunidades agora. Tente novamente em alguns instantes."
+        : null,
     };
   };

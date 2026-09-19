@@ -32,6 +32,13 @@ import {
   getNationalFavorites,
   removeNationalFavorite,
 } from "@/lib/opportunities-api";
+import {
+  formatLastVerifiedAt,
+  getApplicationTarget,
+  getOpportunityLifecycleBadgeClass,
+  getOpportunityLifecycleLabel,
+  shouldShowDeadlineCountdown,
+} from "@/lib/opportunity-lifecycle";
 import NacionalConfirmationPopup from "./nacional-confirmation-popup";
 import type { Opportunity } from "./types";
 
@@ -108,10 +115,16 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
     );
   }
 
-  const timeRemaining = getTimeRemaining(oportunidade.prazoInscricao);
+  const timeRemaining = shouldShowDeadlineCountdown(oportunidade)
+    ? getTimeRemaining(oportunidade.prazoInscricao)
+    : null;
   const deadlineBadgeClass = getTimeRemainingBadgeClass(
     oportunidade.prazoInscricao
   );
+  const lifecycleLabel = getOpportunityLifecycleLabel(oportunidade);
+  const lifecycleBadgeClass = getOpportunityLifecycleBadgeClass(oportunidade);
+  const applicationTarget = getApplicationTarget(oportunidade);
+  const lastVerifiedAt = formatLastVerifiedAt(oportunidade.lastVerifiedAt);
 
   const tabs: { key: ActiveTab; label: string; icon: React.ReactNode }[] = [
     {
@@ -143,7 +156,7 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
           <div className="rounded-lg border border-slate-950 bg-slate-900 p-8 shadow-xl">
             <h2 className="mb-4 font-bold text-2xl text-amber-500">Sobre</h2>
             <p className="mb-6 text-base text-white leading-relaxed">
-              {oportunidade.sobre || "N/A"}
+              {oportunidade.sobre || "Descrição em verificação"}
             </p>
             <div className="grid grid-cols-1 gap-6 text-base md:grid-cols-2">
               {[
@@ -177,7 +190,9 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                   <span className="shrink-0 text-amber-500">{icon}</span>
                   <div>
                     <p className="font-semibold text-amber-500">{label}</p>
-                    <p className="text-white">{value || "N/A"}</p>
+                    <p className="text-white">
+                      {value || `${label} em verificação`}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -196,7 +211,7 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                 <div>
                   <p className="font-semibold text-amber-500">Requisitos</p>
                   <p className="text-white">
-                    {oportunidade.requisitos || "N/A"}
+                    {oportunidade.requisitos || "Requisitos em verificação"}
                   </p>
                 </div>
               </div>
@@ -207,7 +222,8 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                     Instituição Responsável
                   </p>
                   <p className="text-white">
-                    {oportunidade.instituicaoResponsavel || "N/A"}
+                    {oportunidade.instituicaoResponsavel ||
+                      "Organizador em verificação"}
                   </p>
                 </div>
               </div>
@@ -223,7 +239,9 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                   ))}
                 </ul>
               ) : (
-                <p className="text-white">N/A</p>
+                <p className="text-white">
+                  Requisitos específicos em verificação
+                </p>
               )}
             </div>
           </div>
@@ -242,7 +260,8 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                     Taxa de Aplicação
                   </p>
                   <p className="text-white">
-                    {oportunidade.taxaAplicacao || "N/A"}
+                    {oportunidade.taxaAplicacao ||
+                      "Taxa de inscrição em verificação"}
                   </p>
                 </div>
               </div>
@@ -251,7 +270,7 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                 <div>
                   <p className="font-semibold text-amber-500">Benefícios</p>
                   <p className="text-white">
-                    {oportunidade.beneficios || "N/A"}
+                    {oportunidade.beneficios || "Benefícios em verificação"}
                   </p>
                 </div>
               </div>
@@ -259,7 +278,10 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                 <ClipboardListIcon className="mt-1 h-4 w-4 shrink-0 text-amber-500" />
                 <div>
                   <p className="font-semibold text-amber-500">Custos</p>
-                  <p className="text-white">{oportunidade.custos || "N/A"}</p>
+                  <p className="text-white">
+                    {oportunidade.custos ||
+                      "Informações de custo em verificação"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -267,7 +289,8 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                 <div>
                   <p className="font-semibold text-amber-500">Custos Extras</p>
                   <p className="text-white">
-                    {oportunidade.custosExtras || "N/A"}
+                    {oportunidade.custosExtras ||
+                      "Custos adicionais em verificação"}
                   </p>
                 </div>
               </div>
@@ -305,24 +328,63 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                   <span className="shrink-0 text-amber-500">{icon}</span>
                   <div>
                     <p className="font-semibold text-amber-500">{label}</p>
-                    <p className="text-white">{value || "N/A"}</p>
+                    <p className="text-white">
+                      {value || `${label} em verificação`}
+                    </p>
                   </div>
                 </div>
               ))}
               <div className="flex items-start space-x-3">
                 <ExternalLinkIcon className="mt-1 h-4 w-4 shrink-0 text-amber-500" />
                 <div>
-                  <p className="font-semibold text-amber-500">Link Oficial</p>
+                  <p className="font-semibold text-amber-500">
+                    Informações oficiais
+                  </p>
                   <a
                     className="text-amber-500 hover:underline"
                     href={oportunidade.linkOficial}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
-                    {oportunidade.linkOficial || "N/A"}
+                    {oportunidade.linkOficial ||
+                      "Página oficial em verificação"}
                   </a>
                 </div>
               </div>
+              {oportunidade.applicationUrl && (
+                <div className="flex items-start space-x-3">
+                  <ExternalLinkIcon className="mt-1 h-4 w-4 shrink-0 text-amber-500" />
+                  <div>
+                    <p className="font-semibold text-amber-500">
+                      Link de inscrição
+                    </p>
+                    {applicationTarget.available ? (
+                      <a
+                        className="text-amber-500 hover:underline"
+                        href={applicationTarget.href}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {oportunidade.applicationUrl}
+                      </a>
+                    ) : (
+                      <span className="text-white/65">
+                        {oportunidade.applicationUrl}
+                      </span>
+                    )}
+                    {lifecycleLabel && (
+                      <p className="mt-1 text-white/65 text-xs">
+                        {lifecycleLabel}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {lastVerifiedAt && (
+                <p className="text-white/60 text-xs">
+                  Última verificação: {lastVerifiedAt}
+                </p>
+              )}
             </div>
           </div>
         );
@@ -354,6 +416,13 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
               className={`mt-3 inline-flex w-fit rounded-full px-4 py-1 font-bold text-sm ${deadlineBadgeClass}`}
             >
               {timeRemaining}
+            </span>
+          )}
+          {!timeRemaining && lifecycleLabel && (
+            <span
+              className={`mt-3 inline-flex w-fit rounded-full px-4 py-1 font-bold text-sm ${lifecycleBadgeClass}`}
+            >
+              {lifecycleLabel}
             </span>
           )}
         </div>
@@ -397,14 +466,21 @@ const NacionalInfo = ({ id }: NacionalInfoProps) => {
                 {isFavorited ? "Remover" : "Adicionar aos Favoritos"}
               </button>
             )}
-            <a
-              className="inline-flex h-11 min-w-[248px] items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-2 font-bold text-black transition-colors duration-300 hover:bg-amber-600"
-              href={oportunidade.linkOficial || "#"}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Inscrever <ExternalLinkIcon className="ml-2 h-4 w-4" />
-            </a>
+            {applicationTarget.available ? (
+              <a
+                className="inline-flex h-11 min-w-[248px] items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-2 font-bold text-black transition-colors duration-300 hover:bg-amber-600"
+                href={applicationTarget.href}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {applicationTarget.label}
+                <ExternalLinkIcon className="ml-2 h-4 w-4" />
+              </a>
+            ) : (
+              <span className="inline-flex h-11 min-w-[248px] items-center justify-center rounded-full bg-slate-700 px-6 py-2 text-center font-bold text-white">
+                {applicationTarget.label}
+              </span>
+            )}
           </div>
         </div>
 

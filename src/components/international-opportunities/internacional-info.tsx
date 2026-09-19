@@ -33,6 +33,13 @@ import {
   getInternationalFavorites,
   removeInternationalFavorite,
 } from "@/lib/opportunities-api";
+import {
+  formatLastVerifiedAt,
+  getApplicationTarget,
+  getOpportunityLifecycleBadgeClass,
+  getOpportunityLifecycleLabel,
+  shouldShowDeadlineCountdown,
+} from "@/lib/opportunity-lifecycle";
 import InternacionalConfirmationPopup from "./internacional-confirmation-popup";
 import type { Opportunity } from "./types";
 
@@ -123,10 +130,16 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
   }
 
   const scholarshipClasses = getScholarshipTagClasses(oportunidade.tipoBolsa);
-  const timeRemaining = getTimeRemaining(oportunidade.prazoInscricao);
+  const timeRemaining = shouldShowDeadlineCountdown(oportunidade)
+    ? getTimeRemaining(oportunidade.prazoInscricao)
+    : null;
   const deadlineBadgeClass = getTimeRemainingBadgeClass(
     oportunidade.prazoInscricao
   );
+  const lifecycleLabel = getOpportunityLifecycleLabel(oportunidade);
+  const lifecycleBadgeClass = getOpportunityLifecycleBadgeClass(oportunidade);
+  const applicationTarget = getApplicationTarget(oportunidade);
+  const lastVerifiedAt = formatLastVerifiedAt(oportunidade.lastVerifiedAt);
 
   const tabs: { key: ActiveTab; label: string; icon: React.ReactNode }[] = [
     {
@@ -160,7 +173,7 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
               Sobre o Programa
             </h2>
             <p className="mb-6 text-base text-white leading-relaxed">
-              {oportunidade.descricao || "N/A"}
+              {oportunidade.descricao || "Descrição em verificação"}
             </p>
             <div className="grid grid-cols-1 gap-6 text-base md:grid-cols-2">
               {[
@@ -194,7 +207,9 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
                   <span className="shrink-0 text-blue-400">{icon}</span>
                   <div>
                     <p className="font-semibold text-blue-400">{label}</p>
-                    <p className="text-white">{value || "N/A"}</p>
+                    <p className="text-white">
+                      {value || `${label} em verificação`}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -229,7 +244,9 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
                   <span className="shrink-0 text-blue-400">{icon}</span>
                   <div>
                     <p className="font-semibold text-blue-400">{label}</p>
-                    <p className="text-white">{value || "N/A"}</p>
+                    <p className="text-white">
+                      {value || `${label} em verificação`}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -250,7 +267,8 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
                     Taxa de Aplicação
                   </p>
                   <p className="text-white">
-                    {oportunidade.taxaAplicacao || "N/A"}
+                    {oportunidade.taxaAplicacao ||
+                      "Taxa de inscrição em verificação"}
                   </p>
                 </div>
               </div>
@@ -261,7 +279,7 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
                   <span
                     className={`rounded-full px-3 py-1 font-bold text-sm uppercase ${scholarshipClasses}`}
                   >
-                    {oportunidade.tipoBolsa || "N/A"}
+                    {oportunidade.tipoBolsa || "Bolsa em verificação"}
                   </span>
                 </div>
               </div>
@@ -272,7 +290,8 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
                     Cobertura da Bolsa
                   </p>
                   <p className="text-white">
-                    {oportunidade.coberturaBolsa || "N/A"}
+                    {oportunidade.coberturaBolsa ||
+                      "Cobertura da bolsa em verificação"}
                   </p>
                 </div>
               </div>
@@ -281,7 +300,8 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
                 <div>
                   <p className="font-semibold text-blue-400">Custos Extras</p>
                   <p className="text-white">
-                    {oportunidade.custosExtras || "N/A"}
+                    {oportunidade.custosExtras ||
+                      "Custos adicionais em verificação"}
                   </p>
                 </div>
               </div>
@@ -325,24 +345,63 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
                   <span className="shrink-0 text-blue-400">{icon}</span>
                   <div>
                     <p className="font-semibold text-blue-400">{label}</p>
-                    <p className="text-white">{value || "N/A"}</p>
+                    <p className="text-white">
+                      {value || `${label} em verificação`}
+                    </p>
                   </div>
                 </div>
               ))}
               <div className="flex items-start space-x-3">
                 <ExternalLinkIcon className="mt-1 h-4 w-4 shrink-0 text-blue-400" />
                 <div>
-                  <p className="font-semibold text-blue-400">Link Oficial</p>
+                  <p className="font-semibold text-blue-400">
+                    Informações oficiais
+                  </p>
                   <a
                     className="text-blue-400 hover:underline"
                     href={oportunidade.linkOficial}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
-                    {oportunidade.linkOficial || "N/A"}
+                    {oportunidade.linkOficial ||
+                      "Página oficial em verificação"}
                   </a>
                 </div>
               </div>
+              {oportunidade.applicationUrl && (
+                <div className="flex items-start space-x-3">
+                  <ExternalLinkIcon className="mt-1 h-4 w-4 shrink-0 text-blue-400" />
+                  <div>
+                    <p className="font-semibold text-blue-400">
+                      Link de inscrição
+                    </p>
+                    {applicationTarget.available ? (
+                      <a
+                        className="text-blue-400 hover:underline"
+                        href={applicationTarget.href}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        {oportunidade.applicationUrl}
+                      </a>
+                    ) : (
+                      <span className="text-white/65">
+                        {oportunidade.applicationUrl}
+                      </span>
+                    )}
+                    {lifecycleLabel && (
+                      <p className="mt-1 text-white/65 text-xs">
+                        {lifecycleLabel}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {lastVerifiedAt && (
+                <p className="text-white/60 text-xs">
+                  Última verificação: {lastVerifiedAt}
+                </p>
+              )}
             </div>
           </div>
         );
@@ -377,6 +436,13 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
               className={`mt-3 inline-flex w-fit rounded-full px-4 py-1 font-bold text-sm ${deadlineBadgeClass}`}
             >
               {timeRemaining}
+            </span>
+          )}
+          {!timeRemaining && lifecycleLabel && (
+            <span
+              className={`mt-3 inline-flex w-fit rounded-full px-4 py-1 font-bold text-sm ${lifecycleBadgeClass}`}
+            >
+              {lifecycleLabel}
             </span>
           )}
         </div>
@@ -425,14 +491,21 @@ const InternacionalInfo = ({ id }: InternacionalInfoProps) => {
                 {isFavorited ? "Remover" : "Adicionar aos Favoritos"}
               </button>
             )}
-            <a
-              className="inline-flex h-11 min-w-[248px] items-center justify-center gap-2 rounded-full bg-blue-500 px-6 py-2 font-bold text-white transition-colors duration-300 hover:bg-blue-600"
-              href={oportunidade.linkOficial || "#"}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              Aplicar agora <ExternalLinkIcon className="ml-2 h-4 w-4" />
-            </a>
+            {applicationTarget.available ? (
+              <a
+                className="inline-flex h-11 min-w-[248px] items-center justify-center gap-2 rounded-full bg-blue-500 px-6 py-2 font-bold text-white transition-colors duration-300 hover:bg-blue-600"
+                href={applicationTarget.href}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {applicationTarget.label}
+                <ExternalLinkIcon className="ml-2 h-4 w-4" />
+              </a>
+            ) : (
+              <span className="inline-flex h-11 min-w-[248px] items-center justify-center rounded-full bg-slate-700 px-6 py-2 text-center font-bold text-white">
+                {applicationTarget.label}
+              </span>
+            )}
           </div>
         </div>
 

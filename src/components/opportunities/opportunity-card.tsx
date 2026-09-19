@@ -9,6 +9,12 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { getTimeRemaining, getTimeRemainingBadgeClass } from "@/lib/date-utils";
+import {
+  formatLastVerifiedAt,
+  getOpportunityLifecycleBadgeClass,
+  getOpportunityLifecycleLabel,
+  shouldShowDeadlineCountdown,
+} from "@/lib/opportunity-lifecycle";
 import type { Opportunity, OpportunityCardConfig } from "./types";
 import {
   getOpportunityLocation,
@@ -36,10 +42,15 @@ const OpportunityCard = ({
     showModalidade,
   } = config;
 
-  const timeRemaining = getTimeRemaining(opportunity.prazoInscricao);
+  const timeRemaining = shouldShowDeadlineCountdown(opportunity)
+    ? getTimeRemaining(opportunity.prazoInscricao)
+    : null;
   const deadlineBadgeClass = getTimeRemainingBadgeClass(
     opportunity.prazoInscricao
   );
+  const lifecycleLabel = getOpportunityLifecycleLabel(opportunity);
+  const lifecycleBadgeClass = getOpportunityLifecycleBadgeClass(opportunity);
+  const lastVerifiedAt = formatLastVerifiedAt(opportunity.lastVerifiedAt);
   const iconColorClass =
     accentColor === "blue" ? "text-blue-400" : "text-amber-500";
   const hoverShadowClass =
@@ -63,6 +74,13 @@ const OpportunityCard = ({
           className={`absolute top-4 right-4 z-10 rounded-full px-3 py-1 font-bold text-xs ${deadlineBadgeClass}`}
         >
           {timeRemaining}
+        </div>
+      )}
+      {!timeRemaining && lifecycleLabel && (
+        <div
+          className={`absolute top-4 right-4 z-10 rounded-full px-3 py-1 font-bold text-xs ${lifecycleBadgeClass}`}
+        >
+          {lifecycleLabel}
         </div>
       )}
 
@@ -129,6 +147,11 @@ const OpportunityCard = ({
               <Clock3Icon className={`${iconColorClass} h-4 w-4`} />
               <span className="text-sm">Duração: {opportunity.duracao}</span>
             </div>
+          )}
+          {lastVerifiedAt && (
+            <p className="mt-2 text-white/55 text-xs">
+              Verificada em {lastVerifiedAt}
+            </p>
           )}
         </div>
       </div>
