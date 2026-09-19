@@ -1,6 +1,8 @@
 # Web release inventory
 
-`RELEASE_INVENTORY.tsv` classifies and hashes every candidate file in this authoritative checkout except the inventory files themselves and Git/verification-workspace metadata.
+`RELEASE_INVENTORY.tsv` classifies and hashes every tracked candidate file in this
+authoritative checkout except the TSV itself. Git and verification-workspace
+metadata are not tracked release inputs.
 
 Included classifications:
 

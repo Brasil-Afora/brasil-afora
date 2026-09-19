@@ -3,7 +3,7 @@
 This baseline freezes the versions used by the clean release proof. `package.json`,
 `bun.lock`, and the installed tree agree for every web dependency below. The Python
 rows are declared in the coordinated scraper repository at commit
-`307f306dc3edf18a997b2d27ddba2c6ee18b9bf1` and locked by its `uv.lock`.
+`189459fc3f92e5720877eee012182f9d5bc63d52` and locked by its `uv.lock`.
 
 | Dependency | Declared | Lockfile | Verified installed | Authoritative baseline |
 | --- | --- | --- | --- | --- |
