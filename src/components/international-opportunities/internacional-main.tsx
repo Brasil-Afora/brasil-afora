@@ -83,7 +83,7 @@ const header: CatalogHeaderConfig = {
   breadcrumb: "Internacional",
   icon: GlobeIcon,
   map: {
-    src: "/catalog/header-mundo.jpg",
+    src: "/catalog/header-mundo-v2.jpg",
     west: -130,
     east: 160,
     north: 66,

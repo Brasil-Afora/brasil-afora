@@ -28,9 +28,9 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
                 alt="Logo do Brasil Afora"
                 className="h-20 w-auto object-contain"
                 height={80}
-                src="/logo-20260413.png"
+                src="/brasil-afora-logo.svg"
                 unoptimized
-                width={80}
+                width={99}
               />
             </Link>
 
@@ -73,11 +73,16 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
                 alt="Logo do Brasil Afora"
                 className="h-12 w-auto object-contain"
                 height={48}
-                src="/logo-20260413.png"
+                src="/brasil-afora-logo.svg"
                 unoptimized
-                width={48}
+                width={59}
               />
-              <span className="font-bold text-white">Brasil Afora</span>
+              <span className="whitespace-nowrap font-bold font-wordmark text-white text-xl">
+                BRASIL
+              </span>
+              <span className="whitespace-nowrap font-bold font-wordmark text-signal text-xl">
+                AFORA
+              </span>
             </Link>
 
             <h2 className="font-bold text-2xl text-white">{title}</h2>

@@ -1,4 +1,8 @@
 import { ImageResponse } from "next/og";
+import {
+  LOGO_MARK_PATHS,
+  LOGO_MARK_VIEWBOX,
+} from "@/components/logo/logo-paths";
 
 export const size = {
   width: 180,
@@ -15,18 +19,29 @@ export default function AppleIcon() {
         background:
           "linear-gradient(135deg, #020617 0%, #0f172a 55%, #111827 100%)",
         borderRadius: "24px",
-        color: "#f59e0b",
         display: "flex",
-        fontFamily: "Arial, sans-serif",
-        fontSize: 76,
-        fontWeight: 900,
         height: "100%",
         justifyContent: "center",
-        letterSpacing: "-3px",
         width: "100%",
       }}
     >
-      BA
+      <svg
+        aria-label="Logo do Brasil Afora"
+        height={105}
+        role="img"
+        viewBox={LOGO_MARK_VIEWBOX}
+        width={130}
+      >
+        {LOGO_MARK_PATHS.map((d) => (
+          <path
+            d={d}
+            fill="#ffffff"
+            key={d.slice(0, 24)}
+            stroke="#ffffff"
+            strokeWidth={1}
+          />
+        ))}
+      </svg>
     </div>,
     {
       ...size,

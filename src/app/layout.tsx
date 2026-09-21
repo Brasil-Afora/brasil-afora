@@ -6,6 +6,7 @@ import {
   Caveat,
   Geist,
   Geist_Mono,
+  Space_Grotesk,
 } from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -44,6 +45,12 @@ const bebasNeue = Bebas_Neue({
   variable: "--font-bebas-neue",
   subsets: ["latin"],
   weight: "400",
+});
+
+const wordmark = Space_Grotesk({
+  variable: "--font-wordmark",
+  subsets: ["latin"],
+  weight: ["500", "700"],
 });
 
 const atkinsonNext = Atkinson_Hyperlegible_Next({
@@ -99,7 +106,7 @@ export const metadata: Metadata = {
     url: "/",
     images: [
       {
-        url: "/logo-20260413.png",
+        url: "/brasil-afora-logo-og.png",
         alt: "Logo da plataforma Brasil Afora",
       },
     ],
@@ -108,7 +115,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ["/logo-20260413.png"],
+    images: ["/brasil-afora-logo-og.png"],
   },
   category: "education",
 };
@@ -120,7 +127,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} ${atkinsonNext.variable} ${caveat.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} ${wordmark.variable} ${atkinsonNext.variable} ${caveat.variable} h-full antialiased`}
       lang="pt-BR"
     >
       <body className="flex min-h-full flex-col">

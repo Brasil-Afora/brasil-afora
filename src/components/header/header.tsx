@@ -95,18 +95,18 @@ const Header = ({ transparent = false }: HeaderProps) => {
             className="absolute left-1/2 flex -translate-x-1/2 transform items-center space-x-1"
             href="/"
           >
-            <span className="whitespace-nowrap font-bebas font-bold text-3xl text-white sm:text-4xl">
+            <span className="whitespace-nowrap font-bold font-wordmark text-3xl text-white sm:text-4xl">
               BRASIL
             </span>
             <Image
               alt="Logo do Brasil Afora"
               className="h-10 w-auto object-contain"
               height={36}
-              src="/logo-20260413.png"
+              src="/brasil-afora-logo.svg"
               unoptimized
-              width={36}
+              width={45}
             />
-            <span className="whitespace-nowrap font-bebas font-bold text-3xl text-signal sm:text-4xl">
+            <span className="whitespace-nowrap font-bold font-wordmark text-3xl text-signal sm:text-4xl">
               AFORA
             </span>
           </Link>
@@ -119,14 +119,14 @@ const Header = ({ transparent = false }: HeaderProps) => {
               alt="Logo do Brasil Afora"
               className="h-11 w-auto object-contain"
               height={44}
-              src="/logo-20260413.png"
+              src="/brasil-afora-logo.svg"
               unoptimized
-              width={44}
+              width={54}
             />
-            <span className="whitespace-nowrap font-bebas font-bold text-2xl text-white sm:text-3xl">
+            <span className="whitespace-nowrap font-bold font-wordmark text-2xl text-white sm:text-3xl">
               BRASIL
             </span>
-            <span className="whitespace-nowrap font-bebas font-bold text-2xl text-signal sm:text-3xl">
+            <span className="whitespace-nowrap font-bold font-wordmark text-2xl text-signal sm:text-3xl">
               AFORA
             </span>
           </Link>

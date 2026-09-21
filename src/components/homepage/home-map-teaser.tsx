@@ -12,10 +12,14 @@ import useScrollReveal from "@/hooks/use-scroll-reveal";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
 import type { GeoPoint, MapDestination } from "@/lib/geo";
 
-// public/catalog/header-mundo.jpg is public/map.jpg (equirectangular) cropped
-// to this window. The SVG overlay works in lon+180 / 90-lat units, so its
-// viewBox is the same window.
-const MAP_IMAGE = "/catalog/header-mundo.jpg";
+// public/catalog/header-mundo-v2.jpg is public/map.jpg (equirectangular)
+// cropped to this window. The SVG overlay works in lon+180 / 90-lat units, so
+// its viewBox is the same window.
+//
+// NOTE: the image URL is part of the Next.js image-optimization cache key, so
+// any future re-crop MUST be saved under a new filename; otherwise stale
+// optimized variants (old crop, same URL) will misalign every pin and route.
+const MAP_IMAGE = "/catalog/header-mundo-v2.jpg";
 const VIEW = { west: -130, east: 160, north: 66, south: -48 };
 const VIEW_WIDTH = VIEW.east - VIEW.west;
 const VIEW_HEIGHT = VIEW.north - VIEW.south;
