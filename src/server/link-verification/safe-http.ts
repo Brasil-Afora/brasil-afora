@@ -265,6 +265,18 @@ const defaultPinnedRequest = (
         )
       );
     });
+    // setTimeout above is a socket *idle* timer: a server that sends one byte
+    // every few seconds never trips it and can hold a request for as long as it
+    // takes to trickle out maxBytes. This timer bounds the whole exchange.
+    const totalTimer = setTimeout(() => {
+      request.destroy(
+        new SafeHttpError(
+          "REQUEST_TIMEOUT",
+          `Request exceeded the ${options.timeoutMs}ms total time limit.`
+        )
+      );
+    }, options.timeoutMs);
+    request.on("close", () => clearTimeout(totalTimer));
     request.on("error", reject);
     request.end();
   });

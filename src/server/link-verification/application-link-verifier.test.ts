@@ -56,6 +56,34 @@ describe("safe application-link verification", () => {
     });
   });
 
+  it("reads a sign-in form with a sign-up link as a login wall, not an open application", () => {
+    // Login portals routinely say "Inscreva-se" beside their sign-in form. The
+    // password field is what distinguishes it: unattended automation must not
+    // restore Apply on a login wall.
+    const result = classifyApplicationPage({
+      expectedEditionYear: 2026,
+      officialDomains: ["example.org"],
+      originalUrl: "https://example.org/apply/2026",
+      response: response(`
+        <html>
+          <h1>Portal do candidato 2026</h1>
+          <form method="post">
+            <input name="email" />
+            <input type="password" name="senha" />
+            <button type="submit">Entrar</button>
+          </form>
+          <p>Ainda não tem conta? <a href="/cadastro">Inscreva-se</a></p>
+        </html>
+      `),
+    });
+
+    expect(result).toMatchObject({
+      acceptsSubmissions: false,
+      documentRole: "login_wall",
+      status: "login_only",
+    });
+  });
+
   it("detects an old edition even when its form still responds", () => {
     const result = classifyApplicationPage({
       expectedEditionYear: 2026,

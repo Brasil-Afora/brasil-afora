@@ -4,11 +4,14 @@ import { z } from "zod";
 import { db } from "@/db/client";
 import {
   ApplicationLinkVerificationError,
-  verifyApplicationLink,
+  verifyApplicationLinkWithChange,
 } from "@/server/link-verification/application-link-verifier";
 import { requireMaintenanceCapability } from "@/server/maintenance-auth";
 
 export const dynamic = "force-dynamic";
+// The verification's own network deadline is 45s; this leaves room for the
+// database writes that follow it. Honoured by Vercel, ignored elsewhere.
+export const maxDuration = 60;
 
 const linkCheckRequestSchema = z.object({}).strict();
 
@@ -44,8 +47,21 @@ export async function POST(
   }
   const { id } = await context.params;
   try {
-    const result = await verifyApplicationLink(db, id, authResult.principal.id);
-    return NextResponse.json({ data: result }, { status: 201 });
+    const verification = await verifyApplicationLinkWithChange(
+      db,
+      id,
+      authResult.principal.id
+    );
+    return NextResponse.json(
+      {
+        data: verification.assessment,
+        meta: {
+          material_change: verification.materialChange,
+          previous_status: verification.previousStatus,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof ApplicationLinkVerificationError) {
       let status = 500;

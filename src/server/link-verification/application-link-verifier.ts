@@ -200,8 +200,13 @@ export const classifyApplicationPage = ({
 
   const text = normalizedText(response.body);
   const html = response.body;
-  const form = hasApplicationForm(html);
   const password = hasPasswordInput(html);
+  // A form with a password field is a sign-in flow. Login portals routinely
+  // carry a "Inscreva-se" sign-up link, so treating their form as an
+  // application form would read a login wall as current_and_open and restore
+  // Apply with no reviewer involved. Unattended automation must fail toward
+  // suppressing Apply, so such a page is a login wall.
+  const form = hasApplicationForm(html) && !password;
   const detectedYears = [
     ...new Set([...yearsIn(text), ...yearsIn(response.finalUrl)]),
   ].sort((left, right) => right - left);
@@ -325,11 +330,37 @@ export const classifyApplicationPage = ({
 };
 // biome-ignore-end lint/complexity/noExcessiveCognitiveComplexity: End ordered semantic checks.
 
+/**
+ * Hard ceiling on one verification's network work (robots.txt, every redirect
+ * hop, the page itself). It keeps a verification far inside the 15-minute
+ * queue lease, so a reclaim can never overlap a verification still running, and
+ * inside the link-check route's 60-second function limit.
+ */
+export const VERIFICATION_DEADLINE_MS = 45_000;
+
 export interface VerifyApplicationLinkDependencies {
   client?: SafeHttpClient;
+  deadlineMs?: number;
   now?: Date;
   robotsChecker?: typeof checkRobotsAllowed;
 }
+
+const withDeadline = <T>(work: Promise<T>, deadlineMs: number): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () =>
+        reject(
+          new SafeHttpError(
+            "VERIFICATION_TIMEOUT",
+            `Verification exceeded the ${deadlineMs}ms deadline.`
+          )
+        ),
+      deadlineMs
+    );
+  });
+  return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
+};
 
 export class ApplicationLinkVerificationError extends Error {
   readonly code: string;
@@ -404,12 +435,28 @@ const persistLifecycleEffects = async ({
   });
 };
 
-export const verifyApplicationLink = async (
+export interface ApplicationLinkVerification {
+  assessment: typeof applicationLinkAssessments.$inferSelect;
+  materialChange: boolean;
+  previousStatus: LinkStatus | null;
+}
+
+/**
+ * Verify one application round and report whether the operational status
+ * changed.
+ *
+ * The network work runs under VERIFICATION_DEADLINE_MS. Every write — the
+ * assessment, the edition's last-verified time, a degraded-link review task,
+ * and the audit event — commits in one transaction, so a failure part-way can
+ * never leave an assessment without its audit trail, and a retry never
+ * duplicates a half-applied verification.
+ */
+export const verifyApplicationLinkWithChange = async (
   database: Database,
   applicationRoundId: string,
   actorId: string,
   dependencies: VerifyApplicationLinkDependencies = {}
-) => {
+): Promise<ApplicationLinkVerification> => {
   const contextRows = await database
     .select({
       applicationUrl: applicationRounds.applicationUrl,
@@ -437,6 +484,7 @@ export const verifyApplicationLink = async (
       "The application round has no application URL."
     );
   }
+  const applicationUrl = context.applicationUrl;
   const previousAssessmentRows = await database
     .select()
     .from(applicationLinkAssessments)
@@ -450,15 +498,25 @@ export const verifyApplicationLink = async (
   const now = dependencies.now ?? new Date();
   const client = dependencies.client ?? createSafeHttpClient();
   const robotsChecker = dependencies.robotsChecker ?? checkRobotsAllowed;
+  const deadlineMs = dependencies.deadlineMs ?? VERIFICATION_DEADLINE_MS;
   let assessment: ApplicationPageClassification;
   let finalUrl: string | null = null;
   let httpStatus: number | null = null;
   let redirectChain: string[] = [];
   try {
-    const target = new URL(context.applicationUrl);
-    const robots = await robotsChecker(client, target, now);
-    if (robots.allowed) {
-      const response = await client.get(target.toString());
+    const target = new URL(applicationUrl);
+    const observed = await withDeadline(
+      (async () => {
+        const robots = await robotsChecker(client, target, now);
+        if (!robots.allowed) {
+          return { response: null, robots };
+        }
+        return { response: await client.get(target.toString()), robots };
+      })(),
+      deadlineMs
+    );
+    if (observed.response) {
+      const response = observed.response;
       finalUrl = response.finalUrl;
       httpStatus = response.status;
       redirectChain = response.redirectChain;
@@ -471,16 +529,16 @@ export const verifyApplicationLink = async (
       assessment = classifyApplicationPage({
         expectedEditionYear: context.editionYear,
         officialDomains,
-        originalUrl: context.applicationUrl,
+        originalUrl: applicationUrl,
         response,
       });
-      assessment.reasons.unshift(robots.reason);
+      assessment.reasons.unshift(observed.robots.reason);
     } else {
       assessment = {
         acceptsSubmissions: null,
         documentRole: "unknown",
         editionYear: context.editionYear,
-        reasons: [robots.reason],
+        reasons: [observed.robots.reason],
         status: "blocked",
       };
     }
@@ -504,46 +562,69 @@ export const verifyApplicationLink = async (
     };
   }
 
-  const rows = await database
-    .insert(applicationLinkAssessments)
-    .values({
-      acceptsSubmissions: assessment.acceptsSubmissions,
-      applicationRoundId,
-      checkedAt: now,
-      documentRole: assessment.documentRole,
-      editionYear: assessment.editionYear,
-      finalUrl,
-      httpStatus,
-      originalUrl: context.applicationUrl,
-      reasons: assessment.reasons,
-      redirectChain,
-      status: assessment.status,
-    })
-    .returning();
-  const result = rows[0];
-  if (!result) {
-    throw new ApplicationLinkVerificationError(
-      "ASSESSMENT_WRITE_FAILED",
-      "The link assessment could not be persisted."
-    );
-  }
-  await persistLifecycleEffects({
-    database,
-    editionId: context.editionId,
-    now,
-    previousStatus: previousAssessment?.status ?? null,
-    result,
+  const result = await database.transaction(async (transaction) => {
+    const rows = await transaction
+      .insert(applicationLinkAssessments)
+      .values({
+        acceptsSubmissions: assessment.acceptsSubmissions,
+        applicationRoundId,
+        checkedAt: now,
+        documentRole: assessment.documentRole,
+        editionYear: assessment.editionYear,
+        finalUrl,
+        httpStatus,
+        originalUrl: applicationUrl,
+        reasons: assessment.reasons,
+        redirectChain,
+        status: assessment.status,
+      })
+      .returning();
+    const inserted = rows[0];
+    if (!inserted) {
+      throw new ApplicationLinkVerificationError(
+        "ASSESSMENT_WRITE_FAILED",
+        "The link assessment could not be persisted."
+      );
+    }
+    await persistLifecycleEffects({
+      database: transaction as unknown as Database,
+      editionId: context.editionId,
+      now,
+      previousStatus: previousAssessment?.status ?? null,
+      result: inserted,
+    });
+    await transaction.insert(auditEvents).values({
+      action: "application_link.verified",
+      actorId,
+      actorKind: "service",
+      entityId: inserted.id,
+      entityType: "application_link_assessment",
+      metadata: {
+        application_round_id: applicationRoundId,
+        status: inserted.status,
+      },
+    });
+    return inserted;
   });
-  await database.insert(auditEvents).values({
-    action: "application_link.verified",
-    actorId,
-    actorKind: "service",
-    entityId: result.id,
-    entityType: "application_link_assessment",
-    metadata: {
-      application_round_id: applicationRoundId,
-      status: result.status,
-    },
-  });
-  return result;
+  const previousStatus = previousAssessment?.status ?? null;
+  return {
+    assessment: result,
+    materialChange: previousStatus !== result.status,
+    previousStatus,
+  };
 };
+
+export const verifyApplicationLink = async (
+  database: Database,
+  applicationRoundId: string,
+  actorId: string,
+  dependencies: VerifyApplicationLinkDependencies = {}
+) =>
+  (
+    await verifyApplicationLinkWithChange(
+      database,
+      applicationRoundId,
+      actorId,
+      dependencies
+    )
+  ).assessment;

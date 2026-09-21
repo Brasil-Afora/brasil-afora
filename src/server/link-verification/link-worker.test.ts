@@ -3,12 +3,12 @@ import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { describe, expect, it } from "vitest";
 import { schema } from "@/db/schema";
-import { ApplicationLinkVerificationError } from "@/server/link-verification/application-link-verifier";
+import { verifyApplicationLinkWithChange } from "@/server/link-verification/application-link-verifier";
 import {
   type ClaimedLinkJob,
-  createDatabaseLinkVerifier,
   type LinkQueueBoundary,
   type LinkVerificationOutcome,
+  PermanentLinkJobError,
   runLinkWorkerBatch,
 } from "@/server/link-verification/link-worker";
 import {
@@ -378,9 +378,9 @@ describe("application-link worker execution", () => {
         queue: realQueue(database, now),
         verify: () =>
           Promise.reject(
-            new ApplicationLinkVerificationError(
+            new PermanentLinkJobError(
               "APPLICATION_URL_MISSING",
-              "The application round has no application URL."
+              "The link-check route reports this job can never succeed."
             )
           ),
       });
@@ -413,7 +413,12 @@ describe("application-link worker execution", () => {
         verify: () => Promise.reject(new Error("connection reset")),
       });
 
-      expect(results[0]).toMatchObject({ retryable: true, success: false });
+      expect(results[0]).toMatchObject({
+        completionConfirmed: true,
+        infrastructureFailure: true,
+        retryable: true,
+        success: false,
+      });
       const row = await jobRow(client, jobId);
       expect(row.status).toBe("queued");
       expect(row.attempts).toBe(1);
@@ -482,6 +487,7 @@ describe("application-link worker execution", () => {
             ? Promise.reject(new Error("completion unavailable"))
             : Promise.resolve(undefined),
       },
+      sleep: () => Promise.resolve(),
       verify: () =>
         Promise.resolve({
           materialChange: true,
@@ -490,36 +496,124 @@ describe("application-link worker execution", () => {
         }),
     });
     expect(results).toHaveLength(2);
-    expect(results[0].success).toBe(false);
-    expect(results[1].success).toBe(true);
+    // The first verification succeeded; only its acknowledgement was lost, so
+    // it is still a success — just an unconfirmed one left to lease expiry.
+    expect(results[0]).toMatchObject({
+      completionConfirmed: false,
+      success: true,
+    });
+    expect(results[1]).toMatchObject({
+      completionConfirmed: true,
+      success: true,
+    });
   });
 
+  it("never reports a finished verification as a failed job", async () => {
+    // The success completion fails twice, then lands. The worker must retry the
+    // *success* completion, and must never fall back to a failure completion:
+    // that would requeue finished work and eventually dead-letter it.
+    const sent: Array<{ success: boolean }> = [];
+    let calls = 0;
+    const results = await runLinkWorkerBatch({
+      limit: 1,
+      queue: {
+        claim: () =>
+          Promise.resolve([
+            {
+              applicationRoundId: "33333333-3333-4333-8333-333333333333",
+              id: "44444444-4444-4444-8444-444444444444",
+              jobKind: "application_link",
+              leaseToken: "55555555-5555-4555-8555-555555555555",
+              status: "running",
+            },
+          ]),
+        complete: (_jobId, _leaseToken, input) => {
+          sent.push({ success: input.success });
+          calls += 1;
+          return calls < 3
+            ? Promise.reject(new Error("completion response lost"))
+            : Promise.resolve(undefined);
+        },
+      },
+      sleep: () => Promise.resolve(),
+      verify: verifierReturning({
+        materialChange: true,
+        previousStatus: "broken",
+        status: "current_and_open",
+      }),
+    });
+    expect(results[0]).toMatchObject({
+      completionConfirmed: true,
+      success: true,
+    });
+    expect(sent).toEqual([
+      { success: true },
+      { success: true },
+      { success: true },
+    ]);
+  });
+
+  it("leaves an unconfirmable success to lease expiry rather than failing it", async () => {
+    const sent: Array<{ success: boolean }> = [];
+    const results = await runLinkWorkerBatch({
+      limit: 1,
+      queue: {
+        claim: () =>
+          Promise.resolve([
+            {
+              applicationRoundId: "33333333-3333-4333-8333-333333333333",
+              id: "44444444-4444-4444-8444-444444444444",
+              jobKind: "application_link",
+              leaseToken: "55555555-5555-4555-8555-555555555555",
+              status: "running",
+            },
+          ]),
+        complete: (_jobId, _leaseToken, input) => {
+          sent.push({ success: input.success });
+          return Promise.reject(new Error("queue unreachable"));
+        },
+      },
+      sleep: () => Promise.resolve(),
+      verify: verifierReturning({
+        materialChange: false,
+        previousStatus: "current_and_open",
+        status: "current_and_open",
+      }),
+    });
+    expect(results[0]).toMatchObject({
+      completionConfirmed: false,
+      success: true,
+    });
+    expect(sent.every((call) => call.success)).toBe(true);
+  });
+});
+
+describe("application-link verification (the link-check route's work)", () => {
   it("records an operational assessment without touching publication state", async () => {
     const client = new PGlite();
     try {
       await migrate(client);
+      // Port 9 is refused by the safe HTTP client before any socket opens, so
+      // this exercises the real verifier with no network dependency.
       const roundId = await seedApplicationRound(
         client,
-        "https://example.org/apply"
+        "http://127.0.0.1:9/apply"
       );
-      await seedLinkJob(client, roundId, "operational-only");
       const database = dbFor(client);
-      const now = new Date("2026-09-20T09:00:00Z");
       const before = await client.query<{ count: string }>(
         "SELECT count(*)::text AS count FROM publication_versions"
       );
 
-      await runLinkWorkerBatch({
-        limit: 1,
-        queue: realQueue(database, now),
-        // The real verifier, driven against a URL the safe HTTP client
-        // refuses, so an assessment is genuinely written by product code.
-        verify: createDatabaseLinkVerifier(
-          database as never,
-          "link-worker"
-        ) as never,
-      });
+      const verification = await verifyApplicationLinkWithChange(
+        database as never,
+        roundId,
+        "link-worker",
+        { now: new Date("2026-09-20T09:00:00Z") }
+      );
 
+      expect(verification.previousStatus).toBeNull();
+      expect(verification.materialChange).toBe(true);
+      expect(verification.assessment.status).toBe("blocked");
       const assessments = await client.query<{
         application_round_id: string;
         status: string;
@@ -532,10 +626,85 @@ describe("application-link worker execution", () => {
         "SELECT count(*)::text AS count FROM publication_versions"
       );
       expect(after.rows[0]?.count).toBe(before.rows[0]?.count);
-      const audits = await client.query<{ action: string }>(
-        "SELECT action FROM audit_events WHERE action = 'application_link.verified'"
+      const audits = await client.query<{ actor_id: string }>(
+        "SELECT actor_id FROM audit_events WHERE action = 'application_link.verified'"
       );
-      expect(audits.rows).toHaveLength(1);
+      expect(audits.rows).toEqual([{ actor_id: "link-worker" }]);
+
+      const second = await verifyApplicationLinkWithChange(
+        database as never,
+        roundId,
+        "link-worker",
+        { now: new Date("2026-09-20T10:00:00Z") }
+      );
+      expect(second.previousStatus).toBe("blocked");
+      expect(second.materialChange).toBe(false);
+    } finally {
+      await client.close();
+    }
+  });
+
+  it("bounds a verification that never finishes by its deadline", async () => {
+    const client = new PGlite();
+    try {
+      await migrate(client);
+      const roundId = await seedApplicationRound(
+        client,
+        "https://example.org/apply"
+      );
+      const database = dbFor(client);
+      const started = Date.now();
+      const verification = await verifyApplicationLinkWithChange(
+        database as never,
+        roundId,
+        "link-worker",
+        {
+          client: {
+            get: () => new Promise(() => undefined),
+          } as never,
+          deadlineMs: 50,
+          robotsChecker: () =>
+            Promise.resolve({ allowed: true, reason: "robots stub" }) as never,
+        }
+      );
+      expect(Date.now() - started).toBeLessThan(5000);
+      expect(verification.assessment.status).toBe("broken");
+      expect(verification.assessment.reasons.join(" ")).toContain(
+        "VERIFICATION_TIMEOUT"
+      );
+    } finally {
+      await client.close();
+    }
+  });
+
+  it("writes nothing when any part of the verification's writes fails", async () => {
+    const client = new PGlite();
+    try {
+      await migrate(client);
+      const roundId = await seedApplicationRound(
+        client,
+        "http://127.0.0.1:9/apply"
+      );
+      const database = dbFor(client);
+      // Make the last write in the sequence (the audit event) impossible.
+      await client.exec("DROP TABLE audit_events CASCADE");
+
+      await expect(
+        verifyApplicationLinkWithChange(
+          database as never,
+          roundId,
+          "link-worker"
+        )
+      ).rejects.toThrow();
+
+      const assessments = await client.query<{ count: string }>(
+        "SELECT count(*)::text AS count FROM application_link_assessments"
+      );
+      expect(assessments.rows[0]?.count).toBe("0");
+      const edition = await client.query<{ last_verified_at: Date | null }>(
+        "SELECT last_verified_at FROM editions"
+      );
+      expect(edition.rows[0]?.last_verified_at).toBeNull();
     } finally {
       await client.close();
     }

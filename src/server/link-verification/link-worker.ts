@@ -1,16 +1,5 @@
 import "server-only";
 
-import { desc, eq } from "drizzle-orm";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import type { schema } from "@/db/schema";
-import { applicationLinkAssessments } from "@/db/schema/ingestion";
-import {
-  ApplicationLinkVerificationError,
-  verifyApplicationLink,
-} from "@/server/link-verification/application-link-verifier";
-
-type Database = NodePgDatabase<typeof schema>;
-
 export const LINK_WORKER_JOB_KIND = "application_link";
 export const LINK_WORKER_PRINCIPAL_ID = "link-worker";
 
@@ -52,10 +41,17 @@ export interface LinkVerificationOutcome {
   status: string;
 }
 
+/**
+ * Performs one verification. In production this is an authenticated call to
+ * the web's link-check route: the worker holds no database credential, so the
+ * process that fetches untrusted, externally sourced URLs cannot write to the
+ * database except through that one narrowly scoped route.
+ */
 export type LinkVerifier = (
   applicationRoundId: string
 ) => Promise<LinkVerificationOutcome>;
 
+/** The queue handed the worker something it must never execute. */
 export class LinkWorkerContractError extends Error {
   constructor(message: string) {
     super(message);
@@ -63,9 +59,33 @@ export class LinkWorkerContractError extends Error {
   }
 }
 
+/**
+ * The job can never succeed — its round no longer exists, or has no
+ * application URL. Retrying would only burn attempts, so it dead-letters on
+ * the first. A target site that is down is *not* this: the web records that as
+ * a broken or blocked assessment and the verification succeeds.
+ */
+export class PermanentLinkJobError extends Error {
+  readonly code: string;
+
+  constructor(code: string, message: string) {
+    super(message);
+    this.name = "PermanentLinkJobError";
+    this.code = code;
+  }
+}
+
 export interface LinkJobResult {
   applicationRoundId: string | null;
+  /** Whether the queue acknowledged the completion this worker sent. */
+  completionConfirmed: boolean;
   error?: string;
+  /**
+   * The failure was this worker's own reach to the web (unreachable, refused,
+   * misconfigured), not anything about the job. The loop backs off on these so
+   * a broken deployment cannot burn attempts across the whole queue.
+   */
+  infrastructureFailure?: boolean;
   jobId: string;
   materialChange?: boolean;
   retryable?: boolean;
@@ -73,33 +93,20 @@ export interface LinkJobResult {
   success: boolean;
 }
 
-/**
- * Failures that can never succeed on a retry.
- *
- * A target site that is down is *not* one of these: the verifier records that
- * as a `broken` or `blocked` assessment and the job succeeds. Only a job that
- * can never be executed at all is terminal.
- */
-const PERMANENT_VERIFICATION_CODES = new Set([
-  "APPLICATION_ROUND_NOT_FOUND",
-  "APPLICATION_URL_MISSING",
-]);
-
-const classifyFailure = (error: unknown): { retryable: boolean } => {
+const classifyFailure = (
+  error: unknown
+): { infrastructure: boolean; retryable: boolean } => {
   if (
-    error instanceof ApplicationLinkVerificationError &&
-    PERMANENT_VERIFICATION_CODES.has(error.code)
+    error instanceof PermanentLinkJobError ||
+    error instanceof LinkWorkerContractError
   ) {
-    return { retryable: false };
+    return { infrastructure: false, retryable: false };
   }
-  if (error instanceof LinkWorkerContractError) {
-    return { retryable: false };
-  }
-  return { retryable: true };
+  return { infrastructure: true, retryable: true };
 };
 
 const failureMessage = (error: unknown): string => {
-  if (error instanceof ApplicationLinkVerificationError) {
+  if (error instanceof PermanentLinkJobError) {
     // The code is what an operator greps for in dead-letter triage, so it has
     // to survive into last_error rather than only the prose message.
     return `${error.name}: ${error.code}: ${error.message}`.slice(0, 2000);
@@ -111,48 +118,31 @@ const failureMessage = (error: unknown): string => {
   return described.slice(0, 2000);
 };
 
-/**
- * Verify one application round and report whether the operational assessment
- * changed, reading the previous assessment before the new one is written.
- */
-export const createDatabaseLinkVerifier =
-  (database: Database, actorId = LINK_WORKER_PRINCIPAL_ID): LinkVerifier =>
-  async (applicationRoundId: string): Promise<LinkVerificationOutcome> => {
-    const previousRows = await database
-      .select({ status: applicationLinkAssessments.status })
-      .from(applicationLinkAssessments)
-      .where(
-        eq(applicationLinkAssessments.applicationRoundId, applicationRoundId)
-      )
-      .orderBy(desc(applicationLinkAssessments.createdAt))
-      .limit(1);
-    const previousStatus = previousRows[0]?.status ?? null;
-    const result = await verifyApplicationLink(
-      database,
-      applicationRoundId,
-      actorId
-    );
-    return {
-      materialChange: previousStatus !== result.status,
-      previousStatus,
-      status: result.status,
-    };
-  };
+const defaultSleep = (milliseconds: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+
+const SUCCESS_COMPLETION_ATTEMPTS = 3;
 
 /**
  * Claim and execute at most `limit` application-link jobs, sequentially.
  *
- * Every mutation goes back through the queue API under the lease token issued
- * at claim time, so BF-08 fencing decides what this worker may write; the
- * worker itself asserts nothing about its own authority.
+ * Every queue mutation goes through the maintenance API under the lease token
+ * issued at claim time, so BF-08 fencing decides what this worker may change.
+ * Verification writes go through the web's link-check route; the web bounds
+ * each verification to 45 seconds, far inside the 15-minute lease, so a job
+ * cannot be reclaimed while its verification is still running.
  */
 export const runLinkWorkerBatch = async ({
   limit = 1,
   queue,
+  sleep = defaultSleep,
   verify,
 }: {
   limit?: number;
   queue: LinkQueueBoundary;
+  sleep?: (milliseconds: number) => Promise<void>;
   verify: LinkVerifier;
 }): Promise<LinkJobResult[]> => {
   if (limit < 1) {
@@ -161,7 +151,7 @@ export const runLinkWorkerBatch = async ({
   const jobs = await queue.claim(limit);
   const results: LinkJobResult[] = [];
   for (const job of jobs) {
-    results.push(await executeLinkJob(job, queue, verify));
+    results.push(await executeLinkJob(job, queue, verify, sleep));
   }
   return results;
 };
@@ -169,8 +159,10 @@ export const runLinkWorkerBatch = async ({
 const executeLinkJob = async (
   job: ClaimedLinkJob,
   queue: LinkQueueBoundary,
-  verify: LinkVerifier
+  verify: LinkVerifier,
+  sleep: (milliseconds: number) => Promise<void>
 ): Promise<LinkJobResult> => {
+  let outcome: LinkVerificationOutcome;
   try {
     if (job.jobKind !== LINK_WORKER_JOB_KIND) {
       throw new LinkWorkerContractError(
@@ -182,38 +174,59 @@ const executeLinkJob = async (
         "an application-link job arrived without an application round"
       );
     }
-    const outcome = await verify(job.applicationRoundId);
-    await queue.complete(job.id, job.leaseToken, {
-      material_change: outcome.materialChange,
-      success: true,
-    });
-    return {
-      applicationRoundId: job.applicationRoundId,
-      jobId: job.id,
-      materialChange: outcome.materialChange,
-      status: outcome.status,
-      success: true,
-    };
+    outcome = await verify(job.applicationRoundId);
   } catch (error) {
-    const { retryable } = classifyFailure(error);
+    const { infrastructure, retryable } = classifyFailure(error);
     const message = failureMessage(error);
-    // A completion that itself fails must not abort the batch: the lease
-    // expires and BF-08 reclaim handles it.
+    let completionConfirmed = false;
     try {
       await queue.complete(job.id, job.leaseToken, {
         error: message,
         retryable,
         success: false,
       });
+      completionConfirmed = true;
     } catch {
-      // Intentionally swallowed; the lease expiry is the recovery path.
+      // The lease expires and BF-08 reclaims the job; nothing is lost.
     }
     return {
       applicationRoundId: job.applicationRoundId,
+      completionConfirmed,
       error: message,
+      infrastructureFailure: infrastructure,
       jobId: job.id,
       retryable,
       success: false,
     };
   }
+
+  // The verification happened. Whatever the completion call does next, it must
+  // never be reported as a failed job: that would requeue a finished
+  // verification, lose material_change, and eventually dead-letter work that
+  // succeeded every time. A completion that committed but lost its response is
+  // replayed idempotently by the server under the same lease token, so the
+  // success completion itself is simply retried.
+  let completionConfirmed = false;
+  for (let attempt = 1; attempt <= SUCCESS_COMPLETION_ATTEMPTS; attempt += 1) {
+    try {
+      await queue.complete(job.id, job.leaseToken, {
+        material_change: outcome.materialChange,
+        success: true,
+      });
+      completionConfirmed = true;
+      break;
+    } catch {
+      if (attempt < SUCCESS_COMPLETION_ATTEMPTS) {
+        await sleep(1000 * attempt);
+      }
+    }
+  }
+  return {
+    applicationRoundId: job.applicationRoundId,
+    completionConfirmed,
+    jobId: job.id,
+    materialChange: outcome.materialChange,
+    status: outcome.status,
+    success: true,
+  };
 };
