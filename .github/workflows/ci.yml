@@ -8,6 +8,21 @@ on:
 permissions:
   contents: read
 
+# Repository-native CI for the public web repository.
+#
+# This repository holds no Actions secret, by design: it is public, it runs on
+# pull requests, and it feeds two Vercel production projects. It therefore
+# cannot read the private scraper repository, and the two cross-language suites
+# that execute the real Python worker (BF-07, BF-10) do not run here. They run
+# in the dedicated release gate, Brasil-Afora/brasil-afora-release-gate, which
+# checks out both sides of a release pair by exact SHA with a read-only deploy
+# key. Everything else — lint, types, migrations, every other Vitest suite, the
+# native tests, and the production build — runs here on every change.
+#
+# The exclusion is self-checking: the "cross-language suites" step fails if the
+# set of suites that need the Python checkout ever differs from the set this
+# workflow excludes, so a new cross-language suite cannot fail here for a
+# missing env var, and an excluded one cannot silently stop being one.
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -29,8 +44,6 @@ jobs:
     env:
       BETTER_AUTH_SECRET: build-only-secret-build-only-secret-123456
       BETTER_AUTH_URL: http://localhost:3000
-      BRASIL_AFORA_PYTHON: ${{ github.workspace }}/.ci/brasil-afora-scraper/.venv/bin/python
-      BRASIL_AFORA_PYTHON_REPO: ${{ github.workspace }}/.ci/brasil-afora-scraper
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/brasil_afora
       GOOGLE_CLIENT_ID: build-only-client
       GOOGLE_CLIENT_SECRET: build-only-secret
@@ -38,45 +51,62 @@ jobs:
       NEXT_PUBLIC_STRUCTURED_OPPORTUNITIES: "false"
       RESEND_API_KEY: re_build_only
       RESEND_FROM_EMAIL: Brasil Afora <noreply@example.org>
+      CROSS_LANGUAGE_SUITES: >-
+        src/server/maintenance/bf07-end-to-end.test.ts
+        src/server/maintenance/bf10-one-pilot-end-to-end.test.ts
     steps:
       - name: Checkout web source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Checkout exact scraper release
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          repository: Brasil-Afora/brasil-afora-scraper
-          ref: 189459fc3f92e5720877eee012182f9d5bc63d52
-          path: .ci/brasil-afora-scraper
+          persist-credentials: false
+
+      - name: Cross-language suites are exactly the excluded set
+        shell: bash
+        run: |
+          actual="$(grep -rl 'BRASIL_AFORA_PYTHON_REPO' src --include='*.test.ts' | sort)"
+          expected="$(printf '%s\n' ${CROSS_LANGUAGE_SUITES} | sort)"
+          if [ "${actual}" != "${expected}" ]; then
+            echo "::error::Suites needing the Python checkout changed. Update CROSS_LANGUAGE_SUITES here and make sure the release gate runs them."
+            diff <(echo "${expected}") <(echo "${actual}") || true
+            exit 1
+          fi
+          echo "Delegated to the release gate:"; echo "${actual}"
+
       - name: Install exact Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 26.7.0
+
       - name: Install exact Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: 1.3.14
-      - name: Install pinned uv
-        uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
-        with:
-          version: "0.11.29"
-          enable-cache: true
-      - name: Install exact scraper environment
-        working-directory: .ci/brasil-afora-scraper
-        run: |
-          uv python install 3.14.7
-          uv sync --frozen --extra dev --no-editable
+
       - name: Locked web install
         run: bun install --frozen-lockfile
+
       - name: Apply all migrations to disposable PostgreSQL 17
         run: bun run db:migrate
+
       - name: Lint and format contract
         run: bun run check
+
       - name: Type check
         run: bun run typecheck
-      - name: Full Vitest, migration, cross-language, and native data tests
-        run: bun run test --coverage
+
+      - name: Vitest (all suites except the cross-language pair)
+        shell: bash
+        run: |
+          excludes=()
+          for suite in ${CROSS_LANGUAGE_SUITES}; do excludes+=(--exclude "${suite}"); done
+          bun x vitest run --coverage "${excludes[@]}"
+
+      - name: Native data tests
+        run: node --test src/data/showcase-opportunities.test.mjs
+
       - name: Production build
         run: bun run build
+
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
