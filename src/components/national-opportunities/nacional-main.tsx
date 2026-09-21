@@ -7,6 +7,7 @@ import type { CatalogHeaderConfig } from "@/components/opportunities/catalog-hea
 import { toNationalItem } from "@/components/opportunities/catalog-model";
 import CatalogPage from "@/components/opportunities/catalog-page";
 import { FILTER_OPTIONS } from "@/components/opportunities/filter-options";
+import { BRAZIL_MAP } from "@/components/opportunities/map-windows";
 import {
   isVerifiedNationalOpportunityId,
   isVerifiedNationalOpportunityName,
@@ -68,13 +69,7 @@ const header: CatalogHeaderConfig = {
   accentWord: "Nacionais",
   breadcrumb: "Nacional",
   icon: MapPinnedIcon,
-  map: {
-    src: "/catalog/header-brasil.jpg",
-    west: -82,
-    east: -18,
-    north: 8,
-    south: -36,
-  },
+  map: BRAZIL_MAP,
   subtitle:
     "Olimpíadas, feiras de ciências, imersões e programas de liderança para estudantes em todo o Brasil.",
   titleLead: "Oportunidades",

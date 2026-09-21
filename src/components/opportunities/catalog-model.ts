@@ -73,7 +73,7 @@ const monogramFor = (name: string, institution: string): string => {
     .join("");
 };
 
-const coverFor = (
+export const coverFor = (
   image: string,
   region: string,
   name: string,
@@ -99,7 +99,7 @@ const coverFor = (
   return { kind: "photo", src: image };
 };
 
-const scholarshipLabel = (tipoBolsa: string): string | null => {
+export const scholarshipLabel = (tipoBolsa: string): string | null => {
   const normalized = tipoBolsa
     .normalize("NFD")
     .replace(DIACRITICS_REGEX, "")
@@ -116,10 +116,10 @@ const scholarshipLabel = (tipoBolsa: string): string | null => {
   return null;
 };
 
-const shortLevel = (nivelEnsino: string): string =>
+export const shortLevel = (nivelEnsino: string): string =>
   nivelEnsino.split(LEVEL_SEPARATOR_REGEX).filter(Boolean).join(" · ");
 
-const isFree = (taxaAplicacao: string): boolean =>
+export const isFree = (taxaAplicacao: string): boolean =>
   taxaAplicacao.toLowerCase().startsWith("gratuit");
 
 export const toInternationalItem = (

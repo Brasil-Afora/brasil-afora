@@ -64,6 +64,8 @@ interface NationalOpportunityRecord {
 }
 
 export interface InternationalOpportunity {
+  /** Last time the record changed in the catalog (dd/mm/yyyy), when known. */
+  atualizadoEm?: string;
   cidade: string;
   coberturaBolsa: string;
   contato: string;
@@ -91,6 +93,8 @@ export interface InternationalOpportunity {
 }
 
 export interface NationalOpportunity {
+  /** Last time the record changed in the catalog (dd/mm/yyyy), when known. */
+  atualizadoEm?: string;
   beneficios: string;
   cidadeEstado: string;
   contato: string;
@@ -117,14 +121,14 @@ export interface NationalOpportunity {
   tipo: string;
 }
 
-// Locations are derived from the city text on the server, never entered.
+// Locations and timestamps are derived on the server, never entered.
 export type InternationalOpportunityInput = Omit<
   InternationalOpportunity,
-  "id" | "localizacoes"
+  "id" | "localizacoes" | "atualizadoEm"
 >;
 export type NationalOpportunityInput = Omit<
   NationalOpportunity,
-  "id" | "localizacoes"
+  "id" | "localizacoes" | "atualizadoEm"
 >;
 
 const SPECIFIC_REQUIREMENTS_SPLIT_REGEX = /\r?\n|;|\|/;
@@ -301,6 +305,9 @@ const normalizeModality = (
   return "Presencial";
 };
 
+const updatedAtOf = (value: string | Date | undefined): string | undefined =>
+  value ? toDateString(value) : undefined;
+
 const mapInternationalOpportunity = (
   item: OpportunityRecord
 ): InternationalOpportunity => ({
@@ -327,6 +334,7 @@ const mapInternationalOpportunity = (
   linkOficial: item.officialLink,
   contato: item.contact,
   localizacoes: item.locations ?? [],
+  atualizadoEm: updatedAtOf(item.updatedAt),
 });
 
 const mapNationalOpportunity = (
@@ -355,6 +363,7 @@ const mapNationalOpportunity = (
   linkOficial: item.officialLink ?? "",
   contato: item.contact ?? "",
   localizacoes: item.locations ?? [],
+  atualizadoEm: updatedAtOf(item.updatedAt),
 });
 
 const fetchFromApi = async <T>(path: string): Promise<T> => {

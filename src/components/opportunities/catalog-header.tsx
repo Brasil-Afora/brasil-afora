@@ -2,14 +2,9 @@ import { ChevronRightIcon, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { GeoPoint } from "@/lib/geo";
+import type { MapWindow } from "./map-windows";
 
-export interface CatalogMapWindow {
-  east: number;
-  north: number;
-  south: number;
-  src: string;
-  west: number;
-}
+export type CatalogMapWindow = MapWindow;
 
 export interface CatalogHeaderConfig {
   accentClassName: string;

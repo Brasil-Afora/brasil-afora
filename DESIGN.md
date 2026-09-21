@@ -243,6 +243,14 @@ Header: logo lockup left, four centered links at 15px, profile menu right. The a
 - **List row:** thumbnail, institution and title, place and level, a stacked deadline column, arrow. Grid or list is the reader's choice and is remembered.
 - **Pagination:** nine per page; the current page is an amber square.
 
+### Opportunity page
+Built only from what the scraper and catalog actually carry; a field the source doesn't state reads "Não informado", and a missing section says so in a dashed note instead of filler. No quotes, FAQ or document lists (the scraper doesn't extract them).
+- **Hero:** breadcrumb, institution tile, title, the description's first sentence, and "Acessar site oficial" / "Salvar" (catalog entries only) / "Compartilhar", over the cover dissolving in from the right.
+- **Facts card:** place, level, funding or type, duration, age or grade, language or modality, fee and deadline, each with a lucide icon.
+- **Sections:** Visão geral, Quem pode participar, Custos e benefícios, Como se candidatar, under a sticky tab bar that sits flush under the header and follows the scroll. Requirements are neutral bullets, not green checks.
+- **Application steps:** the student's own checklist. Each step is a native checkbox drawn as a numbered ring; ticked steps fill ink with a check, the first unticked one gets an amber ring and "Próxima etapa", and a segmented bar counts progress. Nothing is inferred from dates. Progress is kept per opportunity in this browser (`brasil-afora:etapas:<scope>:<id>`) until it moves to the profile as "applications in progress".
+- **Sidebar:** deadline card with countdown and CTA, source card (verified: checked on the official source and when; catalog: last update and the official domain), a mini map with the place's pins, and three similar open opportunities. On phones a bottom bar keeps the deadline and "Site oficial" in reach.
+
 ### Map teaser
 The night-lights map of the Americas and Atlantic, brightened slightly, with amber routes drawn from Brasília to each open verified destination and pins for national ones, plus a country legend.
 

@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { opportunities } from "@/db/schema/opportunities";
+import { resolveInternationalLocations } from "@/server/geo/resolve-location";
 import { requireAdminInRoute } from "@/server/route-auth";
 
 export const dynamic = "force-dynamic";
@@ -53,7 +54,18 @@ export async function GET(
       .where(eq(opportunities.id, id))
       .limit(1);
 
-    return NextResponse.json({ opportunity: data[0] ?? null });
+    const record = data[0];
+    return NextResponse.json({
+      opportunity: record
+        ? {
+            ...record,
+            locations: resolveInternationalLocations(
+              record.city,
+              record.country
+            ),
+          }
+        : null,
+    });
   } catch {
     return NextResponse.json(
       { message: "Failed to fetch opportunity." },

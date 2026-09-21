@@ -7,6 +7,7 @@ import type { CatalogHeaderConfig } from "@/components/opportunities/catalog-hea
 import { toInternationalItem } from "@/components/opportunities/catalog-model";
 import CatalogPage from "@/components/opportunities/catalog-page";
 import { FILTER_OPTIONS } from "@/components/opportunities/filter-options";
+import { WORLD_MAP } from "@/components/opportunities/map-windows";
 import {
   isVerifiedInternationalOpportunityId,
   verifiedInternationalOpportunities,
@@ -82,13 +83,7 @@ const header: CatalogHeaderConfig = {
   accentWord: "Internacionais",
   breadcrumb: "Internacional",
   icon: GlobeIcon,
-  map: {
-    src: "/catalog/header-mundo-v2.jpg",
-    west: -130,
-    east: 160,
-    north: 66,
-    south: -48,
-  },
+  map: WORLD_MAP,
   subtitle:
     "Bolsas de estudo, intercâmbios, summer programs e cursos para estudantes brasileiros em todo o mundo.",
   titleLead: "Oportunidades",

@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { nationalOpportunities } from "@/db/schema/national-opportunities";
+import { resolveNationalLocations } from "@/server/geo/resolve-location";
 import { requireAdminInRoute } from "@/server/route-auth";
 
 export const dynamic = "force-dynamic";
@@ -54,7 +55,15 @@ export async function GET(
       .where(eq(nationalOpportunities.id, id))
       .limit(1);
 
-    return NextResponse.json({ nationalOpportunity: data[0] ?? null });
+    const record = data[0];
+    return NextResponse.json({
+      nationalOpportunity: record
+        ? {
+            ...record,
+            locations: resolveNationalLocations(record.cityState),
+          }
+        : null,
+    });
   } catch {
     return NextResponse.json(
       { message: "Failed to fetch national opportunity." },
