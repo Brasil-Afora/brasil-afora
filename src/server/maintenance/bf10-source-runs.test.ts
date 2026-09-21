@@ -22,7 +22,7 @@ import {
 
 const SOURCE_ID = "5b0f1c1e-6f6c-5d4a-9c1e-00000000b010";
 const BASE_URL = "https://one.ufma.br/";
-const WORKER = "maintenance-worker";
+const WORKER = "source-run-operator";
 const T0 = new Date("2026-09-19T18:00:00Z");
 
 const migrate = async (client: PGlite): Promise<void> => {

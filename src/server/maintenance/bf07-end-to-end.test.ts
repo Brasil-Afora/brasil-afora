@@ -29,6 +29,22 @@ const requiredEnv = (name: string): string => {
 };
 
 const PYTHON_REPO = requiredEnv("BRASIL_AFORA_PYTHON_REPO");
+// The fixture server authorizes exactly as production does: each route family
+// accepts only the credential of the actor that owns it, and the queue records
+// the same principal id the real credential model assigns.
+const SOURCE_WORKER_PRINCIPAL = "source-worker";
+const SOURCE_WORKER_BEARER = `Bearer ${"s".repeat(32)}`;
+const INGESTION_BEARER = `Bearer ${"i".repeat(32)}`;
+
+const bearerFor = (pathname: string): string | null => {
+  if (pathname.startsWith("/api/v1/maintenance/")) {
+    return SOURCE_WORKER_BEARER;
+  }
+  if (pathname === "/api/v1/ingestions") {
+    return INGESTION_BEARER;
+  }
+  return null;
+};
 const PYTHON = requiredEnv("BRASIL_AFORA_PYTHON");
 const temporaryDirectories: string[] = [];
 const CHECKPOINT_ROUTE_PATTERN =
@@ -160,12 +176,21 @@ describe("BF-07 registered-source worker end to end", () => {
           response.end(fixtureHtml);
           return;
         }
+        const expectedBearer = bearerFor(url.pathname);
+        if (
+          expectedBearer &&
+          request.headers.authorization !== expectedBearer
+        ) {
+          serverErrors.push(`wrong credential for ${url.pathname}`);
+          sendJson(response, 401, { error: "unauthorized" });
+          return;
+        }
         const body = (await readJson(request)) as Record<string, unknown>;
         if (url.pathname === "/api/v1/maintenance/recrawls/claims") {
           events.push("claim");
           const jobs = await claimRecrawlJobs(
             database as unknown as Parameters<typeof claimRecrawlJobs>[0],
-            "maintenance-worker",
+            SOURCE_WORKER_PRINCIPAL,
             Number(body.limit ?? 1),
             queueNow,
             Array.isArray(body.job_kinds)
@@ -183,7 +208,7 @@ describe("BF-07 registered-source worker end to end", () => {
           const job = await checkpointRecrawlJob(
             database as unknown as Parameters<typeof checkpointRecrawlJob>[0],
             checkpointMatch[1] ?? "",
-            "maintenance-worker",
+            SOURCE_WORKER_PRINCIPAL,
             typeof body.lease_token === "string" ? body.lease_token : "",
             parsed,
             queueNow
@@ -208,7 +233,7 @@ describe("BF-07 registered-source worker end to end", () => {
           const job = await completeRecrawlJob(
             database as unknown as Parameters<typeof completeRecrawlJob>[0],
             completionMatch[1] ?? "",
-            "maintenance-worker",
+            SOURCE_WORKER_PRINCIPAL,
             typeof body.lease_token === "string" ? body.lease_token : "",
             {
               error: typeof body.error === "string" ? body.error : undefined,
@@ -462,12 +487,21 @@ describe("BF-07 registered-source worker end to end", () => {
           response.end(fixtureHtml);
           return;
         }
+        const expectedBearer = bearerFor(url.pathname);
+        if (
+          expectedBearer &&
+          request.headers.authorization !== expectedBearer
+        ) {
+          serverErrors.push(`wrong credential for ${url.pathname}`);
+          sendJson(response, 401, { error: "unauthorized" });
+          return;
+        }
         const body = (await readJson(request)) as Record<string, unknown>;
         if (url.pathname === "/api/v1/maintenance/recrawls/claims") {
           events.push("claim");
           const jobs = await claimRecrawlJobs(
             database as unknown as Parameters<typeof claimRecrawlJobs>[0],
-            "maintenance-worker",
+            SOURCE_WORKER_PRINCIPAL,
             Number(body.limit ?? 1),
             queueNow,
             Array.isArray(body.job_kinds)
@@ -484,7 +518,7 @@ describe("BF-07 registered-source worker end to end", () => {
           const job = await checkpointRecrawlJob(
             database as unknown as Parameters<typeof checkpointRecrawlJob>[0],
             checkpointMatch[1] ?? "",
-            "maintenance-worker",
+            SOURCE_WORKER_PRINCIPAL,
             typeof body.lease_token === "string" ? body.lease_token : "",
             parsed,
             queueNow
@@ -517,7 +551,7 @@ describe("BF-07 registered-source worker end to end", () => {
           const job = await completeRecrawlJob(
             database as unknown as Parameters<typeof completeRecrawlJob>[0],
             completionMatch[1] ?? "",
-            "maintenance-worker",
+            SOURCE_WORKER_PRINCIPAL,
             typeof body.lease_token === "string" ? body.lease_token : "",
             {
               error: typeof body.error === "string" ? body.error : undefined,

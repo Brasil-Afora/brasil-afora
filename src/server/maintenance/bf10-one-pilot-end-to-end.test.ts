@@ -66,7 +66,10 @@ const REGULATION = readFileSync(
   join(FIXTURES, "regulamento_2026-09-19.html"),
   "utf8"
 );
-const WORKER = "maintenance-worker";
+// The principal id the real credential model assigns to the operator token.
+const WORKER = "source-run-operator";
+const OPERATOR_BEARER = `Bearer ${"o".repeat(32)}`;
+const INGESTION_BEARER = `Bearer ${"i".repeat(32)}`;
 const SIGNUP_PATH = /\/inscricao$/;
 const REVIEWER_ID = "00000000-0000-4000-8000-00000000b10a";
 const RUN_ROUTE =
@@ -201,6 +204,19 @@ const createPilot = async () => {
       response.statusCode = typeof page === "number" ? page : 200;
       response.setHeader("content-type", "text/html; charset=utf-8");
       response.end(typeof page === "number" ? "error" : page);
+      return;
+    }
+    // Authorize exactly as production does: the operator's credential for the
+    // maintenance routes, the ingestion credential for ingestion, nothing else.
+    let expectedBearer: string | null = null;
+    if (url.pathname.startsWith("/api/v1/maintenance/")) {
+      expectedBearer = OPERATOR_BEARER;
+    } else if (url.pathname === "/api/v1/ingestions") {
+      expectedBearer = INGESTION_BEARER;
+    }
+    if (expectedBearer && request.headers.authorization !== expectedBearer) {
+      serverErrors.push(`wrong credential for ${url.pathname}`);
+      sendJson(response, 401, { error: "unauthorized" });
       return;
     }
     const body = (await readJson(request)) as Record<string, unknown>;
