@@ -1,0 +1,233 @@
+/* Leaflet overrides for the /mapa night-lights map. Colors come from the
+   theme tokens; CSS wins over the stroke/fill attributes Leaflet writes. */
+
+.opportunity-map.leaflet-container {
+  /* The ocean of the brightened tiles, so the space around the world at low
+     zoom reads as more sea. */
+  font-family: inherit;
+  /* The ocean of the brightened tiles, so the space around the world at low
+     zoom reads as more sea. */
+  background: #0b0d20;
+}
+
+.opportunity-map.leaflet-container:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: -2px;
+}
+
+/* Shapes take focus on click; they're not in the tab order (the list beside
+   the map is the keyboard path), so no focus box around them. */
+.opportunity-map .leaflet-interactive:focus {
+  outline: none;
+}
+
+.opportunity-map .map-night {
+  filter: brightness(1.6) saturate(0.85);
+}
+
+/* At fractional zoom each scaled tile's edge is antialiased, and the brighter
+   lower-zoom tiles show through as a grid. Adding the edges instead of layering
+   them makes neighbouring tiles meet at full opacity. */
+.opportunity-map .leaflet-tile-container img {
+  mix-blend-mode: plus-lighter;
+}
+
+/* Shapes and routes blend in "screen" mode: the amber tints the dark land
+   while every city light stays white, so the night lights read through. */
+.opportunity-map .leaflet-overlay-pane,
+.opportunity-map .leaflet-routes-pane {
+  mix-blend-mode: screen;
+  transition: opacity 450ms ease-out;
+}
+
+/* During a flight the vector layer is only being stretched, not redrawn. */
+.opportunity-map.is-flying .leaflet-overlay-pane,
+.opportunity-map.is-flying .leaflet-routes-pane {
+  opacity: 0;
+  transition-duration: 120ms;
+}
+
+/* Every border, faint, so the lit countries have context. */
+.opportunity-map .map-border {
+  vector-effect: non-scaling-stroke;
+  fill: none;
+  stroke: var(--color-mist);
+  stroke-opacity: 0.16;
+  stroke-width: 0.6;
+}
+
+/* Countries with open opportunities, three steps of amber. */
+.opportunity-map .map-country {
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+  fill: var(--color-signal);
+  stroke: var(--color-signal);
+  stroke-opacity: 0.6;
+  stroke-width: 1;
+  transition:
+    fill-opacity 160ms ease-out,
+    stroke-opacity 160ms ease-out;
+}
+
+.opportunity-map .map-country.tier-1 {
+  fill-opacity: 0.1;
+}
+
+.opportunity-map .map-country.tier-2 {
+  fill-opacity: 0.18;
+}
+
+.opportunity-map .map-country.tier-3 {
+  fill-opacity: 0.28;
+}
+
+.opportunity-map .map-country:hover {
+  fill-opacity: 0.32;
+  stroke-opacity: 1;
+}
+
+/* The chosen country is marked by its outline; a light fill keeps its own
+   city lights visible. */
+.opportunity-map .map-country.is-selected {
+  fill-opacity: 0.2;
+  stroke: var(--color-signal-strong);
+  stroke-opacity: 1;
+  stroke-width: 1.8;
+}
+
+/* The legend's swatches, at the same strengths. */
+.map-swatch {
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.625rem;
+  background: rgb(255 155 15 / var(--swatch-alpha, 0.2));
+  border: 1px solid rgb(255 155 15 / 0.7);
+  border-radius: 2px;
+}
+
+.map-swatch.tier-1 {
+  --swatch-alpha: 0.1;
+}
+
+.map-swatch.tier-2 {
+  --swatch-alpha: 0.18;
+}
+
+.map-swatch.tier-3 {
+  --swatch-alpha: 0.28;
+}
+
+/* City pins: an amber dot on a soft halo (HTML markers, so they keep their
+   size while the map zooms). */
+.opportunity-map .map-pin {
+  cursor: pointer;
+  background: rgb(255 155 15 / 0.2);
+  border-radius: 50%;
+}
+
+.opportunity-map .map-pin::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  content: "";
+  background: var(--color-signal);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--color-navy-950);
+  transition: transform 150ms ease-out;
+}
+
+.opportunity-map .map-pin:hover::after {
+  transform: scale(1.3);
+}
+
+/* Brasília, where every route starts. */
+.opportunity-map .map-origin {
+  background: var(--color-navy-950);
+  border: 1.5px solid var(--color-white);
+  border-radius: 50%;
+}
+
+/* Countries too small for an outline: a ring at the capital. */
+.opportunity-map .map-country-dot {
+  background: rgb(255 155 15 / 0.35);
+  border: 1.5px solid var(--color-signal);
+  border-radius: 50%;
+}
+
+.opportunity-map .map-country-dot.is-selected {
+  background: rgb(255 155 15 / 0.6);
+  border-color: var(--color-signal-strong);
+}
+
+/* Routes from Brasília draw themselves (the Drawn Line Rule). */
+.opportunity-map .map-route {
+  fill: none;
+  stroke: var(--color-signal);
+  stroke-opacity: 0.9;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: map-route-draw 1.4s 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes map-route-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opportunity-map .map-route {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+
+  .opportunity-map .map-country {
+    transition: none;
+  }
+}
+
+/* Tooltips and the chosen country's label. */
+.opportunity-map .map-tooltip,
+.opportunity-map .map-label {
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--color-white);
+  background: var(--color-navy-900);
+  border: 1px solid var(--color-navy-600);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px -12px rgb(0 0 0 / 0.9);
+}
+
+.opportunity-map .map-tooltip span,
+.opportunity-map .map-label span {
+  display: flex;
+  flex-direction: column;
+}
+
+.opportunity-map .map-tooltip strong {
+  font-weight: 600;
+}
+
+.opportunity-map .map-tooltip strong + span {
+  font-size: 12px;
+  color: var(--color-mist);
+}
+
+.opportunity-map .map-label {
+  font-weight: 600;
+  border-color: rgb(255 155 15 / 0.6);
+}
+
+.opportunity-map .leaflet-tooltip-top::before {
+  border-top-color: var(--color-navy-600);
+}
+
+.opportunity-map .map-label.leaflet-tooltip-top::before {
+  border-top-color: rgb(255 155 15 / 0.6);
+}

@@ -181,7 +181,7 @@ The home page reads like a departure board: where, for whom, and until when, bef
 ### Named Rules
 **The One Amber Rule.** Amber means "act here" or "this is close". It never decorates a heading, an icon ring or a background field, with one deliberate exception below.
 
-**The Scope Accent Rule.** Each catalog owns one accent for its title word, header icon and filter-panel links: Atlantic Blue for Internacional, Signal Amber for Nacional (the pairing the site already used before the redesign). Buttons stay amber on both.
+**The Scope Accent Rule.** Each catalog owns one accent for its title word, header icon and filter-panel links: Atlantic Blue for Internacional, Signal Amber for Nacional (the pairing the site already used before the redesign). The map page takes Signal Amber too, the color of its lit countries. Buttons stay amber everywhere.
 
 **The Scoped Trust Rule.** Green and the "Verificada" badge appear only on opportunities from the curated verified set. Catalog items never borrow them.
 
@@ -250,6 +250,13 @@ Built only from what the scraper and catalog actually carry; a field the source 
 - **Sections:** Visão geral, Quem pode participar, Custos e benefícios, Como se candidatar, under a sticky tab bar that sits flush under the header and follows the scroll. Requirements are neutral bullets, not green checks.
 - **Application steps:** the student's own checklist. Each step is a native checkbox drawn as a numbered ring; ticked steps fill ink with a check, the first unticked one gets an amber ring and "Próxima etapa", and a segmented bar counts progress. Nothing is inferred from dates. Progress is kept per opportunity in this browser (`brasil-afora:etapas:<scope>:<id>`) until it moves to the profile as "applications in progress".
 - **Sidebar:** deadline card with countdown and CTA, source card (verified: checked on the official source and when; catalog: last update and the official domain), a mini map with the place's pins, and three similar open opportunities. On phones a bottom bar keeps the deadline and "Site oficial" in reach.
+
+### Map page (/mapa)
+The night-lights world at full resolution (EPSG:4326 tiles to zoom 4), always filling its frame and opening on the Atlantic. Countries with open opportunities glow amber in three steps (1, 2–4, 5+), blended in "screen" mode so their own city lights stay white; every other border is a faint mist line. Amber dots mark cities, and a white ring marks Brasília.
+- **Choosing a country** (on the map, or in the list beside it) flies there. The outlines fade out during the flight and back in on landing, then the routes from Brasília draw themselves. The chosen country gets a brighter outline and a label. The choice is kept in the URL (`?pais=ca`), and the detail page's "Onde acontece" card links to it.
+- **Panel:** the destinations list (small country silhouette, name, next deadline, count) plus "Fecham primeiro", the three nearest deadlines. For a chosen country it shows type chips that toggle the type filter, then that country's opportunities by deadline and a link to the catalog pre-filtered to it.
+- **Filters:** search (country, city, institution, program), type, level, and "Apenas verificadas", all built from the data actually present.
+- On phones the map comes first, and a "Ver lista" button jumps to the chosen country's list.
 
 ### Map teaser
 The night-lights map of the Americas and Atlantic, brightened slightly, with amber routes drawn from Brasília to each open verified destination and pins for national ones, plus a country legend.

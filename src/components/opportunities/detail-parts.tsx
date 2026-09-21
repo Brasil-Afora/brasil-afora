@@ -25,7 +25,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import useApplicationSteps from "@/hooks/use-application-steps";
 import { formatDaysLeft } from "@/lib/date-utils";
-import type { OpportunityLocation } from "@/lib/geo";
+import { findCountry, type OpportunityLocation } from "@/lib/geo";
 import CatalogCover from "./catalog-cover";
 import { URGENT_DAYS } from "./catalog-model";
 import type {
@@ -747,6 +747,8 @@ export const PlaceCard = ({
   const approximate = detail.locations.some(
     (point) => point.precision !== "city"
   );
+  const iso =
+    detail.scope === "national" ? "BR" : findCountry(detail.similarPlace)?.iso;
   return (
     <SideCard title="Onde acontece">
       <p className="flex gap-2 text-[15px] text-slate-200">
@@ -799,6 +801,15 @@ export const PlaceCard = ({
         <p className="mt-2 text-[12px] text-mist-dim">
           Localização aproximada (capital do estado ou do país).
         </p>
+      )}
+      {iso && (
+        <Link
+          className="mt-3 inline-flex items-center gap-1 font-medium text-[14px] text-signal hover:text-signal-strong"
+          href={`/mapa?pais=${iso.toLowerCase()}`}
+        >
+          Ver no mapa
+          <ChevronRightIcon aria-hidden="true" className="h-4 w-4" />
+        </Link>
       )}
     </SideCard>
   );

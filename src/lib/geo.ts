@@ -21,7 +21,7 @@ export type BrazilRegion =
   | "sudeste"
   | "sul";
 
-interface CountryGeo extends GeoPoint {
+export interface CountryGeo extends GeoPoint {
   /** ISO 3166-1 alpha-2, as used by GeoNames. */
   iso: string;
   region: WorldRegion;
@@ -182,6 +182,14 @@ export const findCountries = (value: string): CountryGeo[] => {
     normalized.includes(candidate)
   ).map((candidate) => COUNTRIES[candidate]);
 };
+
+/** The country with exactly this Portuguese name (any case or accents). */
+export const findCountryByName = (value: string): CountryGeo | null =>
+  COUNTRIES[normalizePlaceName(value)] ?? null;
+
+/** The country with this ISO 3166-1 alpha-2 code, if known. */
+export const findCountryByIso = (iso: string): CountryGeo | null =>
+  Object.values(COUNTRIES).find((country) => country.iso === iso) ?? null;
 
 /** First known country mentioned in a free-text country field. */
 export const findCountry = (value: string): CountryGeo | null => {
