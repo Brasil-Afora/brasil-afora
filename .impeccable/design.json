@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-21T11:47:09.909880+00:00",
+  "title": "Design System: Brasil Afora",
+  "extensions": {
+    "colorMeta": {
+      "navy-ground": {
+        "role": "neutral",
+        "displayName": "Navy Ground",
+        "tonalRamp": [
+          "#010811",
+          "#03111f",
+          "#071628",
+          "#0e233a",
+          "#1a3148",
+          "#2a4563",
+          "#4b6688",
+          "#8093b0"
+        ]
+      },
+      "navy-header": {
+        "role": "neutral",
+        "displayName": "Navy Header"
+      },
+      "navy-surface": {
+        "role": "neutral",
+        "displayName": "Navy Surface"
+      },
+      "navy-field": {
+        "role": "neutral",
+        "displayName": "Navy Field"
+      },
+      "navy-rule": {
+        "role": "neutral",
+        "displayName": "Navy Rule"
+      },
+      "navy-rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink"
+      },
+      "mist": {
+        "role": "neutral",
+        "displayName": "Mist"
+      },
+      "mist-dim": {
+        "role": "neutral",
+        "displayName": "Mist Dim"
+      },
+      "signal-amber": {
+        "role": "primary",
+        "displayName": "Signal Amber",
+        "tonalRamp": [
+          "#4a2a00",
+          "#7a4600",
+          "#b86700",
+          "#e88300",
+          "#ff9b0f",
+          "#ffb33f",
+          "#ffcd80",
+          "#ffe8c4"
+        ]
+      },
+      "signal-amber-bright": {
+        "role": "primary",
+        "displayName": "Bright Amber"
+      },
+      "funding-blue": {
+        "role": "secondary",
+        "displayName": "Funding Blue"
+      },
+      "verified-green": {
+        "role": "secondary",
+        "displayName": "Verified Green"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headline only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Panel titles."
+      },
+      "card-title": {
+        "displayName": "Card title",
+        "purpose": "Opportunity names on cards."
+      },
+      "body-lede": {
+        "displayName": "Lede",
+        "purpose": "Hero promise."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Section and panel copy."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Meta rows, chips, tags, captions; tabular figures for dates."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "Logo lockup only."
+      },
+      "hand": {
+        "displayName": "Hand",
+        "purpose": "The single handwritten note on the hero photo."
+      }
+    },
+    "shadows": [
+      {
+        "name": "float",
+        "value": "0 28px 60px -20px rgba(0,0,0,0.85)",
+        "purpose": "Search results popover."
+      },
+      {
+        "name": "lift",
+        "value": "0 24px 48px -28px rgba(0,0,0,0.9)",
+        "purpose": "Opportunity card on hover."
+      },
+      {
+        "name": "header",
+        "value": "0 12px 30px -18px rgba(0,0,0,0.8)",
+        "purpose": "Header after scroll."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Hand note reveal and underline draw on load."
+      },
+      {
+        "name": "route-draw",
+        "value": "scroll-driven (animation-timeline: view()), linear",
+        "purpose": "Map routes draw as the map scrolls into view; drawn by default without support or with reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one amber action per region.",
+      "html": "<button class=\"ds-btn-primary\">Enviar oportunidade</button>",
+      "css": ".ds-btn-primary { background: #ff9b0f; color: #03111f; height: 48px; padding: 0 24px; border: none; border-radius: 14px; font: 600 15px/1 'Atkinson Hyperlegible Next', system-ui, sans-serif; transition: background-color .2s; cursor: pointer; } .ds-btn-primary:hover, .ds-btn-primary:focus-visible { background: #ffb33f; outline: none; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary navigation action, e.g. Abrir mapa.",
+      "html": "<a class=\"ds-btn-outline\" href=\"#\">Abrir mapa</a>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; height: 40px; padding: 0 20px; border: 1px solid rgba(255,155,15,.7); border-radius: 9999px; color: #fff; font: 600 14px/1 'Atkinson Hyperlegible Next', system-ui, sans-serif; text-decoration: none; transition: background-color .2s, color .2s; } .ds-btn-outline:hover, .ds-btn-outline:focus-visible { background: #ff9b0f; color: #03111f; outline: none; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Hero search with attached amber button.",
+      "html": "<div class=\"ds-search\"><input class=\"ds-search-input\" placeholder=\"País, instituição ou programa\"><button class=\"ds-search-btn\">Buscar</button></div>",
+      "css": ".ds-search { display: flex; height: 56px; overflow: hidden; border: 1px solid #1a3148; border-radius: 14px; background: rgba(14,35,58,.85); transition: border-color .3s, box-shadow .3s; } .ds-search:focus-within { border-color: rgba(255,155,15,.7); box-shadow: 0 0 0 4px rgba(255,155,15,.14); } .ds-search-input { flex: 1; min-width: 0; padding: 0 16px; background: transparent; border: none; color: #fff; caret-color: #ff9b0f; font: 400 16px 'Atkinson Hyperlegible Next', system-ui, sans-serif; outline: none; } .ds-search-input::placeholder { color: #aabad4; } .ds-search-btn { padding: 0 32px; border: none; background: #ff9b0f; color: #03111f; font: 600 15px 'Atkinson Hyperlegible Next', system-ui, sans-serif; cursor: pointer; } .ds-search-btn:hover { background: #ffb33f; }"
+    },
+    {
+      "name": "Category Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Shortcut into a pre-filtered catalog.",
+      "html": "<a class=\"ds-chip\" href=\"#\">Olimpíadas</a>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border: 1px solid #1a3148; border-radius: 9999px; background: rgba(7,22,40,.7); color: #f1f5f9; font: 400 14px 'Atkinson Hyperlegible Next', system-ui, sans-serif; text-decoration: none; transition: border-color .2s, background-color .2s; } .ds-chip:hover, .ds-chip:focus-visible { border-color: rgba(255,155,15,.6); background: #0e233a; outline: none; }"
+    },
+    {
+      "name": "Verified Badge",
+      "kind": "chip",
+      "refersTo": "badge-verified",
+      "description": "Only on curated verified opportunities.",
+      "html": "<span class=\"ds-badge-verified\">Verificada</span>",
+      "css": ".ds-badge-verified { display: inline-flex; padding: 4px 10px; border-radius: 9999px; background: #0cb261; color: #03111f; font: 600 12px 'Atkinson Hyperlegible Next', system-ui, sans-serif; }"
+    },
+    {
+      "name": "Funding Tag",
+      "kind": "chip",
+      "refersTo": "tag-funding",
+      "description": "First card tag: the funding fact.",
+      "html": "<span class=\"ds-tag-funding\">Bolsa integral</span>",
+      "css": ".ds-tag-funding { display: inline-flex; padding: 4px 10px; border-radius: 9999px; background: #1d4fc0; color: #fff; font: 500 12px 'Atkinson Hyperlegible Next', system-ui, sans-serif; }"
+    },
+    {
+      "name": "Opportunity Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Verified opportunity with deadline countdown.",
+      "html": "<article class=\"ds-card\"><p class=\"ds-card-inst\">University of Toronto</p><h3 class=\"ds-card-title\">Lester B. Pearson International Scholarship 2027</h3><p class=\"ds-card-meta\">Prazo 09/10/2026 <strong>faltam 18 dias</strong></p></article>",
+      "css": ".ds-card { max-width: 320px; padding: 16px 20px 20px; border: 1px solid #1a3148; border-radius: 14px; background: rgba(7,22,40,.7); color: #f1f5f9; font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif; transition: transform .3s, border-color .3s, box-shadow .3s; } .ds-card:hover { transform: translateY(-4px); border-color: #2a4563; box-shadow: 0 24px 48px -28px rgba(0,0,0,.9); } .ds-card-inst { margin: 0; color: #aabad4; font-size: 13px; } .ds-card-title { margin: 8px 0 0; color: #fff; font-size: 17px; font-weight: 600; line-height: 1.375; } .ds-card-meta { margin: 12px 0 0; font-size: 14px; font-variant-numeric: tabular-nums; } .ds-card-meta strong { margin-left: 8px; color: #ff9b0f; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Departure Board at Dusk",
+    "overview": "The home page reads like a departure board: where, for whom, and until when, before anything else. A dusk skyline dissolves into deep navy; one hot amber marks what you can act on. The world was pinned by the owner's mockup (2026-09-21) and built code-first. Every reading surface uses Atkinson Hyperlegible Next, a face drawn for legibility, because the audience runs from 12-year-olds on phones to postgraduates.",
+    "keyCharacteristics": [
+      "Deep navy ground with hairline navy rules instead of heavy containers.",
+      "A single amber for action, the active nav, urgent deadlines and drawn routes.",
+      "Real photographs (campuses, a dusk skyline, a night map) as the only imagery; no illustration, no crests.",
+      "Facts rendered as data: deadline dates in tabular figures, a countdown beside each.",
+      "One handwritten note per page, on a photograph."
+    ],
+    "rules": [
+      {
+        "name": "The One Amber Rule",
+        "body": "Amber means \"act here\" or \"this is close\". It never decorates a heading, an icon ring or a background field.",
+        "section": "colors"
+      },
+      {
+        "name": "The Scoped Trust Rule",
+        "body": "Green and the \"Verificada\" badge appear only on opportunities from the curated verified set. Catalog items never borrow them.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Kicker Rule",
+        "body": "Headings carry their own weight. No eyebrow or tracked-caps label sits above a heading, even though the reference mockup had them.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Separate with a 1px navy rule before reaching for a shadow or a filled container.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Drawn Line Rule",
+        "body": "The only motion is amber lines drawing themselves: the photo note's underline on load and the map routes as they scroll into view. Under reduced motion they render already drawn.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do show the deadline and a days-left countdown on every opportunity surface; turn the countdown amber at 21 days or fewer.",
+      "Do credit every sourced photograph (see `public/home/SOURCES.md`, `public/opportunities/showcase/SOURCES.md`).",
+      "Do keep reading text in Atkinson Hyperlegible Next at 13px or larger."
+    ],
+    "donts": [
+      "Don't put eyebrow/kicker labels above headings.",
+      "Don't use amber as decoration or green outside the verified set.",
+      "Don't draw fake university crests or logos; use the institution name with a landmark icon.",
+      "Don't add a second handwritten note or a second motion idea."
+    ]
+  }
+}

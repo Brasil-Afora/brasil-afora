@@ -1,0 +1,219 @@
+---
+name: Brasil Afora
+description: Academic opportunities for Brazilian students, in Brazil and abroad — dusk navy, one hot amber, verified facts up front.
+colors:
+  navy-ground: "#03111f"
+  navy-header: "#071628"
+  navy-surface: "#0a1c31"
+  navy-field: "#0e233a"
+  navy-rule: "#1a3148"
+  navy-rule-strong: "#2a4563"
+  ink: "#f1f5f9"
+  mist: "#aabad4"
+  mist-dim: "#8093b0"
+  signal-amber: "#ff9b0f"
+  signal-amber-bright: "#ffb33f"
+  funding-blue: "#1d4fc0"
+  verified-green: "#0cb261"
+typography:
+  display:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "clamp(2.3rem, 1.1rem + 3vw, 3.6rem)"
+    fontWeight: 700
+    lineHeight: 1.04
+    letterSpacing: "-0.025em"
+  headline:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "2rem"
+    fontWeight: 700
+    lineHeight: 1.25
+    letterSpacing: "-0.01em"
+  title:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "1.375rem"
+    fontWeight: 700
+    lineHeight: 1.25
+  card-title:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "17px"
+    fontWeight: 600
+    lineHeight: 1.375
+  body-lede:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "17px"
+    fontWeight: 400
+    lineHeight: 1.625
+  body:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "15px"
+    fontWeight: 400
+    lineHeight: 1.625
+  label:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "13px"
+    fontWeight: 500
+    lineHeight: 1.4
+  wordmark:
+    fontFamily: "Bebas Neue, sans-serif"
+    fontSize: "1.875rem"
+    fontWeight: 400
+    letterSpacing: "0.05em"
+  hand:
+    fontFamily: "Caveat, cursive"
+    fontSize: "2rem"
+    fontWeight: 600
+    lineHeight: 0.95
+rounded:
+  tag: "9999px"
+  field: "14px"
+  card: "14px"
+  panel: "18px"
+spacing:
+  gutter-mobile: "20px"
+  gutter: "32px"
+  container: "1344px"
+  stack: "20px"
+  section: "56px"
+components:
+  button-primary:
+    backgroundColor: "{colors.signal-amber}"
+    textColor: "{colors.navy-ground}"
+    rounded: "{rounded.field}"
+    height: "48px"
+    padding: "0 24px"
+  button-primary-hover:
+    backgroundColor: "{colors.signal-amber-bright}"
+  button-outline:
+    textColor: "{colors.ink}"
+    rounded: "{rounded.tag}"
+    height: "40px"
+    padding: "0 20px"
+  search-field:
+    backgroundColor: "{colors.navy-field}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.field}"
+    height: "56px"
+  chip:
+    backgroundColor: "{colors.navy-header}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.tag}"
+    height: "40px"
+    padding: "0 16px"
+  card:
+    backgroundColor: "{colors.navy-header}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.card}"
+  tag-funding:
+    backgroundColor: "{colors.funding-blue}"
+    textColor: "#ffffff"
+    rounded: "{rounded.tag}"
+    padding: "4px 10px"
+  badge-verified:
+    backgroundColor: "{colors.verified-green}"
+    textColor: "{colors.navy-ground}"
+    rounded: "{rounded.tag}"
+    padding: "4px 10px"
+---
+
+# Design System: Brasil Afora
+
+## Overview
+
+**Creative North Star: "The Departure Board at Dusk"**
+
+The home page reads like a departure board: where, for whom, and until when, before anything else. A dusk skyline dissolves into deep navy; one hot amber marks what you can act on. The world was pinned by the owner's mockup (2026-09-21) and built code-first. Every reading surface uses Atkinson Hyperlegible Next, a face drawn for legibility, because the audience runs from 12-year-olds on phones to postgraduates.
+
+**Key Characteristics:**
+- Deep navy ground with hairline navy rules instead of heavy containers.
+- A single amber for action, the active nav, urgent deadlines and drawn routes.
+- Real photographs (campuses, a dusk skyline, a night map) as the only imagery; no illustration, no crests.
+- Facts rendered as data: deadline dates in tabular figures, a countdown beside each.
+- One handwritten note per page, on a photograph.
+
+## Colors
+
+### Primary
+- **Signal Amber** (`signal-amber`): the primary button ("Buscar", "Enviar oportunidade"), the active nav underline, urgent countdowns, catalog links, and the drawn map routes. Hover lifts to **Bright Amber** (`signal-amber-bright`).
+
+### Secondary
+- **Funding Blue** (`funding-blue`): the first tag on a card, which states the funding fact ("Bolsa integral", "Bolsa variável") or the program type.
+- **Verified Green** (`verified-green`): only the "Verificada" badge, with navy text for contrast.
+
+### Neutral
+- **Navy Ground** (`navy-ground`): page background.
+- **Navy Header** (`navy-header`): header when scrolled, cards, panels, chips (usually at 60–70% over the ground).
+- **Navy Field** (`navy-field`): the search field and hovered rows.
+- **Navy Rule** (`navy-rule`) and **Strong Rule** (`navy-rule-strong`): 1px borders, dividers, icon rings.
+- **Ink** (`ink`) for body text on navy; **Mist** (`mist`) for secondary text; **Mist Dim** (`mist-dim`) only for footer fine print.
+
+### Named Rules
+**The One Amber Rule.** Amber means "act here" or "this is close". It never decorates a heading, an icon ring or a background field.
+
+**The Scoped Trust Rule.** Green and the "Verificada" badge appear only on opportunities from the curated verified set. Catalog items never borrow them.
+
+## Typography
+
+**Display / reading:** Atkinson Hyperlegible Next (400–700).
+**Wordmark:** Bebas Neue, only in the logo lockup ("BRASIL" white, "AFORA" amber).
+**Hand:** Caveat 600, only for the single photo note.
+
+### Hierarchy
+- **Display** (`display`): the hero headline, two lines at desktop, balanced.
+- **Headline** (`headline`): section titles such as "Oportunidades selecionadas" (1.75rem on mobile).
+- **Title** (`title`): panel titles (why-list, map card, contribute band).
+- **Card title** (`card-title`): opportunity names, balanced, up to three lines.
+- **Body lede / body** (`body-lede`, `body`): hero promise at 17px, section copy at 15px, measure capped near 37rem.
+- **Label** (`label`): meta rows, chips (14px), tags and captions (12–13px); dates use tabular figures.
+
+### Named Rules
+**The No Kicker Rule.** Headings carry their own weight. No eyebrow or tracked-caps label sits above a heading, even though the reference mockup had them.
+
+## Layout
+
+A single centered container (`container`, 84rem) with a 20px gutter on phones and 32px from 640px up; the header shares the same container so the logo aligns with content. The desktop hero is a text column (max 44rem) over a photo that owns the right 58% of the band and bleeds to the viewport edge. Opportunity cards sit in one column on phones, two from 640px, and auto-fit columns of at least 17rem from 1280px. The why-list and map card pair up from 1024px (roughly 1 : 1.05). Category chips wrap on larger screens and become a single horizontally scrolling row on phones.
+
+## Elevation & Depth
+
+Flat, layered by tone: surfaces are navy tints separated by 1px rules. Shadows appear only on things that float or lift: the search results popover, a card lifted 4px on hover, the verified badge over photos, and the header once the page scrolls (solid navy; no backdrop blur, which would trap the fixed mobile drawer). Shadows always have a vertical offset and soft blur.
+
+**The Hairline Rule.** Separate with a 1px navy rule before reaching for a shadow or a filled container.
+
+## Shapes
+
+Tags, chips, outline buttons and badges are full pills (`tag`). Fields and cards share one gentle radius (`field`, `card`, 14px); larger panels step up to 18px (`panel`). Photos are cropped to their card edge; no masks approximating shapes, except soft gradient fades where the hero photo dissolves into the navy.
+
+## Components
+
+### Buttons
+- **Primary:** amber fill, navy label, 48px tall (the search button fills the 56px field height). Hover to bright amber.
+- **Outline:** 40px pill, amber border at ~70%, white label; fills amber with navy text on hover ("Abrir mapa").
+
+### Chips
+Category shortcuts: 40px pills on translucent navy with a navy rule, a 16px lucide icon in mist, and a label in ink; the border warms to amber on hover and focus. Each opens a catalog with its filter pre-applied.
+
+### Cards / Containers
+Opportunity card: 160px photo on top with the green "Verificada" badge, then institution line (mist, landmark icon), title, a meta list (place, level, deadline with countdown), tags, and a footer rule holding "Fonte oficial ↗" (opens the official page) and "Ver detalhes →". The whole card is one link via the title; the source link sits above it. Lifts 4px and brightens its rule on hover.
+
+### Inputs / Fields
+Search: 56px field on navy field color, search icon in mist, amber caret; focus warms the border to amber with a soft amber halo. Results open as a popover listbox (keyboard: arrows, Enter, Escape) with a result count, verified badges, and links to both catalogs.
+
+### Navigation
+Header: logo lockup left, four centered links at 15px, profile menu right. The active link is amber with a 2px amber underline that grows from the left on hover. Transparent over the page until scroll, then solid navy with a hairline and a soft shadow.
+
+### Map teaser
+The night-lights map of the Americas and Atlantic, brightened slightly, with amber routes drawn from Brasília to each open verified destination and pins for national ones, plus a country legend.
+
+**The Drawn Line Rule.** The only motion is amber lines drawing themselves: the photo note's underline on load and the map routes as they scroll into view. Under reduced motion they render already drawn.
+
+## Do's and Don'ts
+
+### Do:
+- **Do** show the deadline and a days-left countdown on every opportunity surface; turn the countdown amber at 21 days or fewer.
+- **Do** credit every sourced photograph (see `public/home/SOURCES.md`, `public/opportunities/showcase/SOURCES.md`).
+- **Do** keep reading text in Atkinson Hyperlegible Next at 13px or larger.
+
+### Don't:
+- **Don't** put eyebrow/kicker labels above headings.
+- **Don't** use amber as decoration or green outside the verified set.
+- **Don't** draw fake university crests or logos; use the institution name with a landmark icon.
+- **Don't** add a second handwritten note or a second motion idea.
