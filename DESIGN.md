@@ -14,6 +14,7 @@ colors:
   signal-amber: "#ff9b0f"
   signal-amber-bright: "#ffb33f"
   funding-blue: "#1d4fc0"
+  atlantic-blue: "#5b9bff"
   verified-green: "#0cb261"
 typography:
   display:
@@ -33,6 +34,16 @@ typography:
     fontSize: "1.375rem"
     fontWeight: 700
     lineHeight: 1.25
+  title-sm:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "20px"
+    fontWeight: 700
+    lineHeight: 1.3
+  panel-title:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "18px"
+    fontWeight: 700
+    lineHeight: 1.3
   card-title:
     fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
     fontSize: "17px"
@@ -43,16 +54,36 @@ typography:
     fontSize: "17px"
     fontWeight: 400
     lineHeight: 1.625
+  body-lg:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "16px"
+    fontWeight: 400
+    lineHeight: 1.625
   body:
     fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
     fontSize: "15px"
     fontWeight: 400
     lineHeight: 1.625
+  ui:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "14px"
+    fontWeight: 400
+    lineHeight: 1.45
   label:
     fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
     fontSize: "13px"
     fontWeight: 500
     lineHeight: 1.4
+  caption:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "12px"
+    fontWeight: 500
+    lineHeight: 1.35
+  micro:
+    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontSize: "11px"
+    fontWeight: 700
+    lineHeight: 1.2
   wordmark:
     fontFamily: "Bebas Neue, sans-serif"
     fontSize: "1.875rem"
@@ -137,6 +168,7 @@ The home page reads like a departure board: where, for whom, and until when, bef
 
 ### Secondary
 - **Funding Blue** (`funding-blue`): the first tag on a card, which states the funding fact ("Bolsa integral", "Bolsa variável") or the program type.
+- **Atlantic Blue** (`atlantic-blue`): the international catalog's scope accent: the word "Internacionais" in its title, its header icon, the filter panel's icon and "Limpar filtros" link.
 - **Verified Green** (`verified-green`): only the "Verificada" badge, with navy text for contrast.
 
 ### Neutral
@@ -147,7 +179,9 @@ The home page reads like a departure board: where, for whom, and until when, bef
 - **Ink** (`ink`) for body text on navy; **Mist** (`mist`) for secondary text; **Mist Dim** (`mist-dim`) only for footer fine print.
 
 ### Named Rules
-**The One Amber Rule.** Amber means "act here" or "this is close". It never decorates a heading, an icon ring or a background field.
+**The One Amber Rule.** Amber means "act here" or "this is close". It never decorates a heading, an icon ring or a background field, with one deliberate exception below.
+
+**The Scope Accent Rule.** Each catalog owns one accent for its title word, header icon and filter-panel links: Atlantic Blue for Internacional, Signal Amber for Nacional (the pairing the site already used before the redesign). Buttons stay amber on both.
 
 **The Scoped Trust Rule.** Green and the "Verificada" badge appear only on opportunities from the curated verified set. Catalog items never borrow them.
 
@@ -162,8 +196,10 @@ The home page reads like a departure board: where, for whom, and until when, bef
 - **Headline** (`headline`): section titles such as "Oportunidades selecionadas" (1.75rem on mobile).
 - **Title** (`title`): panel titles (why-list, map card, contribute band).
 - **Card title** (`card-title`): opportunity names, balanced, up to three lines.
-- **Body lede / body** (`body-lede`, `body`): hero promise at 17px, section copy at 15px, measure capped near 37rem.
-- **Label** (`label`): meta rows, chips (14px), tags and captions (12–13px); dates use tabular figures.
+- **Title small / panel title** (`title-sm`, `panel-title`): result counts and empty-state titles (20px); the filter panel and mobile sheet titles (18px).
+- **Body lede / body** (`body-lede`, `body-lg`, `body`): hero promise at 17px, page subtitles at 16px, section copy at 15px, measure capped near 37rem.
+- **UI** (`ui`): controls, chips, meta rows and card details at 14px.
+- **Label / caption / micro** (`label`, `caption`, `micro`): field labels and institution lines (13px), tags and badges (12px), the compact logo-tile monogram (11px); dates use tabular figures.
 
 ### Named Rules
 **The No Kicker Rule.** Headings carry their own weight. No eyebrow or tracked-caps label sits above a heading, even though the reference mockup had them.
@@ -199,6 +235,13 @@ Search: 56px field on navy field color, search icon in mist, amber caret; focus 
 
 ### Navigation
 Header: logo lockup left, four centered links at 15px, profile menu right. The active link is amber with a 2px amber underline that grows from the left on hover. Transparent over the page until scroll, then solid navy with a hairline and a soft shadow.
+
+### Catalog pages (Internacional, Nacional)
+- **Header:** breadcrumb, a 64px icon ring and a two-tone title (scope accent on the last word) over a night-lights map of the catalog's territory, with amber pins where the listed opportunities take place. No handwritten note here (owner's call, 2026-09-21).
+- **Filter panel:** a sticky 19rem card of labeled fields (multi-select dropdowns, age, deadline window, a green "Apenas verificadas" switch) with the contribute card below it. On phones the same fields live in a bottom sheet whose apply button previews the result count.
+- **Opportunity card:** 160px cover (the photo, or the regional night map with the institution's logo or monogram on a white tile), status badge ("Verificada" green, "Prazo próximo" amber), institution, title, tags, meta list (place, deadline, audience), and a footer with the countdown and a round arrow that fills amber on hover.
+- **List row:** thumbnail, institution and title, place and level, a stacked deadline column, arrow. Grid or list is the reader's choice and is remembered.
+- **Pagination:** nine per page; the current page is an amber square.
 
 ### Map teaser
 The night-lights map of the Americas and Atlantic, brightened slightly, with amber routes drawn from Brasília to each open verified destination and pins for national ones, plus a country legend.

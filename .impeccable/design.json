@@ -75,6 +75,10 @@
       "verified-green": {
         "role": "secondary",
         "displayName": "Verified Green"
+      },
+      "atlantic-blue": {
+        "role": "secondary",
+        "displayName": "Atlantic Blue"
       }
     },
     "typographyMeta": {
@@ -113,6 +117,30 @@
       "hand": {
         "displayName": "Hand",
         "purpose": "The single handwritten note on the hero photo."
+      },
+      "title-sm": {
+        "displayName": "title-sm",
+        "purpose": "Result counts and empty-state titles."
+      },
+      "panel-title": {
+        "displayName": "panel-title",
+        "purpose": "Filter panel and sheet titles."
+      },
+      "body-lg": {
+        "displayName": "body-lg",
+        "purpose": "Page subtitles."
+      },
+      "ui": {
+        "displayName": "ui",
+        "purpose": "Controls, chips, meta rows."
+      },
+      "caption": {
+        "displayName": "caption",
+        "purpose": "Tags and badges."
+      },
+      "micro": {
+        "displayName": "micro",
+        "purpose": "Compact logo-tile monogram."
       }
     },
     "shadows": [
@@ -215,6 +243,14 @@
       "description": "Verified opportunity with deadline countdown.",
       "html": "<article class=\"ds-card\"><p class=\"ds-card-inst\">University of Toronto</p><h3 class=\"ds-card-title\">Lester B. Pearson International Scholarship 2027</h3><p class=\"ds-card-meta\">Prazo 09/10/2026 <strong>faltam 18 dias</strong></p></article>",
       "css": ".ds-card { max-width: 320px; padding: 16px 20px 20px; border: 1px solid #1a3148; border-radius: 14px; background: rgba(7,22,40,.7); color: #f1f5f9; font-family: 'Atkinson Hyperlegible Next', system-ui, sans-serif; transition: transform .3s, border-color .3s, box-shadow .3s; } .ds-card:hover { transform: translateY(-4px); border-color: #2a4563; box-shadow: 0 24px 48px -28px rgba(0,0,0,.9); } .ds-card-inst { margin: 0; color: #aabad4; font-size: 13px; } .ds-card-title { margin: 8px 0 0; color: #fff; font-size: 17px; font-weight: 600; line-height: 1.375; } .ds-card-meta { margin: 12px 0 0; font-size: 14px; font-variant-numeric: tabular-nums; } .ds-card-meta strong { margin-left: 8px; color: #ff9b0f; }"
+    },
+    {
+      "name": "Catalog Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Catalog opportunity: cover, status badge, institution, title, tags, meta, countdown and arrow.",
+      "html": "<article class=\"ds-cat\"><div class=\"ds-cat-cover\"><span class=\"ds-cat-logo\">OBA</span></div><div class=\"ds-cat-body\"><p class=\"ds-cat-inst\">OBA</p><h3 class=\"ds-cat-title\">Olimpíada Brasileira de Astronomia</h3><p class=\"ds-cat-meta\">Prazo 01/05/2027</p><p class=\"ds-cat-foot\"><span>faltam 222 dias</span><span class=\"ds-cat-arrow\">→</span></p></div></article>",
+      "css": ".ds-cat{max-width:300px;border:1px solid #1a3148;border-radius:14px;overflow:hidden;background:rgba(7,22,40,.7);color:#f1f5f9;font-family:'Atkinson Hyperlegible Next',system-ui,sans-serif;transition:transform .3s,border-color .3s}.ds-cat:hover{transform:translateY(-4px);border-color:#2a4563}.ds-cat-cover{height:160px;background:#0b1026;display:flex;align-items:center;justify-content:center}.ds-cat-logo{width:56px;height:56px;border-radius:16px;background:#fff;color:#03111f;font-weight:700;display:flex;align-items:center;justify-content:center}.ds-cat-body{padding:16px 20px 20px}.ds-cat-inst{margin:0;color:#aabad4;font-size:13px}.ds-cat-title{margin:8px 0 0;font-size:17px;font-weight:600;color:#fff}.ds-cat-meta{margin:12px 0 0;font-size:14px;font-variant-numeric:tabular-nums}.ds-cat-foot{margin:16px 0 0;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:14px}.ds-cat-arrow{width:40px;height:40px;border-radius:999px;border:1px solid #2a4563;display:flex;align-items:center;justify-content:center}.ds-cat:hover .ds-cat-arrow{background:#ff9b0f;border-color:#ff9b0f;color:#03111f}"
     }
   ],
   "narrative": {
@@ -230,7 +266,7 @@
     "rules": [
       {
         "name": "The One Amber Rule",
-        "body": "Amber means \"act here\" or \"this is close\". It never decorates a heading, an icon ring or a background field.",
+        "body": "Amber means \"act here\" or \"this is close\". It never decorates a heading, an icon ring or a background field, with one deliberate exception below.",
         "section": "colors"
       },
       {
@@ -252,6 +288,11 @@
         "name": "The Drawn Line Rule",
         "body": "The only motion is amber lines drawing themselves: the photo note's underline on load and the map routes as they scroll into view. Under reduced motion they render already drawn.",
         "section": "components"
+      },
+      {
+        "name": "The Scope Accent Rule",
+        "body": "Each catalog owns one accent for its title word, header icon and filter-panel links: Atlantic Blue for Internacional, Signal Amber for Nacional (the pairing the site already used before the redesign). Buttons stay amber on both.",
+        "section": "colors"
       }
     ],
     "dos": [
