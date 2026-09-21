@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { opportunities } from "@/db/schema/opportunities";
+import { resolveInternationalLocations } from "@/server/geo/resolve-location";
 import { requireAdminInRoute } from "@/server/route-auth";
 
 export const dynamic = "force-dynamic";
@@ -49,7 +50,12 @@ const normalizeOpportunityInput = (
 export async function GET() {
   try {
     const data = await db.select().from(opportunities);
-    return NextResponse.json({ opportunities: data });
+    return NextResponse.json({
+      opportunities: data.map((item) => ({
+        ...item,
+        locations: resolveInternationalLocations(item.city, item.country),
+      })),
+    });
   } catch {
     return NextResponse.json(
       { message: "Failed to fetch opportunities." },

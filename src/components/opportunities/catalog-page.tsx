@@ -480,9 +480,7 @@ function CatalogPage<F extends CatalogFilterValues>({
     setSheetOpen(false);
   };
 
-  const pins = ready
-    ? items.flatMap((item) => (item.geo ? [item.geo] : []))
-    : [];
+  const pins = ready ? items.flatMap((item) => item.locations) : [];
 
   return (
     <div className="min-h-screen bg-navy-950 font-reading text-slate-100">
@@ -598,6 +596,19 @@ function CatalogPage<F extends CatalogFilterValues>({
           )}
 
           <ContributeCard className="mt-10 lg:hidden" />
+
+          <p className="mt-10 text-[12px] text-mist-dim">
+            Localizações do mapa:{" "}
+            <a
+              className="underline decoration-navy-600 underline-offset-2 hover:text-slate-200"
+              href="https://www.geonames.org/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              GeoNames
+            </a>{" "}
+            (CC BY 4.0).
+          </p>
         </div>
       </div>
 

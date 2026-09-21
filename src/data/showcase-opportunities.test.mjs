@@ -53,7 +53,7 @@ const LOCALHOST_FALLBACK_REGEX =
   /const (?:FALLBACK|DEFAULT)_SITE_URL = "http:\/\/localhost:3000"/;
 const INTERNAL_CATALOG_REGEX = /<CatalogPage/;
 const MERGED_VERIFIED_DATA_REGEX =
-  /verified(?:International|National)Opportunities\.filter/;
+  /verified(?:International|National)Opportunities\s*\.filter/;
 const OPEN_DEADLINE_FILTER_REGEX = /isOpportunityDeadlineOpen/;
 const VERIFIED_DETAIL_REGEX =
   /isVerified(?:International|National)OpportunityId/;

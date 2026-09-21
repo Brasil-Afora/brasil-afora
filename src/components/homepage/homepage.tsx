@@ -1,8 +1,8 @@
+import { getVerifiedDestinations } from "@/server/geo/opportunity-locations";
 import FeaturedOpportunities from "./featured-opportunities";
 import HomeContribute from "./home-contribute";
 import {
   getFeaturedOpportunities,
-  getMapDestinations,
   getVerifiedSearchEntries,
 } from "./home-data";
 import HomeHero from "./home-hero";
@@ -17,13 +17,18 @@ const HERO_PHOTO_CREDIT = {
   url: "https://commons.wikimedia.org/wiki/File:Edinburgh_Evening_Skyline.jpg",
 };
 
+const GEONAMES_CREDIT = {
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+  url: "https://www.geonames.org/",
+};
+
 const creditLinkClassName =
   "underline decoration-navy-600 underline-offset-2 transition-colors hover:text-slate-200";
 
 const Homepage = () => {
   const featured = getFeaturedOpportunities();
   const verifiedEntries = getVerifiedSearchEntries(featured);
-  const destinations = getMapDestinations(featured);
+  const verifiedDestinations = getVerifiedDestinations();
 
   return (
     <div className="overflow-x-clip bg-navy-950 font-reading text-slate-100">
@@ -32,7 +37,7 @@ const Homepage = () => {
 
       <div className="mx-auto grid w-full max-w-[84rem] gap-8 px-5 pb-14 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10">
         <HomeWhy />
-        <HomeMapTeaser destinations={destinations} />
+        <HomeMapTeaser verifiedDestinations={verifiedDestinations} />
       </div>
 
       <HomeContribute />
@@ -59,6 +64,25 @@ const Homepage = () => {
             >
               {HERO_PHOTO_CREDIT.license}
             </a>
+            . Localizações do mapa:{" "}
+            <a
+              className={creditLinkClassName}
+              href={GEONAMES_CREDIT.url}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              GeoNames
+            </a>{" "}
+            (
+            <a
+              className={creditLinkClassName}
+              href={GEONAMES_CREDIT.licenseUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              CC BY 4.0
+            </a>
+            )
           </p>
         </div>
       </footer>

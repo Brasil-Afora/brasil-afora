@@ -1,21 +1,36 @@
+"use client";
+
 import { ArrowRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { type MapDestination, type MapPoint, ROUTE_ORIGIN } from "./home-data";
+import { useMemo } from "react";
+import {
+  useInternationalOpportunitiesQuery,
+  useNationalOpportunitiesQuery,
+} from "@/hooks/queries/use-opportunity-queries";
+import useScrollReveal from "@/hooks/use-scroll-reveal";
+import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
+import type { GeoPoint, MapDestination } from "@/lib/geo";
 
-// The teaser image is public/map.jpg (equirectangular) cropped to this window:
-// the Americas and the Atlantic, where the routes run. The SVG overlay works
-// in lon+180 / 90-lat units, so its viewBox is the same window.
-const MAP_IMAGE = "/home/americas-atlantic-night.jpg";
-const VIEW = { west: -170, east: 60, north: 65, south: -50 };
+// public/catalog/header-mundo.jpg is public/map.jpg (equirectangular) cropped
+// to this window. The SVG overlay works in lon+180 / 90-lat units, so its
+// viewBox is the same window.
+const MAP_IMAGE = "/catalog/header-mundo.jpg";
+const VIEW = { west: -130, east: 160, north: 66, south: -48 };
 const VIEW_WIDTH = VIEW.east - VIEW.west;
 const VIEW_HEIGHT = VIEW.north - VIEW.south;
 const ARC_BOW = 0.22;
-const ROUTE_STAGGER = 12;
+const ROUTE_STAGGER = 8;
+const MAX_ROUTES = 14;
+const PIN_PRECISION = 1;
+const REVEAL_OPTIONS = { threshold: 0.1 };
 
-const project = ({ lat, lon }: MapPoint) => ({ x: lon + 180, y: 90 - lat });
+/** Origin of the routes: Brasília, the geographic middle of the country. */
+const ROUTE_ORIGIN: GeoPoint = { lat: -15.79, lon: -47.88 };
 
-const arcPath = (from: MapPoint, to: MapPoint): string => {
+const project = ({ lat, lon }: GeoPoint) => ({ x: lon + 180, y: 90 - lat });
+
+const arcPath = (from: GeoPoint, to: GeoPoint): string => {
   const a = project(from);
   const b = project(to);
   const dx = b.x - a.x;
@@ -26,22 +41,95 @@ const arcPath = (from: MapPoint, to: MapPoint): string => {
   return `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
 };
 
+const pointKey = ({ lat, lon }: GeoPoint): string =>
+  `${lat.toFixed(PIN_PRECISION)}:${lon.toFixed(PIN_PRECISION)}`;
+
+const isInView = ({ lat, lon }: GeoPoint): boolean =>
+  lon >= VIEW.west &&
+  lon <= VIEW.east &&
+  lat <= VIEW.north &&
+  lat >= VIEW.south;
+
+const uniquePoints = (destinations: MapDestination[]): MapDestination[] => [
+  ...new Map(destinations.map((item) => [pointKey(item), item])).values(),
+];
+
+/** Opportunities per country (an opportunity with two cities counts once). */
 const countByCountry = (destinations: MapDestination[]) => {
-  const counts = new Map<string, number>();
+  const names = new Map<string, Set<string>>();
   for (const destination of destinations) {
-    counts.set(destination.country, (counts.get(destination.country) ?? 0) + 1);
+    const set = names.get(destination.country) ?? new Set<string>();
+    set.add(destination.name);
+    names.set(destination.country, set);
   }
-  return [...counts.entries()];
+  return [...names.entries()]
+    .map(([country, set]) => [country, set.size] as const)
+    .sort((a, b) => b[1] - a[1]);
+};
+
+const nameKey = (name: string): string =>
+  name.trim().toLocaleLowerCase("pt-BR");
+
+/**
+ * Catalog opportunities are fetched once the map scrolls into view; each
+ * already carries the locations the API resolved from its city text.
+ */
+const useCatalogDestinations = (
+  enabled: boolean,
+  verifiedDestinations: MapDestination[]
+): MapDestination[] => {
+  const international = useInternationalOpportunitiesQuery({ enabled });
+  const national = useNationalOpportunitiesQuery({ enabled });
+
+  return useMemo(() => {
+    const verifiedNames = new Set(
+      verifiedDestinations.map((item) => nameKey(item.name))
+    );
+    const isNewAndOpen = (name: string, deadline: string) =>
+      !verifiedNames.has(nameKey(name)) && isOpportunityDeadlineOpen(deadline);
+
+    return [
+      ...(international.data ?? [])
+        .filter((item) => isNewAndOpen(item.nome, item.prazoInscricao))
+        .flatMap((item) =>
+          (item.localizacoes ?? []).map((location) => ({
+            ...location,
+            country: item.pais,
+            name: item.nome,
+            scope: "international" as const,
+          }))
+        ),
+      ...(national.data ?? [])
+        .filter((item) => isNewAndOpen(item.nome, item.prazoInscricao))
+        .flatMap((item) =>
+          (item.localizacoes ?? []).map((location) => ({
+            ...location,
+            country: "Brasil",
+            name: item.nome,
+            scope: "national" as const,
+          }))
+        ),
+    ];
+  }, [international.data, national.data, verifiedDestinations]);
 };
 
 const HomeMapTeaser = ({
-  destinations,
+  verifiedDestinations,
 }: {
-  destinations: MapDestination[];
+  verifiedDestinations: MapDestination[];
 }) => {
+  const [mapRef, mapVisible] = useScrollReveal(REVEAL_OPTIONS);
+  const catalogDestinations = useCatalogDestinations(
+    mapVisible,
+    verifiedDestinations
+  );
+  const destinations = [...verifiedDestinations, ...catalogDestinations];
+  const visible = destinations.filter(isInView);
+  const routes = uniquePoints(
+    visible.filter((item) => item.scope === "international")
+  ).slice(0, MAX_ROUTES);
+  const pins = uniquePoints(visible);
   const origin = project(ROUTE_ORIGIN);
-  const abroad = destinations.filter((d) => d.scope === "international");
-  const national = destinations.filter((d) => d.scope === "national");
 
   return (
     <section
@@ -72,6 +160,7 @@ const HomeMapTeaser = ({
       <figure className="mt-6">
         <div
           className="relative overflow-hidden rounded-lg bg-navy-950 ring-1 ring-navy-700"
+          ref={mapRef}
           style={{ aspectRatio: `${VIEW_WIDTH} / ${VIEW_HEIGHT}` }}
         >
           <Image
@@ -87,16 +176,16 @@ const HomeMapTeaser = ({
             preserveAspectRatio="none"
             viewBox={`${VIEW.west + 180} ${90 - VIEW.north} ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
           >
-            {abroad.map((destination, index) => (
+            {routes.map((destination, index) => (
               <path
                 className="ba-route ba-stroke"
                 d={arcPath(ROUTE_ORIGIN, destination)}
                 fill="none"
-                key={destination.id}
+                key={pointKey(destination)}
                 pathLength={1}
                 stroke="var(--color-signal)"
                 strokeLinecap="round"
-                strokeWidth={0.85}
+                strokeWidth={0.8}
                 style={
                   {
                     "--route-start": `${10 + index * ROUTE_STAGGER}%`,
@@ -105,10 +194,10 @@ const HomeMapTeaser = ({
                 }
               />
             ))}
-            {[...abroad, ...national].map((destination) => {
+            {pins.map((destination) => {
               const point = project(destination);
               return (
-                <g key={`${destination.id}-pin`}>
+                <g key={`pin-${pointKey(destination)}`}>
                   <circle
                     cx={point.x}
                     cy={point.y}
@@ -139,7 +228,7 @@ const HomeMapTeaser = ({
         {destinations.length > 0 && (
           <figcaption className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-mist">
             <span className="text-slate-200">
-              Do Brasil para a seleção verificada:
+              Onde estão as oportunidades abertas:
             </span>
             {countByCountry(destinations).map(([country, count]) => (
               <span className="inline-flex items-center gap-1.5" key={country}>

@@ -11,6 +11,7 @@ The shared catalog used by the international and national listing pages (`catalo
 - Colors come from the brand tokens in `globals.css`; each catalog passes its scope accent through `CatalogHeaderConfig.accentClassName`.
 - Reuse `FilterDropdown` for multi-select filters; single choices use a native `<select>`.
 - Card covers without a photo use the regional night maps in `public/catalog/` (see `catalog-model.ts` and `src/lib/geo.ts`).
+- Map pins come from `localizacoes`: the list API resolves them from each record's city/state text (`src/server/geo/resolve-location.ts`, GeoNames), and the server pages resolve the verified set. Never hard-code coordinates for an opportunity.
 
 ## Architecture patterns
 

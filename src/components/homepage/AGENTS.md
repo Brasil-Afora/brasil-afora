@@ -17,3 +17,4 @@ The product's home page (`/`): hero with live search and category shortcuts, the
 - The page (`src/app/(marketing)/page.tsx`) revalidates hourly so countdowns and expired opportunities stay current without a client-side date check.
 - Category shortcuts pre-apply catalog filters by writing the catalog's session-storage key (`OPPORTUNITY_FILTER_STORAGE_KEYS`) before navigating.
 - Search fetches the full catalogs only after the user focuses the field, and falls back to the verified set when the API fails.
+- The map teaser draws the verified destinations the server resolved, then loads the catalogs (with their API-resolved `localizacoes`) once it scrolls into view. Routes go from Brasília to each place abroad; national places are pins.

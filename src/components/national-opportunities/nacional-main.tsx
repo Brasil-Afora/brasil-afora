@@ -18,6 +18,7 @@ import useOpportunityFilters, {
   OPPORTUNITY_FILTER_STORAGE_KEYS,
 } from "@/hooks/use-opportunity-filters";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
+import type { LocationsById } from "@/server/geo/opportunity-locations";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 
 const initialFiltros: OpportunitiesFiltros = {
@@ -57,6 +58,11 @@ const fields: CatalogFilterField<keyof OpportunitiesFiltros>[] = [
   },
 ];
 
+interface NacionalMainProps {
+  /** Locations of the verified selection, resolved on the server. */
+  verifiedLocations: LocationsById;
+}
+
 const header: CatalogHeaderConfig = {
   accentClassName: "text-signal",
   accentWord: "Nacionais",
@@ -74,19 +80,24 @@ const header: CatalogHeaderConfig = {
   titleLead: "Oportunidades",
 };
 
-const NacionalMain = () => {
+const NacionalMain = ({ verifiedLocations }: NacionalMainProps) => {
   const { data, loading, error, retry } = useOportunidadesNacionais();
 
   // The verified selection and the catalog form one list; a catalog record
   // that duplicates a verified one by name is dropped.
   const merged = useMemo<Opportunity[]>(
     () => [
-      ...verifiedNationalOpportunities.filter((opportunity) =>
-        isOpportunityDeadlineOpen(opportunity.prazoInscricao)
-      ),
+      ...verifiedNationalOpportunities
+        .filter((opportunity) =>
+          isOpportunityDeadlineOpen(opportunity.prazoInscricao)
+        )
+        .map((opportunity) => ({
+          ...opportunity,
+          localizacoes: verifiedLocations[opportunity.id] ?? [],
+        })),
       ...data.filter((item) => !isVerifiedNationalOpportunityName(item.nome)),
     ],
-    [data]
+    [data, verifiedLocations]
   );
 
   const {

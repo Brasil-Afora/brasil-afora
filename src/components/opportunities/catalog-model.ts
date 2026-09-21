@@ -1,5 +1,5 @@
 import { getBrasiliaDaysUntil } from "@/lib/date-utils";
-import { findCountry, findState, type GeoPoint } from "@/lib/geo";
+import { findCountry, findState, type OpportunityLocation } from "@/lib/geo";
 import type {
   InternationalOpportunity,
   NationalOpportunity,
@@ -21,11 +21,12 @@ export interface CatalogItem {
   cover: CatalogCover;
   daysLeft: number | null;
   deadline: string;
-  geo: GeoPoint | null;
   href: string;
   id: string;
   institution: string;
   level: string;
+  /** Where it takes place, resolved on the server; empty when nationwide or online. */
+  locations: OpportunityLocation[];
   name: string;
   place: string;
   scope: CatalogScope;
@@ -139,7 +140,7 @@ export const toInternationalItem = (
     ),
     daysLeft: getBrasiliaDaysUntil(opportunity.prazoInscricao, now),
     deadline: opportunity.prazoInscricao,
-    geo: country,
+    locations: opportunity.localizacoes ?? [],
     href: `/oportunidades/internacionais/${opportunity.id}`,
     id: opportunity.id,
     institution: opportunity.instituicaoResponsavel,
@@ -171,7 +172,7 @@ export const toNationalItem = (
     ),
     daysLeft: getBrasiliaDaysUntil(opportunity.prazoInscricao, now),
     deadline: opportunity.prazoInscricao,
-    geo: state,
+    locations: opportunity.localizacoes ?? [],
     href: `/oportunidades/nacionais/${opportunity.id}`,
     id: opportunity.id,
     institution: opportunity.instituicaoResponsavel,

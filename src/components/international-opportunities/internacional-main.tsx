@@ -17,6 +17,7 @@ import useOpportunityFilters, {
   OPPORTUNITY_FILTER_STORAGE_KEYS,
 } from "@/hooks/use-opportunity-filters";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
+import type { LocationsById } from "@/server/geo/opportunity-locations";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 
 const initialFiltros: OpportunitiesFiltros = {
@@ -71,6 +72,11 @@ const fields: CatalogFilterField<keyof OpportunitiesFiltros>[] = [
   },
 ];
 
+interface InternacionalMainProps {
+  /** Locations of the verified selection, resolved on the server. */
+  verifiedLocations: LocationsById;
+}
+
 const header: CatalogHeaderConfig = {
   accentClassName: "text-atlantic",
   accentWord: "Internacionais",
@@ -78,10 +84,10 @@ const header: CatalogHeaderConfig = {
   icon: GlobeIcon,
   map: {
     src: "/catalog/header-mundo.jpg",
-    west: -110,
-    east: 140,
-    north: 62,
-    south: -42,
+    west: -130,
+    east: 160,
+    north: 66,
+    south: -48,
   },
   subtitle:
     "Bolsas de estudo, intercâmbios, summer programs e cursos para estudantes brasileiros em todo o mundo.",
@@ -91,21 +97,26 @@ const header: CatalogHeaderConfig = {
 const nameKey = (name: string): string =>
   name.trim().toLocaleLowerCase("pt-BR");
 
-const InternacionalMain = () => {
+const InternacionalMain = ({ verifiedLocations }: InternacionalMainProps) => {
   const { data, loading, error, retry } = useOportunidadesInternacionais();
 
   // The verified selection and the catalog form one list; a catalog record
   // that duplicates a verified one by name is dropped.
   const merged = useMemo<Opportunity[]>(() => {
-    const verified = verifiedInternationalOpportunities.filter((opportunity) =>
-      isOpportunityDeadlineOpen(opportunity.prazoInscricao)
-    );
+    const verified = verifiedInternationalOpportunities
+      .filter((opportunity) =>
+        isOpportunityDeadlineOpen(opportunity.prazoInscricao)
+      )
+      .map((opportunity) => ({
+        ...opportunity,
+        localizacoes: verifiedLocations[opportunity.id] ?? [],
+      }));
     const verifiedNames = new Set(verified.map((item) => nameKey(item.nome)));
     return [
       ...verified,
       ...data.filter((item) => !verifiedNames.has(nameKey(item.nome))),
     ];
-  }, [data]);
+  }, [data, verifiedLocations]);
 
   const {
     clearFilters,

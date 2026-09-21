@@ -2,6 +2,7 @@ import {
   getVerifiedInternationalOpportunityById,
   getVerifiedNationalOpportunityById,
 } from "@/data/verified-opportunities";
+import type { OpportunityLocation } from "@/lib/geo";
 
 interface OpportunityRecord {
   ageRange: string;
@@ -19,6 +20,8 @@ interface OpportunityRecord {
   id: string;
   image: string;
   languageRequirements: string;
+  /** Resolved on the server from the city/state text. */
+  locations?: OpportunityLocation[];
   name: string;
   officialLink: string;
   responsibleInstitution: string;
@@ -46,6 +49,8 @@ interface NationalOpportunityRecord {
   extraCosts: string;
   id: string;
   image: string;
+  /** Resolved on the server from the city/state text. */
+  locations?: OpportunityLocation[];
   modality: string;
   name: string;
   officialLink: string;
@@ -71,6 +76,8 @@ export interface InternationalOpportunity {
   imagem: string;
   instituicaoResponsavel: string;
   linkOficial: string;
+  /** Where it takes place; filled in by the API (and for the verified set by the server page). */
+  localizacoes?: OpportunityLocation[];
   nivelEnsino: string;
   nome: string;
   pais: string;
@@ -96,6 +103,8 @@ export interface NationalOpportunity {
   imagem: string;
   instituicaoResponsavel: string;
   linkOficial: string;
+  /** Where it takes place; filled in by the API (and for the verified set by the server page). */
+  localizacoes?: OpportunityLocation[];
   modalidade: "Online" | "Presencial" | "Híbrido";
   nivelEnsino: string;
   nome: string;
@@ -108,11 +117,15 @@ export interface NationalOpportunity {
   tipo: string;
 }
 
+// Locations are derived from the city text on the server, never entered.
 export type InternationalOpportunityInput = Omit<
   InternationalOpportunity,
-  "id"
+  "id" | "localizacoes"
 >;
-export type NationalOpportunityInput = Omit<NationalOpportunity, "id">;
+export type NationalOpportunityInput = Omit<
+  NationalOpportunity,
+  "id" | "localizacoes"
+>;
 
 const SPECIFIC_REQUIREMENTS_SPLIT_REGEX = /\r?\n|;|\|/;
 const BR_DATE_IN_TEXT_REGEX = /\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/;
@@ -313,6 +326,7 @@ const mapInternationalOpportunity = (
   processoInscricao: item.applicationProcess,
   linkOficial: item.officialLink,
   contato: item.contact,
+  localizacoes: item.locations ?? [],
 });
 
 const mapNationalOpportunity = (
@@ -340,6 +354,7 @@ const mapNationalOpportunity = (
   etapasSelecao: item.selectionSteps ?? "",
   linkOficial: item.officialLink ?? "",
   contato: item.contact ?? "",
+  localizacoes: item.locations ?? [],
 });
 
 const fetchFromApi = async <T>(path: string): Promise<T> => {
