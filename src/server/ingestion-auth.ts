@@ -3,6 +3,7 @@ import "server-only";
 import { timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { sharedCredentialError } from "@/server/service-credentials";
 
 const MINIMUM_TOKEN_LENGTH = 32;
 
@@ -54,6 +55,10 @@ export const requireIngestionInRoute = async (request: NextRequest) => {
 };
 
 export const ingestionAuthConfigurationError = (): NextResponse | null => {
+  const shared = sharedCredentialError("INGESTION_AUTH_SCOPE_COLLAPSE");
+  if (shared) {
+    return shared;
+  }
   const configuredToken = process.env.INGESTION_API_TOKEN?.trim();
   if (configuredToken && configuredToken.length < MINIMUM_TOKEN_LENGTH) {
     return NextResponse.json(

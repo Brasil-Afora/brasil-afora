@@ -4,10 +4,10 @@
  * Runs as its own long-lived process (a Render Background Worker), separate
  * from the Python source-document worker. It holds exactly one credential,
  * LINK_WORKER_TOKEN, scoped to queue:claim:application_link, queue:write and
- * link-check:run. It has no database credential: it claims and completes jobs
- * through the maintenance API and verifies through the web's link-check route,
- * so the process that fetches untrusted, externally sourced URLs cannot touch
- * the database except through that one narrowly scoped route.
+ * link-check:run. It fetches nothing and holds no database credential: it
+ * claims and completes jobs through the maintenance API and asks the web's
+ * link-check route to verify each round. The web does the fetch — SSRF-safe,
+ * time-bounded, parsed in linear time — and the writes.
  *
  * It never publishes. A verification writes an operational assessment,
  * refreshes the edition's last-verified time, and opens a review task when the

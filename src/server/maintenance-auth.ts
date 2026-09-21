@@ -3,6 +3,10 @@ import "server-only";
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import {
+  credentialMisconfiguration,
+  sharedCredentialError,
+} from "@/server/service-credentials";
 
 const MINIMUM_TOKEN_LENGTH = 32;
 
@@ -81,16 +85,6 @@ export const MAINTENANCE_CREDENTIALS: readonly CredentialDefinition[] = [
   },
 ] as const;
 
-/**
- * Bearer credentials owned by other auth modules. They hold no maintenance
- * capability, but a maintenance credential sharing a value with one of them
- * would let the holder of either act as both.
- */
-const OTHER_SERVICE_CREDENTIALS = [
-  "INGESTION_API_TOKEN",
-  "OUTBOX_WORKER_TOKEN",
-];
-
 export interface MaintenancePrincipal {
   capabilities: readonly MaintenanceCapability[];
   id: string;
@@ -120,22 +114,6 @@ const equalSecrets = (left: string, right: string): boolean =>
 const configuredValue = (environmentVariable: string): string | null =>
   process.env[environmentVariable]?.trim() || null;
 
-const misconfigured = (code: string, detail: string): NextResponse => {
-  // The detail names environment variables, so it goes to the server log only;
-  // an unauthenticated caller learns that the credential set is unsound and
-  // nothing about which part of it.
-  console.error(`[maintenance-auth] ${code}: ${detail}`);
-  return NextResponse.json(
-    {
-      error: {
-        code,
-        message: "Maintenance credentials are misconfigured on the server.",
-      },
-    },
-    { status: 503 }
-  );
-};
-
 /**
  * Refuse to authenticate at all while the credential set is unsound.
  *
@@ -147,38 +125,16 @@ const misconfigured = (code: string, detail: string): NextResponse => {
  */
 export const maintenanceCredentialConfigurationError =
   (): NextResponse | null => {
-    const seen = new Map<string, string>();
     for (const credential of MAINTENANCE_CREDENTIALS) {
       const value = configuredValue(credential.environmentVariable);
-      if (value === null) {
-        continue;
-      }
-      if (value.length < MINIMUM_TOKEN_LENGTH) {
-        return misconfigured(
+      if (value !== null && value.length < MINIMUM_TOKEN_LENGTH) {
+        return credentialMisconfiguration(
           "MAINTENANCE_AUTH_MISCONFIGURED",
           `${credential.environmentVariable} must contain at least ${MINIMUM_TOKEN_LENGTH} characters.`
         );
       }
-      const duplicate = seen.get(value);
-      if (duplicate) {
-        return misconfigured(
-          "MAINTENANCE_AUTH_SCOPE_COLLAPSE",
-          `${credential.environmentVariable} and ${duplicate} must not share the same secret.`
-        );
-      }
-      seen.set(value, credential.environmentVariable);
     }
-    for (const environmentVariable of OTHER_SERVICE_CREDENTIALS) {
-      const value = configuredValue(environmentVariable);
-      const duplicate = value === null ? undefined : seen.get(value);
-      if (duplicate) {
-        return misconfigured(
-          "MAINTENANCE_AUTH_SCOPE_COLLAPSE",
-          `${environmentVariable} and ${duplicate} must not share the same secret.`
-        );
-      }
-    }
-    return null;
+    return sharedCredentialError("MAINTENANCE_AUTH_SCOPE_COLLAPSE");
   };
 
 /**

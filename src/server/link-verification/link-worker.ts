@@ -43,9 +43,10 @@ export interface LinkVerificationOutcome {
 
 /**
  * Performs one verification. In production this is an authenticated call to
- * the web's link-check route: the worker holds no database credential, so the
- * process that fetches untrusted, externally sourced URLs cannot write to the
- * database except through that one narrowly scoped route.
+ * the web's link-check route. The worker fetches nothing and holds no database
+ * credential, so a compromised worker can do no more than ask the web to check
+ * a round. The web performs the fetch itself — through the SSRF-safe client,
+ * under hard time limits, with linear-time parsing — and the writes.
  */
 export type LinkVerifier = (
   applicationRoundId: string
@@ -62,8 +63,10 @@ export class LinkWorkerContractError extends Error {
 /**
  * The job can never succeed — its round no longer exists, or has no
  * application URL. Retrying would only burn attempts, so it dead-letters on
- * the first. A target site that is down is *not* this: the web records that as
- * a broken or blocked assessment and the verification succeeds.
+ * the first. A target site that is down is *not* this: the web records a
+ * refused, reset or timed-out site as `broken`, a certificate this runtime
+ * cannot verify as `unknown`, and a policy-refused address as `blocked`, and
+ * the verification succeeds.
  */
 export class PermanentLinkJobError extends Error {
   readonly code: string;

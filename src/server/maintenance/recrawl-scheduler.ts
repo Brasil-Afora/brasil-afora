@@ -355,6 +355,7 @@ export const requestEditionRecrawl = async (
         applicationRoundId: applicationRounds.id,
         applicationUrl: applicationRounds.applicationUrl,
         sourceDocumentId: sourceDocuments.id,
+        sourceDiscoveryMethods: sources.discoveryMethods,
         sourceDocumentUrl: sourceDocuments.canonicalUrl,
         sourceId: sources.id,
       })
@@ -375,8 +376,24 @@ export const requestEditionRecrawl = async (
         "No source documents are linked to this edition."
       );
     }
+    // A reviewer's recrawl request creates unattended queue work. A source
+    // whose only discovery method is an operator-started supervised run must
+    // never get any: its jobs would carry no source_run_id, and an unattended
+    // worker would crawl it. The operator runs a supervised source run instead.
+    const unattended = contexts.filter(
+      (context) =>
+        !context.sourceDiscoveryMethods.includes(
+          SUPERVISED_RUN_DISCOVERY_METHOD
+        )
+    );
+    if (unattended.length === 0) {
+      throw new RecrawlWorkflowError(
+        "SUPERVISED_SOURCE_ONLY",
+        "This edition comes only from supervised-run sources; start a supervised source run instead."
+      );
+    }
     const uniqueSources = latestBy(
-      contexts,
+      unattended,
       (context) => context.sourceDocumentId
     );
     for (const context of uniqueSources.values()) {
@@ -394,7 +411,7 @@ export const requestEditionRecrawl = async (
       });
     }
     const uniqueRounds = latestBy(
-      contexts.filter(
+      unattended.filter(
         (
           context
         ): context is typeof context & {
@@ -474,10 +491,17 @@ const claimRecrawlJobsInTransaction = (
         : undefined;
     // Jobs enqueued by a supervised source run are only ever claimed by that
     // run (by id); unscoped claims from unattended workers never see them.
+    // Unattended claims (no job ids) never see supervised-run work, whatever
+    // path created it: not a job enqueued by a run (it carries source_run_id),
+    // and not any job whose source is supervised-run only. Claiming by explicit
+    // ids is the supervised run's own path, gated by source-run:manage.
     const jobIdFilter =
       jobIds && jobIds.length > 0
         ? inArray(recrawlJobs.id, jobIds)
-        : sql`NOT (${recrawlJobs.payload} ? 'source_run_id')`;
+        : sql`NOT (${recrawlJobs.payload} ? 'source_run_id') AND NOT EXISTS (
+            SELECT 1 FROM ${sources}
+             WHERE ${sources.id} = ${recrawlJobs.sourceId}
+               AND ${SUPERVISED_RUN_DISCOVERY_METHOD} = ANY (${sources.discoveryMethods}))`;
     const jobs = await transaction
       .select()
       .from(recrawlJobs)

@@ -66,18 +66,57 @@ const LOGIN_LANGUAGE = [
 ];
 const FORM_PATTERN = /<form\b/i;
 const FORM_INPUT_PATTERN = /<(?:input|select|textarea)\b/i;
-const BUTTON_SUBMIT_PATTERN = /<button\b[^>]*type\s*=\s*["']?submit/i;
-const INPUT_SUBMIT_PATTERN = /<input\b[^>]*type\s*=\s*["']?submit/i;
-const PASSWORD_INPUT_PATTERN = /<input\b[^>]*type\s*=\s*["']password["']/i;
+// Every tag-scanning pattern below stops at the next "<" as well as at ">".
+// Pages are untrusted and up to 512 KB; with "[^>]*", a page of unclosed tags
+// makes each tag start rescan to the end of the document — quadratic, minutes
+// of uninterruptible CPU inside the web process. "[^<>]*" bounds every scan by
+// the distance to the next tag start, which keeps the total linear.
+const BUTTON_SUBMIT_PATTERN = /<button\b[^<>]*type\s*=\s*["']?submit/i;
+const INPUT_SUBMIT_PATTERN = /<input\b[^<>]*type\s*=\s*["']?submit/i;
+const PASSWORD_INPUT_PATTERN = /<input\b[^<>]*type\s*=\s*["']?password\b/i;
+const TAG_PATTERN = /<[^<>]*>/g;
+const SCRIPT_OPEN_PATTERN = /<script\b/gi;
+const SCRIPT_CLOSE_PATTERN = /<\/script\s*>/gi;
+const STYLE_OPEN_PATTERN = /<style\b/gi;
+const STYLE_CLOSE_PATTERN = /<\/style\s*>/gi;
 const WWW_PREFIX_PATTERN = /^www\./;
 const APPLICATION_PATH_PATTERN =
   /apply|application|candidat|inscri|formulario|register/;
 
+/**
+ * Remove every `<tag …>…</tag>` element in one forward pass.
+ *
+ * A lazy "[\s\S]*?" regex rescans to the end of the document from every
+ * unclosed opening tag, which is quadratic on a hostile page. This scans
+ * forward only: an unclosed element swallows the rest of the document, as a
+ * browser would treat it.
+ */
+const stripElements = (html: string, open: RegExp, close: RegExp): string => {
+  let result = "";
+  let cursor = 0;
+  for (;;) {
+    open.lastIndex = cursor;
+    const start = open.exec(html);
+    if (!start) {
+      return result + html.slice(cursor);
+    }
+    result += `${html.slice(cursor, start.index)} `;
+    close.lastIndex = start.index;
+    const end = close.exec(html);
+    if (!end) {
+      return result;
+    }
+    cursor = end.index + end[0].length;
+  }
+};
+
 const normalizedText = (html: string): string =>
-  html
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
+  stripElements(
+    stripElements(html, SCRIPT_OPEN_PATTERN, SCRIPT_CLOSE_PATTERN),
+    STYLE_OPEN_PATTERN,
+    STYLE_CLOSE_PATTERN
+  )
+    .replace(TAG_PATTERN, " ")
     .replace(/&nbsp;|&#160;/gi, " ")
     .replace(/&amp;/gi, "&")
     .replace(/\s+/g, " ")
@@ -331,10 +370,12 @@ export const classifyApplicationPage = ({
 // biome-ignore-end lint/complexity/noExcessiveCognitiveComplexity: End ordered semantic checks.
 
 /**
- * Hard ceiling on one verification's network work (robots.txt, every redirect
- * hop, the page itself). It keeps a verification far inside the 15-minute
- * queue lease, so a reclaim can never overlap a verification still running, and
- * inside the link-check route's 60-second function limit.
+ * Ceiling on how long one verification waits for its network work (robots.txt,
+ * every redirect hop, the page itself) before recording VERIFICATION_TIMEOUT.
+ * It keeps the verification — and every database write, which only happens
+ * after it — far inside the 15-minute queue lease and the link-check route's
+ * 60-second limit. It does not cancel the requests in flight: those stop on
+ * their own per-request limits (20 s total each) and write nothing.
  */
 export const VERIFICATION_DEADLINE_MS = 45_000;
 
@@ -372,16 +413,27 @@ export class ApplicationLinkVerificationError extends Error {
   }
 }
 
-const safeFailureStatus = (error: SafeHttpError): LinkStatus =>
-  [
-    "PRIVATE_ADDRESS_BLOCKED",
-    "PRIVATE_HOST_BLOCKED",
-    "UNSAFE_PORT",
-    "UNSAFE_PROTOCOL",
-    "URL_CREDENTIALS_BLOCKED",
-  ].includes(error.code)
-    ? "blocked"
-    : "broken";
+const safeFailureStatus = (error: SafeHttpError): LinkStatus => {
+  if (
+    [
+      "PRIVATE_ADDRESS_BLOCKED",
+      "PRIVATE_HOST_BLOCKED",
+      "UNSAFE_PORT",
+      "UNSAFE_PROTOCOL",
+      "URL_CREDENTIALS_BLOCKED",
+    ].includes(error.code)
+  ) {
+    return "blocked";
+  }
+  // This runtime could not verify the certificate, but a visitor's browser may
+  // well trust it (Brazilian public institutions often use chains Node does
+  // not ship). That is not evidence the link is dead, so it is recorded as
+  // indeterminate rather than as a decisive `broken` that suppresses Apply.
+  if (error.code === "TLS_VERIFICATION_FAILED") {
+    return "unknown";
+  }
+  return "broken";
+};
 
 const persistLifecycleEffects = async ({
   database,

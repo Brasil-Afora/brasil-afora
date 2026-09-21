@@ -17,6 +17,16 @@ const requestRecrawlSchema = z
   })
   .strict();
 
+const recrawlErrorStatus = (code: string): number => {
+  if (code === "EDITION_SOURCES_NOT_FOUND") {
+    return 404;
+  }
+  if (code === "SUPERVISED_SOURCE_ONLY") {
+    return 409;
+  }
+  return 500;
+};
+
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -59,7 +69,7 @@ export async function POST(
       return NextResponse.json(
         { error: { code: error.code, message: error.message } },
         {
-          status: error.code === "EDITION_SOURCES_NOT_FOUND" ? 404 : 500,
+          status: recrawlErrorStatus(error.code),
         }
       );
     }

@@ -3,6 +3,7 @@ import "server-only";
 import { timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { sharedCredentialError } from "@/server/service-credentials";
 
 const MINIMUM_TOKEN_LENGTH = 32;
 
@@ -24,6 +25,10 @@ const equalSecrets = (left: string, right: string): boolean => {
 };
 
 export const requireOutboxInRoute = async (request: NextRequest) => {
+  const shared = sharedCredentialError("OUTBOX_AUTH_SCOPE_COLLAPSE");
+  if (shared) {
+    return { principal: null, response: shared };
+  }
   const configuredToken = process.env.OUTBOX_WORKER_TOKEN?.trim();
   if (configuredToken && configuredToken.length < MINIMUM_TOKEN_LENGTH) {
     return {

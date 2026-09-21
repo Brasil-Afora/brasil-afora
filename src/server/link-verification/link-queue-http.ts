@@ -9,7 +9,8 @@ import {
   PermanentLinkJobError,
 } from "@/server/link-verification/link-worker";
 
-const QUEUE_REQUEST_TIMEOUT_MS = 30_000;
+// Claims and completions are single short transactions.
+const QUEUE_REQUEST_TIMEOUT_MS = 15_000;
 // Longer than the link-check route's 60s function limit, so the worker never
 // gives up on a verification the web is still allowed to finish.
 const VERIFY_REQUEST_TIMEOUT_MS = 75_000;
@@ -18,8 +19,10 @@ export const MINIMUM_TOKEN_LENGTH = 32;
 
 /**
  * Codes the link-check route returns for a job that can never succeed. Any
- * other refusal — auth, validation, a 5xx — is the worker's own problem and is
- * retried, so a misconfigured deployment cannot dead-letter the queue.
+ * other refusal — auth, validation, a 5xx — is the worker's own problem: it is
+ * retried, and the worker backs off exponentially. That slows a misconfigured
+ * deployment's damage to a trickle; it cannot make it zero, because each claim
+ * still charges its job one attempt.
  */
 const PERMANENT_LINK_CHECK_CODES = new Set([
   "APPLICATION_ROUND_NOT_FOUND",

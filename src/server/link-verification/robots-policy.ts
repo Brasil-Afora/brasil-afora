@@ -71,13 +71,68 @@ const parseRobots = (body: string): RobotsGroup[] => {
   return groups;
 };
 
-const pathMatches = (pathname: string, rule: string): boolean => {
-  const withoutEndAnchor = rule.endsWith("$") ? rule.slice(0, -1) : rule;
-  const escaped = withoutEndAnchor
-    .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
-    .replaceAll("*", ".*");
-  const expression = new RegExp(`^${escaped}${rule.endsWith("$") ? "$" : ""}`);
-  return expression.test(pathname);
+/**
+ * Total character comparisons allowed while evaluating one robots.txt against
+ * one path. robots.txt is untrusted: the old approach compiled each rule into
+ * a regex where every "*" became ".*", so a rule like "/*a*a*a*a*a*b" backtracks
+ * exponentially. The matcher below is at most O(path × rule) per rule, and this
+ * budget bounds the whole file; a file that exhausts it is treated as
+ * disallowing the path, so a hostile robots.txt can cost a fetch but never
+ * the web's CPU.
+ */
+const ROBOTS_MATCH_BUDGET = 2_000_000;
+
+class RobotsBudgetExceeded extends Error {}
+
+interface MatchBudget {
+  remaining: number;
+}
+
+/**
+ * robots.txt path matching: the rule matches a prefix of the path, "*" matches
+ * any sequence, and a trailing "$" anchors the end. Greedy with backtracking to
+ * the most recent "*", so it never revisits earlier wildcards.
+ */
+const pathMatches = (
+  pathname: string,
+  rule: string,
+  budget: MatchBudget
+): boolean => {
+  const anchored = rule.endsWith("$");
+  const pattern = anchored ? rule.slice(0, -1) : rule;
+  let patternIndex = 0;
+  let pathIndex = 0;
+  let starIndex = -1;
+  let starPathIndex = 0;
+  while (pathIndex < pathname.length) {
+    budget.remaining -= 1;
+    if (budget.remaining < 0) {
+      throw new RobotsBudgetExceeded();
+    }
+    if (pattern[patternIndex] === "*") {
+      starIndex = patternIndex;
+      patternIndex += 1;
+      starPathIndex = pathIndex;
+    } else if (
+      patternIndex < pattern.length &&
+      pattern[patternIndex] === pathname[pathIndex]
+    ) {
+      patternIndex += 1;
+      pathIndex += 1;
+    } else if (patternIndex === pattern.length && !anchored) {
+      return true;
+    } else if (starIndex >= 0) {
+      patternIndex = starIndex + 1;
+      starPathIndex += 1;
+      pathIndex = starPathIndex;
+    } else {
+      return false;
+    }
+  }
+  while (pattern[patternIndex] === "*") {
+    patternIndex += 1;
+  }
+  return patternIndex === pattern.length;
 };
 
 const rulesForAgent = (groups: RobotsGroup[]): RobotsRule[] => {
@@ -92,13 +147,23 @@ const rulesForAgent = (groups: RobotsGroup[]): RobotsRule[] => {
 };
 
 const rulesAllow = (rules: RobotsRule[], path: string): boolean => {
-  const matching = rules
-    .filter((rule) => pathMatches(path, rule.path))
-    .sort(
-      (left, right) =>
-        right.path.length - left.path.length ||
-        Number(right.allow) - Number(left.allow)
+  const budget: MatchBudget = { remaining: ROBOTS_MATCH_BUDGET };
+  let matchingRules: RobotsRule[];
+  try {
+    matchingRules = rules.filter((rule) =>
+      pathMatches(path, rule.path, budget)
     );
+  } catch (error) {
+    if (error instanceof RobotsBudgetExceeded) {
+      return false;
+    }
+    throw error;
+  }
+  const matching = matchingRules.sort(
+    (left, right) =>
+      right.path.length - left.path.length ||
+      Number(right.allow) - Number(left.allow)
+  );
   return matching[0]?.allow ?? true;
 };
 

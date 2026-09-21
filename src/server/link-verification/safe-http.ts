@@ -71,7 +71,10 @@ interface PinnedHttpResponse {
 export interface SafeHttpOptions {
   maxBytes?: number;
   maxRedirects?: number;
+  /** Socket idle limit. */
   timeoutMs?: number;
+  /** Hard limit on one whole request; defaults to twice the idle limit. */
+  totalTimeoutMs?: number;
 }
 
 export interface SafeHttpDependencies {
@@ -99,6 +102,8 @@ const normalizeOptions = (
   maxBytes: options.maxBytes ?? DEFAULT_MAX_BYTES,
   maxRedirects: options.maxRedirects ?? DEFAULT_MAX_REDIRECTS,
   timeoutMs: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+  totalTimeoutMs:
+    options.totalTimeoutMs ?? 2 * (options.timeoutMs ?? DEFAULT_TIMEOUT_MS),
 });
 
 const assertSafeUrl = (value: string): URL => {
@@ -272,10 +277,10 @@ const defaultPinnedRequest = (
       request.destroy(
         new SafeHttpError(
           "REQUEST_TIMEOUT",
-          `Request exceeded the ${options.timeoutMs}ms total time limit.`
+          `Request exceeded the ${options.totalTimeoutMs}ms total time limit.`
         )
       );
-    }, options.timeoutMs);
+    }, options.totalTimeoutMs);
     request.on("close", () => clearTimeout(totalTimer));
     request.on("error", reject);
     request.end();
@@ -311,6 +316,35 @@ const selectPinnedAddress = async (
   return selected;
 };
 
+// Node reports a dead or misconfigured site as a raw error with an errno-style
+// code. Left raw, it escapes the verifier as an unexpected exception, the
+// link-check route answers 500, and the worker blames its own reachability —
+// so a dead link is never recorded as broken. Every network failure therefore
+// leaves this client as a classified SafeHttpError.
+const TLS_ERROR_CODE =
+  /CERT|TLS|SSL|SELF_SIGNED|UNABLE_TO_VERIFY|UNABLE_TO_GET_ISSUER/;
+
+const classifyNetworkError = (error: unknown): SafeHttpError => {
+  if (error instanceof SafeHttpError) {
+    return error;
+  }
+  const code =
+    typeof (error as { code?: unknown })?.code === "string"
+      ? (error as { code: string }).code
+      : "";
+  const message = error instanceof Error ? error.message : String(error);
+  if (TLS_ERROR_CODE.test(code)) {
+    return new SafeHttpError(
+      "TLS_VERIFICATION_FAILED",
+      `${code}: the site's TLS certificate could not be verified.`
+    );
+  }
+  return new SafeHttpError(
+    "CONNECTION_FAILED",
+    `${code || "NETWORK"}: ${message}`.slice(0, 300)
+  );
+};
+
 const isRedirect = (status: number): boolean =>
   [301, 302, 303, 307, 308].includes(status);
 
@@ -338,7 +372,12 @@ export const createSafeHttpClient = (
           currentUrl.hostname,
           resolveHost
         );
-        const response = await requestPinned(currentUrl, address, options);
+        let response: PinnedHttpResponse;
+        try {
+          response = await requestPinned(currentUrl, address, options);
+        } catch (error) {
+          throw classifyNetworkError(error);
+        }
         if (!isRedirect(response.status)) {
           return {
             ...response,
