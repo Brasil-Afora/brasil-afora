@@ -258,6 +258,14 @@ The night-lights world at full resolution (EPSG:4326 tiles to zoom 4), always fi
 - **Filters:** search (country, city, institution, program), type, level, and "Apenas verificadas", all built from the data actually present.
 - On phones the map comes first, and a "Ver lista" button jumps to the chosen country's list.
 
+### Profile page (/perfil)
+Only what the account and this browser actually hold; the mockup's academic profile, alerts and saved searches have no data behind them and are left out.
+- **Header:** avatar (photo or initials), "Olá, {first name}", and the night map pinned where the student's own opportunities are. Three counts link down the page: em andamento, salvas na conta, prazos em 30 dias.
+- **Em andamento:** every opportunity with a status, a task or a ticked step, saved or not. A row shows cover, institution, name, place, deadline, a neutral progress bar (steps and tasks) and a status pill (Preparando, Inscrição enviada, Aprovado in white). Pin keeps it on top. Opening it shows the source's steps (the same checklist as the opportunity page, kept in sync), a status control and the student's own tasks; removing a task offers "Desfazer". Marking "Aprovado" throws a short confetti burst (not under reduced motion).
+- **Salvas:** saved opportunities not yet started, as cards with a filled heart to remove (confirmed) and "Começar", which moves one to Em andamento.
+- **Parecidas com as suas:** three open catalog cards of the same type or country.
+- **Sidebar:** "Prazos próximos" (open, not yet sent, within 30 days; amber within 21) and "Sua conta" (name, email, member since, a line saying the tracking lives in this browser, admin link, Sair).
+
 ### Map teaser
 The night-lights map of the Americas and Atlantic, brightened slightly, with amber routes drawn from Brasília to each open verified destination and pins for national ones, plus a country legend.
 

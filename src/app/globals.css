@@ -241,3 +241,15 @@ select:disabled {
     @apply bg-background text-foreground;
   }
 }
+
+/* The profile's short confetti burst when an application is marked approved. */
+@keyframes profile-confetti {
+  from {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(115vh) rotate(540deg);
+  }
+}

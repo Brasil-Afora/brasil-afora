@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 
 interface SessionUser {
+  createdAt?: Date | string;
   email?: string;
   id: string;
   image?: string | null;

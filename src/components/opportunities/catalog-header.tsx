@@ -36,7 +36,7 @@ const uniquePins = (points: GeoPoint[]): GeoPoint[] => {
  * opportunities currently listed take place. Purely decorative: the list below
  * carries the same information in text.
  */
-const CatalogMap = ({
+export const CatalogMap = ({
   map,
   pins,
 }: {

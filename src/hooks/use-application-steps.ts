@@ -60,6 +60,49 @@ const parse = (raw: string | null): Set<string> => {
   }
 };
 
+/** Every opportunity with ticked steps, as one string so React can compare it. */
+const readAll = (): string => {
+  const entries: [string, string][] = [];
+  try {
+    for (let index = 0; index < window.localStorage.length; index++) {
+      const key = window.localStorage.key(index);
+      if (key?.startsWith(STORAGE_PREFIX)) {
+        entries.push([key, window.localStorage.getItem(key) ?? ""]);
+      }
+    }
+  } catch {
+    // Storage blocked: only this visit's ticks, kept in memory.
+  }
+  for (const [key, value] of memory) {
+    entries.push([key, value]);
+  }
+  return JSON.stringify(entries.sort(([a], [b]) => a.localeCompare(b)));
+};
+
+/**
+ * Ticked steps of every opportunity, keyed like the detail page stores them
+ * ("international:<id>" / "national:<id>"). The profile reads this to list the
+ * applications a student has started.
+ */
+export const useAllApplicationSteps = (): Record<string, string[]> => {
+  const raw = useSyncExternalStore(subscribe, readAll, () => "[]");
+  return useMemo(() => {
+    const entries = JSON.parse(raw) as [string, string][];
+    return Object.fromEntries(
+      entries
+        .map(([key, value]) => [
+          key.slice(STORAGE_PREFIX.length),
+          [...parse(value)],
+        ])
+        .filter(([, done]) => done.length > 0)
+    );
+  }, [raw]);
+};
+
+/** Forgets the ticked steps of one opportunity. */
+export const clearApplicationSteps = (opportunityKey: string) =>
+  write(`${STORAGE_PREFIX}${opportunityKey}`, new Set());
+
 const useApplicationSteps = (opportunityKey: string) => {
   const storageKey = `${STORAGE_PREFIX}${opportunityKey}`;
   const raw = useSyncExternalStore(
