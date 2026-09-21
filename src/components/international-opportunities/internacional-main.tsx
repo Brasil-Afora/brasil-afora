@@ -2,159 +2,157 @@
 
 import { GlobeIcon } from "lucide-react";
 import { useMemo } from "react";
-import type { AppliedFilter } from "@/components/opportunities/opportunities-main-layout";
-import OpportunitiesMainLayout from "@/components/opportunities/opportunities-main-layout";
-import OpportunityList from "@/components/opportunities/opportunity-list";
-import type { OpportunityCardConfig } from "@/components/opportunities/types";
-import VerifiedOpportunitiesSection from "@/components/opportunities/verified-opportunities-section";
+import type { CatalogFilterField } from "@/components/opportunities/catalog-filters";
+import type { CatalogHeaderConfig } from "@/components/opportunities/catalog-header";
+import { toInternationalItem } from "@/components/opportunities/catalog-model";
+import CatalogPage from "@/components/opportunities/catalog-page";
+import { FILTER_OPTIONS } from "@/components/opportunities/filter-options";
 import {
-  VERIFIED_OPPORTUNITIES_DATE,
+  isVerifiedInternationalOpportunityId,
   verifiedInternationalOpportunities,
 } from "@/data/verified-opportunities";
 import { useOportunidadesInternacionais } from "@/hooks/use-oportunidades-internacionais";
 import useOpportunityFilters, {
+  applyOpportunityFilters,
   OPPORTUNITY_FILTER_STORAGE_KEYS,
 } from "@/hooks/use-opportunity-filters";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
-import InternacionalFilter from "./internacional-filter";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 
 const initialFiltros: OpportunitiesFiltros = {
+  apenasVerificadas: false,
   idade: "",
-  pais: [],
   nivelEnsino: [],
-  tipo: [],
+  pais: [],
+  prazo: "",
   requisitosIdioma: [],
   taxaAplicacao: [],
+  tipo: [],
   tipoBolsa: [],
 };
 
-const cardConfig: OpportunityCardConfig = {
-  type: "international",
-  basePath: "/oportunidades/internacionais",
-  accentColor: "blue",
-  showScholarship: true,
-  showDuration: true,
+const fields: CatalogFilterField<keyof OpportunitiesFiltros>[] = [
+  {
+    key: "tipo",
+    label: "Tipo de oportunidade",
+    options: FILTER_OPTIONS.tiposProgramaInternacional,
+    placeholder: "Todos",
+  },
+  {
+    key: "nivelEnsino",
+    label: "Nível de ensino",
+    options: FILTER_OPTIONS.niveisEnsino,
+    placeholder: "Todos",
+  },
+  {
+    key: "pais",
+    label: "País de destino",
+    options: FILTER_OPTIONS.paises,
+    placeholder: "Todos",
+    searchable: true,
+  },
+  {
+    key: "requisitosIdioma",
+    label: "Idioma exigido",
+    options: FILTER_OPTIONS.requisitosIdioma,
+    placeholder: "Todos",
+  },
+  {
+    key: "tipoBolsa",
+    label: "Financiamento",
+    options: FILTER_OPTIONS.tipoBolsa,
+    placeholder: "Todos",
+  },
+  {
+    key: "taxaAplicacao",
+    label: "Taxa de inscrição",
+    options: FILTER_OPTIONS.taxaAplicacao,
+    placeholder: "Todas",
+  },
+];
+
+const header: CatalogHeaderConfig = {
+  accentClassName: "text-atlantic",
+  accentWord: "Internacionais",
+  breadcrumb: "Internacional",
+  icon: GlobeIcon,
+  map: {
+    src: "/catalog/header-mundo.jpg",
+    west: -110,
+    east: 140,
+    north: 62,
+    south: -42,
+  },
+  subtitle:
+    "Bolsas de estudo, intercâmbios, summer programs e cursos para estudantes brasileiros em todo o mundo.",
+  titleLead: "Oportunidades",
 };
 
+const nameKey = (name: string): string =>
+  name.trim().toLocaleLowerCase("pt-BR");
+
 const InternacionalMain = () => {
-  const {
-    data: oportunidadesInternacionais,
-    loading,
-    error,
-  } = useOportunidadesInternacionais();
+  const { data, loading, error, retry } = useOportunidadesInternacionais();
+
+  // The verified selection and the catalog form one list; a catalog record
+  // that duplicates a verified one by name is dropped.
+  const merged = useMemo<Opportunity[]>(() => {
+    const verified = verifiedInternationalOpportunities.filter((opportunity) =>
+      isOpportunityDeadlineOpen(opportunity.prazoInscricao)
+    );
+    const verifiedNames = new Set(verified.map((item) => nameKey(item.nome)));
+    return [
+      ...verified,
+      ...data.filter((item) => !verifiedNames.has(nameKey(item.nome))),
+    ];
+  }, [data]);
 
   const {
     clearFilters,
     filteredData,
     filtros,
     filtrosTemporarios,
-    isFilterActive,
     setFiltros,
     setFiltrosTemporarios,
   } = useOpportunityFilters<Opportunity, OpportunitiesFiltros>(
-    oportunidadesInternacionais,
+    merged,
     initialFiltros,
     OPPORTUNITY_FILTER_STORAGE_KEYS.international,
     "international"
   );
 
-  const verifiedOpportunities = useMemo(
-    () =>
-      verifiedInternationalOpportunities.filter((opportunity) =>
-        isOpportunityDeadlineOpen(opportunity.prazoInscricao)
-      ),
-    []
-  );
-
-  const appliedFilters: AppliedFilter[] = useMemo(() => {
-    const result: AppliedFilter[] = [];
-
-    if (filtros.idade) {
-      result.push({ key: "idade", value: `Idade: ${filtros.idade}` });
-    }
-    for (const p of filtros.pais) {
-      result.push({ key: "pais", value: p });
-    }
-    for (const n of filtros.nivelEnsino) {
-      result.push({ key: "nivelEnsino", value: n });
-    }
-    for (const t of filtros.tipo) {
-      result.push({ key: "tipo", value: t });
-    }
-    for (const i of filtros.requisitosIdioma) {
-      result.push({ key: "requisitosIdioma", value: i });
-    }
-    for (const t of filtros.taxaAplicacao) {
-      result.push({ key: "taxaAplicacao", value: t });
-    }
-    for (const t of filtros.tipoBolsa) {
-      result.push({ key: "tipoBolsa", value: t });
-    }
-
-    return result;
-  }, [filtros]);
-
-  const handleRemoveFilter = (key: string, valueToRemove: string) => {
-    setFiltros((prev) => {
-      const filterKey = key as keyof OpportunitiesFiltros;
-      if (Array.isArray(prev[filterKey])) {
-        return {
-          ...prev,
-          [filterKey]: (prev[filterKey] as string[]).filter(
-            (val) => val !== valueToRemove
-          ),
-        };
-      }
-      return { ...prev, [filterKey]: initialFiltros[filterKey] };
-    });
-  };
-
-  const handleClearFilters = () => {
-    clearFilters();
-  };
-
-  const handleApplyMobileFilters = () => {
-    setFiltros(filtrosTemporarios);
-  };
+  const items = useMemo(() => {
+    const now = new Date();
+    return filteredData.map((opportunity) =>
+      toInternationalItem(
+        opportunity,
+        isVerifiedInternationalOpportunityId(opportunity.id),
+        now
+      )
+    );
+  }, [filteredData]);
 
   return (
-    <OpportunitiesMainLayout
-      accentColor="blue"
-      appliedFilters={appliedFilters}
-      error={error}
-      filterComponent={
-        <InternacionalFilter
-          filtros={filtros}
-          filtrosIniciais={initialFiltros}
-          setFiltros={setFiltros}
-        />
+    <CatalogPage
+      clearFilters={clearFilters}
+      countFor={(draft) =>
+        applyOpportunityFilters(merged, draft, "international").length
       }
-      icon={GlobeIcon}
-      isFilterActive={isFilterActive}
-      loading={loading}
-      mobileFilterComponent={
-        <InternacionalFilter
-          filtros={filtrosTemporarios}
-          filtrosIniciais={initialFiltros}
-          setFiltros={setFiltrosTemporarios}
-        />
-      }
-      onApplyMobileFilters={handleApplyMobileFilters}
-      onClearFilters={handleClearFilters}
-      onRemoveFilter={handleRemoveFilter}
-      resultCount={filteredData.length + verifiedOpportunities.length}
-      subtitle="Explore bolsas de estudo, summer camps e intercâmbios ao redor do mundo."
-      title="Oportunidades Internacionais"
-    >
-      <VerifiedOpportunitiesSection
-        config={cardConfig}
-        data={verifiedOpportunities}
-        description="Elegibilidade, prazos e links oficiais conferidos para estudantes do Brasil. Estas oportunidades ficam em destaque mesmo quando os filtros do catálogo antigo estão ativos."
-        verifiedLabel={`Verificadas em ${VERIFIED_OPPORTUNITIES_DATE.split("-").reverse().join("/")}`}
-      />
-      <OpportunityList config={cardConfig} data={filteredData} />
-    </OpportunitiesMainLayout>
+      crossLink={{
+        href: "/oportunidades/nacionais",
+        label: "Ver oportunidades no Brasil",
+      }}
+      fields={fields}
+      filtros={filtros}
+      filtrosTemporarios={filtrosTemporarios}
+      header={header}
+      initialFilters={initialFiltros}
+      items={items}
+      setFiltros={setFiltros}
+      setFiltrosTemporarios={setFiltrosTemporarios}
+      sortStorageKey="internacionalOrdenacao"
+      status={{ failed: Boolean(error), loading, retry }}
+    />
   );
 };
 

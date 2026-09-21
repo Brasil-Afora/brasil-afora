@@ -35,9 +35,9 @@ const nationalHookPath = path.join(
   projectRoot,
   "src/hooks/use-oportunidades-nacionais.ts"
 );
-const verifiedSectionPath = path.join(
+const catalogPagePath = path.join(
   projectRoot,
-  "src/components/opportunities/verified-opportunities-section.tsx"
+  "src/components/opportunities/catalog-page.tsx"
 );
 const productionUrlFiles = [
   "src/app/layout.tsx",
@@ -51,7 +51,9 @@ const LEADING_SLASH_REGEX = /^\//;
 const PRODUCTION_URL_REGEX = /https:\/\/brasil-afora\.vercel\.app/;
 const LOCALHOST_FALLBACK_REGEX =
   /const (?:FALLBACK|DEFAULT)_SITE_URL = "http:\/\/localhost:3000"/;
-const INTERNAL_VERIFIED_SECTION_REGEX = /<VerifiedOpportunitiesSection/;
+const INTERNAL_CATALOG_REGEX = /<CatalogPage/;
+const MERGED_VERIFIED_DATA_REGEX =
+  /verified(?:International|National)Opportunities\.filter/;
 const OPEN_DEADLINE_FILTER_REGEX = /isOpportunityDeadlineOpen/;
 const VERIFIED_DETAIL_REGEX =
   /isVerified(?:International|National)OpportunityId/;
@@ -100,7 +102,7 @@ test("ships verified international and national opportunities for Brazilian stud
 
 test("renders verified opportunities through the normal internal card and detail flow", async () => {
   await assert.doesNotReject(() => stat(verifiedDataModulePath));
-  await assert.doesNotReject(() => stat(verifiedSectionPath));
+  await assert.doesNotReject(() => stat(catalogPagePath));
 
   const [internationalMain, nationalMain, internationalInfo, nationalInfo] =
     await Promise.all([
@@ -110,8 +112,12 @@ test("renders verified opportunities through the normal internal card and detail
       BunFileCompat.readText(nationalInfoPath),
     ]);
 
-  assert.match(internationalMain, INTERNAL_VERIFIED_SECTION_REGEX);
-  assert.match(nationalMain, INTERNAL_VERIFIED_SECTION_REGEX);
+  assert.match(internationalMain, INTERNAL_CATALOG_REGEX);
+  assert.match(nationalMain, INTERNAL_CATALOG_REGEX);
+  assert.match(internationalMain, MERGED_VERIFIED_DATA_REGEX);
+  assert.match(nationalMain, MERGED_VERIFIED_DATA_REGEX);
+  assert.match(internationalMain, VERIFIED_DETAIL_REGEX);
+  assert.match(nationalMain, VERIFIED_DETAIL_REGEX);
   assert.match(internationalMain, OPEN_DEADLINE_FILTER_REGEX);
   assert.match(nationalMain, OPEN_DEADLINE_FILTER_REGEX);
   assert.match(internationalInfo, VERIFIED_DETAIL_REGEX);

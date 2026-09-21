@@ -2,19 +2,19 @@
 
 ## Folder purpose
 
-Shared components for listing and filtering used by national/international flows.
+The shared catalog used by the international and national listing pages (`catalog-*`), plus filter options and shared types.
 
 ## Rules for agents
 
-- Don't hard-code colors outside of `accentColor` parameter when parameterization is supported.
-- Shared types must remain the source of truth for this folder.
-- Layout should follow current responsiveness (mobile sidebar + desktop panel).
-- Reuse FilterDropdown instead of creating new custom dropdowns.
+- Verified and catalog opportunities form one list: filters, sorting and pagination apply to both. Only the curated set gets the "Verificada" badge.
+- Keep filter matching in `src/hooks/use-opportunity-filters.ts`. When the verified data describes a type in prose, add a stem to `FILTER_ALIASES` in `filter-options.ts` instead of special-casing it in components.
+- Colors come from the brand tokens in `globals.css`; each catalog passes its scope accent through `CatalogHeaderConfig.accentClassName`.
+- Reuse `FilterDropdown` for multi-select filters; single choices use a native `<select>`.
+- Card covers without a photo use the regional night maps in `public/catalog/` (see `catalog-model.ts` and `src/lib/geo.ts`).
 
 ## Architecture patterns
 
-- Common layout component provides shared structure for filter area and results display.
-- Opportunity cards are designed as reusable, style-agnostic components.
-- Filter component accepts accent color as parameter to support multiple themes.
-- Shared types define the contracts between domain-specific and shared components.
-- Responsive layout adapts from sidebar on mobile to side panel on desktop.
+- `*-main.tsx` (per domain) fetches, merges verified + catalog data, applies filters and maps records to `CatalogItem` view models; `catalog-page.tsx` renders everything else.
+- `catalog-page.tsx` gates results on hydration, so prerendered HTML never contains build-time deadlines or countdowns.
+- Sort order lives in session storage per catalog; grid/list view in local storage.
+- The mobile sheet edits a draft copy of the filters and previews the result count before applying.

@@ -1,7 +1,13 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+import { FILTER_ALIASES } from "@/components/opportunities/filter-options";
+import {
+  isVerifiedInternationalOpportunityId,
+  isVerifiedNationalOpportunityId,
+} from "@/data/verified-opportunities";
+import { getBrasiliaDaysUntil } from "@/lib/date-utils";
 import type {
   InternationalOpportunity,
   NationalOpportunity,
@@ -11,8 +17,10 @@ import useSessionStorage from "./use-session-storage";
 type Opportunity = InternationalOpportunity | NationalOpportunity;
 
 interface BaseFilters {
+  apenasVerificadas: boolean;
   idade: string;
   nivelEnsino: string[];
+  prazo: string;
   taxaAplicacao: string[];
   tipo: string[];
 }
@@ -28,6 +36,7 @@ interface NationalFilters extends BaseFilters {
 }
 
 type Filters = InternationalFilters | NationalFilters;
+type CatalogType = "international" | "national";
 
 // Session storage keys the catalogs read their filters from. Other surfaces
 // (the home page category shortcuts) write here to open a catalog pre-filtered.
@@ -36,136 +45,148 @@ export const OPPORTUNITY_FILTER_STORAGE_KEYS = {
   national: "nacionalFiltros",
 } as const;
 
-const OPPORTUNITY_TYPE_SPLIT_REGEX = /\s*[;,|]\s*|\s+\/\s+|\s+e\s+/i;
+const DIACRITICS_REGEX = /\p{M}/gu;
+const AGE_RANGE_REGEX = /(\d{1,2})\s*(?:a|-|–|—|até|ate)\s*(\d{1,2})\s*anos/;
+const AGE_MIN_REGEX =
+  /(?:a partir de|acima de|mínimo de|minimo de|maiores de)\s*(\d{1,2})/;
+const AGE_MAX_REGEX = /(?:até|ate|menores de|no máximo)\s*(\d{1,2})\s*anos/;
+const AGE_PLUS_REGEX = /(\d{1,2})\s*\+/;
 
-const splitOpportunityTypes = (tipo: string): string[] =>
-  tipo
-    .split(OPPORTUNITY_TYPE_SPLIT_REGEX)
-    .map((item) => item.trim())
-    .filter(Boolean);
+const normalize = (value: string): string =>
+  value.normalize("NFD").replace(DIACRITICS_REGEX, "").toLowerCase();
 
-const matchesSelectedTypes = (
-  opportunityType: string,
-  selectedTypes: string[]
-): boolean => {
-  const normalizedSelected = selectedTypes.map((type) => type.toLowerCase());
-  const parsedTypes = splitOpportunityTypes(opportunityType).map((type) =>
-    type.toLowerCase()
+const optionStems = (option: string): readonly string[] =>
+  FILTER_ALIASES[option] ?? [normalize(option)];
+
+/** True when the free text mentions any of the selected options. */
+const matchesAnyOption = (text: string, selected: string[]): boolean => {
+  const haystack = normalize(text);
+  return selected.some((option) =>
+    optionStems(option).some((stem) => haystack.includes(stem))
   );
-  return parsedTypes.some((type) => normalizedSelected.includes(type));
 };
 
-const isAgeInRange = (faixaEtaria: string, age: number): boolean => {
-  const numeros = faixaEtaria.match(/\d+/g)?.map(Number);
-  if (!numeros) {
+/**
+ * Age ranges are free text ("16 a 18 anos em 19/07/2027", "Qualquer idade").
+ * Only a range we can actually read may exclude an opportunity; anything we
+ * cannot parse stays visible rather than silently disappearing.
+ */
+const isAgeAccepted = (faixaEtaria: string, age: number): boolean => {
+  const text = faixaEtaria.toLowerCase();
+  const range = AGE_RANGE_REGEX.exec(text);
+  if (range) {
+    return age >= Number(range[1]) && age <= Number(range[2]);
+  }
+  const minimum = AGE_MIN_REGEX.exec(text) ?? AGE_PLUS_REGEX.exec(text);
+  if (minimum) {
+    return age >= Number(minimum[1]);
+  }
+  const maximum = AGE_MAX_REGEX.exec(text);
+  if (maximum) {
+    return age <= Number(maximum[1]);
+  }
+  return true;
+};
+
+const isVerified = (type: CatalogType, id: string): boolean =>
+  type === "international"
+    ? isVerifiedInternationalOpportunityId(id)
+    : isVerifiedNationalOpportunityId(id);
+
+const matchesBaseFilters = (
+  opportunity: Opportunity,
+  filtros: BaseFilters,
+  type: CatalogType,
+  now: Date
+): boolean => {
+  const age = Number(filtros.idade);
+  if (
+    filtros.idade !== "" &&
+    !Number.isNaN(age) &&
+    !isAgeAccepted(opportunity.faixaEtaria ?? "", age)
+  ) {
     return false;
   }
-  if (numeros.length === 2) {
-    return age >= numeros[0] && age <= numeros[1];
+  if (
+    filtros.tipo.length > 0 &&
+    !matchesAnyOption(opportunity.tipo, filtros.tipo)
+  ) {
+    return false;
   }
-  if (numeros.length === 1 && faixaEtaria.includes("+")) {
-    return age >= numeros[0];
+  if (
+    filtros.nivelEnsino.length > 0 &&
+    !matchesAnyOption(opportunity.nivelEnsino, filtros.nivelEnsino)
+  ) {
+    return false;
   }
-  if (numeros.length === 1) {
-    return age === numeros[0];
+  if (
+    filtros.taxaAplicacao.length > 0 &&
+    !matchesAnyOption(opportunity.taxaAplicacao, filtros.taxaAplicacao)
+  ) {
+    return false;
   }
-  return false;
-};
-
-const applyBaseFilters = <T extends Opportunity>(
-  data: T[],
-  filtros: BaseFilters
-): T[] => {
-  let result = data;
-
-  if (filtros.idade) {
-    const idadeInput = Number(filtros.idade);
-    if (!Number.isNaN(idadeInput)) {
-      result = result.filter((op) =>
-        op.faixaEtaria ? isAgeInRange(op.faixaEtaria, idadeInput) : false
-      );
+  if (filtros.prazo) {
+    const daysLeft = getBrasiliaDaysUntil(opportunity.prazoInscricao, now);
+    if (daysLeft === null || daysLeft > Number(filtros.prazo)) {
+      return false;
     }
   }
-
-  if (filtros.nivelEnsino.length > 0) {
-    result = result.filter((op) =>
-      filtros.nivelEnsino.some((nivel) =>
-        op.nivelEnsino.toLowerCase().includes(nivel.toLowerCase())
-      )
-    );
+  if (filtros.apenasVerificadas && !isVerified(type, opportunity.id)) {
+    return false;
   }
-
-  if (filtros.taxaAplicacao.length > 0) {
-    result = result.filter((op) =>
-      filtros.taxaAplicacao.some((taxa) =>
-        op.taxaAplicacao.toLowerCase().includes(taxa.toLowerCase())
-      )
-    );
-  }
-
-  return result;
+  return true;
 };
 
-const applyInternationalFilters = (
-  data: InternationalOpportunity[],
+const matchesInternationalFilters = (
+  opportunity: InternationalOpportunity,
   filtros: InternationalFilters
-): InternationalOpportunity[] => {
-  let result = applyBaseFilters(data, filtros);
+): boolean =>
+  (filtros.pais.length === 0 ||
+    matchesAnyOption(opportunity.pais, filtros.pais)) &&
+  (filtros.requisitosIdioma.length === 0 ||
+    matchesAnyOption(opportunity.requisitosIdioma, filtros.requisitosIdioma)) &&
+  (filtros.tipoBolsa.length === 0 ||
+    matchesAnyOption(opportunity.tipoBolsa, filtros.tipoBolsa));
 
-  if (filtros.pais.length > 0) {
-    result = result.filter((op) =>
-      filtros.pais.some((pais) =>
-        op.pais.toLowerCase().includes(pais.toLowerCase())
-      )
-    );
-  }
-
-  if (filtros.requisitosIdioma.length > 0) {
-    result = result.filter((op) =>
-      filtros.requisitosIdioma.some((idioma) =>
-        op.requisitosIdioma.toLowerCase().includes(idioma.toLowerCase())
-      )
-    );
-  }
-
-  if (filtros.tipoBolsa.length > 0) {
-    result = result.filter((op) =>
-      filtros.tipoBolsa.some((tipo) =>
-        op.tipoBolsa.toLowerCase().includes(tipo.toLowerCase())
-      )
-    );
-  }
-
-  if (filtros.tipo.length > 0) {
-    result = result.filter((op) => matchesSelectedTypes(op.tipo, filtros.tipo));
-  }
-
-  return result;
-};
-
-const applyNationalFilters = (
-  data: NationalOpportunity[],
+const matchesNationalFilters = (
+  opportunity: NationalOpportunity,
   filtros: NationalFilters
-): NationalOpportunity[] => {
-  let result = applyBaseFilters(data, filtros);
+): boolean =>
+  filtros.modalidade.length === 0 ||
+  matchesAnyOption(opportunity.modalidade, filtros.modalidade);
 
-  if (filtros.tipo.length > 0) {
-    result = result.filter((op) =>
-      filtros.tipo.some((tipo) =>
-        op.tipo.toLowerCase().includes(tipo.toLowerCase())
-      )
-    );
+/** Applies a catalog's filters; exported so drafts can preview their count. */
+export const applyOpportunityFilters = <T extends Opportunity>(
+  data: T[],
+  filtros: Filters,
+  type: CatalogType,
+  now: Date = new Date()
+): T[] =>
+  data.filter((opportunity) => {
+    if (!matchesBaseFilters(opportunity, filtros, type, now)) {
+      return false;
+    }
+    return type === "international"
+      ? matchesInternationalFilters(
+          opportunity as InternationalOpportunity,
+          filtros as InternationalFilters
+        )
+      : matchesNationalFilters(
+          opportunity as NationalOpportunity,
+          filtros as NationalFilters
+        );
+  });
+
+export const countActiveFilters = (filtros: Filters): number => {
+  let count = 0;
+  for (const value of Object.values(filtros)) {
+    if (Array.isArray(value)) {
+      count += value.length;
+    } else if (value === true || (typeof value === "string" && value !== "")) {
+      count += 1;
+    }
   }
-
-  if (filtros.modalidade.length > 0) {
-    result = result.filter((op) =>
-      filtros.modalidade.some((modalidade) =>
-        op.modalidade.toLowerCase().includes(modalidade.toLowerCase())
-      )
-    );
-  }
-
-  return result;
+  return count;
 };
 
 interface UseOpportunityFiltersResult<
@@ -185,65 +206,20 @@ function useOpportunityFilters<T extends Opportunity, F extends Filters>(
   data: T[],
   initialFilters: F,
   storageKey: string,
-  type: "international" | "national"
+  type: CatalogType
 ): UseOpportunityFiltersResult<T, F> {
   const [filtros, setFiltros] = useSessionStorage<F>(
     storageKey,
     initialFilters
   );
   const [filtrosTemporarios, setFiltrosTemporarios] = useState<F>(filtros);
-  const isInitialMount = useRef(true);
 
-  const filteredData = useMemo(() => {
-    if (type === "international") {
-      return applyInternationalFilters(
-        data as InternationalOpportunity[],
-        filtros as InternationalFilters
-      ) as T[];
-    }
-    return applyNationalFilters(
-      data as NationalOpportunity[],
-      filtros as NationalFilters
-    ) as T[];
-  }, [data, filtros, type]);
+  const filteredData = useMemo(
+    () => applyOpportunityFilters(data, filtros, type),
+    [data, filtros, type]
+  );
 
-  const filtrosSignature = useMemo(() => JSON.stringify(filtros), [filtros]);
-
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    } else {
-      const hasSignature = filtrosSignature.length > 0;
-      if (hasSignature) {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    }
-  }, [filtrosSignature]);
-
-  const hasBaseFilters =
-    filtros.idade !== "" ||
-    filtros.nivelEnsino.length > 0 ||
-    filtros.tipo.length > 0 ||
-    filtros.taxaAplicacao.length > 0;
-
-  const isFilterActive = useMemo(() => {
-    if (hasBaseFilters) {
-      return true;
-    }
-
-    if (type === "international") {
-      const internationalFilters = filtros as InternationalFilters;
-
-      return (
-        internationalFilters.pais.length > 0 ||
-        internationalFilters.requisitosIdioma.length > 0 ||
-        internationalFilters.tipoBolsa.length > 0
-      );
-    }
-
-    const nationalFilters = filtros as NationalFilters;
-    return nationalFilters.modalidade.length > 0;
-  }, [filtros, hasBaseFilters, type]);
+  const isFilterActive = countActiveFilters(filtros) > 0;
 
   const clearFilters = () => {
     setFiltros(initialFilters);

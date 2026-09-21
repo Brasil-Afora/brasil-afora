@@ -24,9 +24,11 @@ export interface Opportunity {
 }
 
 export interface OpportunitiesFiltros {
+  apenasVerificadas: boolean;
   idade: string;
   modalidade: string[];
   nivelEnsino: string[];
+  prazo: string;
   taxaAplicacao: string[];
   tipo: string[];
 }

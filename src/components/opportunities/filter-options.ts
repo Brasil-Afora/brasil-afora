@@ -2,6 +2,7 @@ export const FILTER_OPTIONS = {
   niveisEnsino: [
     "Ano Sabático",
     "Doutorado",
+    "Ensino Fundamental",
     "Ensino Médio",
     "Graduação",
     "MBA",
@@ -149,7 +150,52 @@ export const FILTER_OPTIONS = {
 
   taxaAplicacao: ["Gratuito", "Pago"].sort(),
 
-  tipoBolsa: ["Completa", "Parcial", "Sem bolsa"].sort(),
+  tipoBolsa: ["Completa", "Parcial", "Variável", "Sem bolsa"],
 
   modalidade: ["Presencial", "Online", "Híbrido"],
 } as const;
+
+/**
+ * Words (lowercase, without accents) that identify each filter option inside
+ * free-text fields. Catalog records use the option names verbatim, but the
+ * verified selection describes itself in prose ("Bolsa de graduação",
+ * "Programa acadêmico de verão", "Feira científica"), so options match by
+ * these stems instead of exact equality. Options without an entry match by
+ * their own normalized name.
+ */
+export const FILTER_ALIASES: Record<string, readonly string[]> = {
+  // Tipo (internacional)
+  "Curso curta duração": ["curta duracao", "curso curto"],
+  "Curso de idiomas": ["idioma", "language"],
+  "Curso de verão": ["verao", "summer"],
+  "Estágio/Trabalho": ["estagio", "internship", "emprego"],
+  "Evento/Workshop": ["evento", "workshop", "conferencia"],
+  "High School": ["high school"],
+  "Intercâmbio cultural": ["intercambio"],
+  Mestrado: ["mestrado", "master"],
+  "Mobilidade acadêmica": ["mobilidade"],
+  Pesquisa: ["pesquisa", "residencia", "research"],
+  "Trabalho voluntário": ["voluntari"],
+  // Tipo (nacional)
+  Olimpíadas: ["olimpiada"],
+  "Feiras de Ciências": ["feira"],
+  "Programas de Liderança": ["lideranca"],
+  "Iniciação Científica": ["iniciacao cientifica"],
+  "Simulações da ONU": ["simulac", "nacoes unidas"],
+  "Cursos & Imersões": ["curso", "imers", "camp"],
+  "Programas de Mentoria": ["mentoria"],
+  "Voluntariado/Social": ["voluntari", "social"],
+  // Taxa e financiamento
+  Gratuito: ["gratuit", "isent", "sem taxa"],
+  Pago: ["pago", "us$", "r$", "€", "£"],
+  Completa: ["complet", "integral"],
+  Variável: ["variavel"],
+  "Sem bolsa": ["sem bolsa"],
+};
+
+export const DEADLINE_WINDOWS = [
+  { value: "", label: "Qualquer data" },
+  { value: "7", label: "Próximos 7 dias" },
+  { value: "30", label: "Próximos 30 dias" },
+  { value: "90", label: "Próximos 90 dias" },
+] as const;

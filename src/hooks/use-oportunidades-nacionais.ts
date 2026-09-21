@@ -9,6 +9,7 @@ interface UseOportunidadesNacionaisResult {
   data: Opportunity[];
   error: string | null;
   loading: boolean;
+  retry: () => void;
 }
 
 export const useOportunidadesNacionais =
@@ -25,5 +26,8 @@ export const useOportunidadesNacionais =
       data,
       loading: query.isPending,
       error: query.error instanceof Error ? query.error.message : null,
+      retry: () => {
+        query.refetch().catch(() => undefined);
+      },
     };
   };

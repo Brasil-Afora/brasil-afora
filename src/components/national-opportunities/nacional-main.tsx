@@ -1,160 +1,140 @@
 "use client";
 
-import { TrophyIcon } from "lucide-react";
+import { MapPinnedIcon } from "lucide-react";
 import { useMemo } from "react";
-import type { AppliedFilter } from "@/components/opportunities/opportunities-main-layout";
-import OpportunitiesMainLayout from "@/components/opportunities/opportunities-main-layout";
-import OpportunityList from "@/components/opportunities/opportunity-list";
-import type { OpportunityCardConfig } from "@/components/opportunities/types";
-import VerifiedOpportunitiesSection from "@/components/opportunities/verified-opportunities-section";
+import type { CatalogFilterField } from "@/components/opportunities/catalog-filters";
+import type { CatalogHeaderConfig } from "@/components/opportunities/catalog-header";
+import { toNationalItem } from "@/components/opportunities/catalog-model";
+import CatalogPage from "@/components/opportunities/catalog-page";
+import { FILTER_OPTIONS } from "@/components/opportunities/filter-options";
 import {
+  isVerifiedNationalOpportunityId,
   isVerifiedNationalOpportunityName,
-  VERIFIED_OPPORTUNITIES_DATE,
   verifiedNationalOpportunities,
 } from "@/data/verified-opportunities";
 import { useOportunidadesNacionais } from "@/hooks/use-oportunidades-nacionais";
 import useOpportunityFilters, {
+  applyOpportunityFilters,
   OPPORTUNITY_FILTER_STORAGE_KEYS,
 } from "@/hooks/use-opportunity-filters";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
-import NacionalFilter from "./nacional-filter";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 
 const initialFiltros: OpportunitiesFiltros = {
+  apenasVerificadas: false,
   idade: "",
-  nivelEnsino: [],
-  tipo: [],
-  taxaAplicacao: [],
   modalidade: [],
+  nivelEnsino: [],
+  prazo: "",
+  taxaAplicacao: [],
+  tipo: [],
 };
 
-const cardConfig: OpportunityCardConfig = {
-  type: "national",
-  basePath: "/oportunidades/nacionais",
-  accentColor: "amber",
-  showModalidade: true,
+const fields: CatalogFilterField<keyof OpportunitiesFiltros>[] = [
+  {
+    key: "tipo",
+    label: "Tipo de oportunidade",
+    options: FILTER_OPTIONS.tiposProgramaNacional,
+    placeholder: "Todos",
+  },
+  {
+    key: "nivelEnsino",
+    label: "Nível de ensino",
+    options: FILTER_OPTIONS.niveisEnsino,
+    placeholder: "Todos",
+  },
+  {
+    key: "modalidade",
+    label: "Modalidade",
+    options: FILTER_OPTIONS.modalidade,
+    placeholder: "Todas",
+  },
+  {
+    key: "taxaAplicacao",
+    label: "Taxa de inscrição",
+    options: FILTER_OPTIONS.taxaAplicacao,
+    placeholder: "Todas",
+  },
+];
+
+const header: CatalogHeaderConfig = {
+  accentClassName: "text-signal",
+  accentWord: "Nacionais",
+  breadcrumb: "Nacional",
+  icon: MapPinnedIcon,
+  map: {
+    src: "/catalog/header-brasil.jpg",
+    west: -82,
+    east: -18,
+    north: 8,
+    south: -36,
+  },
+  subtitle:
+    "Olimpíadas, feiras de ciências, imersões e programas de liderança para estudantes em todo o Brasil.",
+  titleLead: "Oportunidades",
 };
 
 const NacionalMain = () => {
-  const {
-    data: oportunidadesNacionais,
-    loading,
-    error,
-  } = useOportunidadesNacionais();
+  const { data, loading, error, retry } = useOportunidadesNacionais();
+
+  // The verified selection and the catalog form one list; a catalog record
+  // that duplicates a verified one by name is dropped.
+  const merged = useMemo<Opportunity[]>(
+    () => [
+      ...verifiedNationalOpportunities.filter((opportunity) =>
+        isOpportunityDeadlineOpen(opportunity.prazoInscricao)
+      ),
+      ...data.filter((item) => !isVerifiedNationalOpportunityName(item.nome)),
+    ],
+    [data]
+  );
 
   const {
     clearFilters,
     filteredData,
     filtros,
     filtrosTemporarios,
-    isFilterActive,
     setFiltros,
     setFiltrosTemporarios,
   } = useOpportunityFilters<Opportunity, OpportunitiesFiltros>(
-    oportunidadesNacionais,
+    merged,
     initialFiltros,
     OPPORTUNITY_FILTER_STORAGE_KEYS.national,
     "national"
   );
 
-  const catalogData = useMemo(
-    () =>
-      filteredData.filter(
-        (opportunity) => !isVerifiedNationalOpportunityName(opportunity.nome)
-      ),
-    [filteredData]
-  );
-
-  const verifiedOpportunities = useMemo(
-    () =>
-      verifiedNationalOpportunities.filter((opportunity) =>
-        isOpportunityDeadlineOpen(opportunity.prazoInscricao)
-      ),
-    []
-  );
-
-  const appliedFilters: AppliedFilter[] = useMemo(() => {
-    const result: AppliedFilter[] = [];
-
-    if (filtros.idade) {
-      result.push({ key: "idade", value: `Idade: ${filtros.idade}` });
-    }
-    for (const n of filtros.nivelEnsino) {
-      result.push({ key: "nivelEnsino", value: n });
-    }
-    for (const t of filtros.tipo) {
-      result.push({ key: "tipo", value: t });
-    }
-    for (const t of filtros.taxaAplicacao) {
-      result.push({ key: "taxaAplicacao", value: t });
-    }
-    for (const m of filtros.modalidade) {
-      result.push({ key: "modalidade", value: m });
-    }
-
-    return result;
-  }, [filtros]);
-
-  const handleRemoveFilter = (key: string, valueToRemove: string) => {
-    setFiltros((prev) => {
-      const filterKey = key as keyof OpportunitiesFiltros;
-      if (Array.isArray(prev[filterKey])) {
-        return {
-          ...prev,
-          [filterKey]: (prev[filterKey] as string[]).filter(
-            (val) => val !== valueToRemove
-          ),
-        };
-      }
-      return { ...prev, [filterKey]: initialFiltros[filterKey] };
-    });
-  };
-
-  const handleClearFilters = () => {
-    clearFilters();
-  };
-
-  const handleApplyMobileFilters = () => {
-    setFiltros(filtrosTemporarios);
-  };
+  const items = useMemo(() => {
+    const now = new Date();
+    return filteredData.map((opportunity) =>
+      toNationalItem(
+        opportunity,
+        isVerifiedNationalOpportunityId(opportunity.id),
+        now
+      )
+    );
+  }, [filteredData]);
 
   return (
-    <OpportunitiesMainLayout
-      accentColor="amber"
-      appliedFilters={appliedFilters}
-      error={error}
-      filterComponent={
-        <NacionalFilter
-          filtros={filtros}
-          filtrosIniciais={initialFiltros}
-          setFiltros={setFiltros}
-        />
+    <CatalogPage
+      clearFilters={clearFilters}
+      countFor={(draft) =>
+        applyOpportunityFilters(merged, draft, "national").length
       }
-      icon={TrophyIcon}
-      isFilterActive={isFilterActive}
-      loading={loading}
-      mobileFilterComponent={
-        <NacionalFilter
-          filtros={filtrosTemporarios}
-          filtrosIniciais={initialFiltros}
-          setFiltros={setFiltrosTemporarios}
-        />
-      }
-      onApplyMobileFilters={handleApplyMobileFilters}
-      onClearFilters={handleClearFilters}
-      onRemoveFilter={handleRemoveFilter}
-      resultCount={catalogData.length + verifiedOpportunities.length}
-      subtitle="Encontre olimpíadas, feiras científicas e projetos de liderança no Brasil."
-      title="Oportunidades Nacionais"
-    >
-      <VerifiedOpportunitiesSection
-        config={cardConfig}
-        data={verifiedOpportunities}
-        description="Oportunidades nacionais com inscrições abertas e participação confirmada para estudantes no Brasil. Prazos e regras foram conferidos nas páginas oficiais."
-        verifiedLabel={`Verificadas em ${VERIFIED_OPPORTUNITIES_DATE.split("-").reverse().join("/")}`}
-      />
-      <OpportunityList config={cardConfig} data={catalogData} />
-    </OpportunitiesMainLayout>
+      crossLink={{
+        href: "/oportunidades/internacionais",
+        label: "Ver oportunidades no exterior",
+      }}
+      fields={fields}
+      filtros={filtros}
+      filtrosTemporarios={filtrosTemporarios}
+      header={header}
+      initialFilters={initialFiltros}
+      items={items}
+      setFiltros={setFiltros}
+      setFiltrosTemporarios={setFiltrosTemporarios}
+      sortStorageKey="nacionalOrdenacao"
+      status={{ failed: Boolean(error), loading, retry }}
+    />
   );
 };
 
