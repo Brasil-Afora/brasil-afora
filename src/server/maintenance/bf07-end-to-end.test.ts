@@ -98,7 +98,10 @@ const runWorker = (
         env: {
           ...process.env,
           BRASIL_AFORA_INGESTION_TOKEN: "i".repeat(32),
-          MAINTENANCE_WORKER_TOKEN: "m".repeat(32),
+          // The source-document worker presents only its own scoped
+          // credential; the retired omnipotent token is not set at all.
+          MAINTENANCE_WORKER_TOKEN: undefined,
+          SOURCE_WORKER_TOKEN: "s".repeat(32),
         },
       }
     );

@@ -600,6 +600,15 @@ export const checkpointRecrawlJob = (
       );
     }
     assertActiveLease(job, workerId, leaseToken, now, leaseDurationMs);
+    // A checkpoint stores a source-document ingestion request. No other job
+    // kind has one, so accepting a checkpoint for another kind could only
+    // corrupt that job's payload.
+    if (job.jobKind !== "source_document") {
+      throw new RecrawlWorkflowError(
+        "RECRAWL_CHECKPOINT_UNSUPPORTED",
+        "Only source-document recrawl jobs carry a pending ingestion checkpoint."
+      );
+    }
     const updatedRows = await transaction
       .update(recrawlJobs)
       .set({

@@ -352,7 +352,10 @@ const createPilot = async () => {
           env: {
             ...process.env,
             BRASIL_AFORA_INGESTION_TOKEN: "i".repeat(32),
-            MAINTENANCE_WORKER_TOKEN: "m".repeat(32),
+            // The supervised source-run operator presents only the
+            // operator-scoped credential.
+            MAINTENANCE_WORKER_TOKEN: undefined,
+            SOURCE_RUN_OPERATOR_TOKEN: "o".repeat(32),
           },
         }
       );

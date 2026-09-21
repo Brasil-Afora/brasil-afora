@@ -6,7 +6,7 @@ import {
   ApplicationLinkVerificationError,
   verifyApplicationLink,
 } from "@/server/link-verification/application-link-verifier";
-import { requireMaintenanceInRoute } from "@/server/maintenance-auth";
+import { requireMaintenanceCapability } from "@/server/maintenance-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,10 @@ export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  const authResult = await requireMaintenanceInRoute(request);
+  const authResult = await requireMaintenanceCapability(
+    request,
+    "link-check:run"
+  );
   if (authResult.response) {
     return authResult.response;
   }
