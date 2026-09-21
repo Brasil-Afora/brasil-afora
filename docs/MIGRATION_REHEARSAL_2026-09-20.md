@@ -174,7 +174,7 @@ The restored database was then served by the **current production web build**
 | Combination | Result |
 | ----------- | ------ |
 | New DB + **old production web** (`f0a2ceb`) | **Safe.** All pages 200, all 45 opportunities served, `/api/v1/*` 404 as expected. This is the rollout's migrate-before-deploy window and the post-migration rollback target. |
-| New web + retired `MAINTENANCE_WORKER_TOKEN` | 401 — fails closed |
+| New web + retired `MAINTENANCE_WORKER_TOKEN` | 401 — fails closed. (This local probe did not set the variable on the server, so it only showed an unknown token is refused; the release gate now repeats it with the variable configured.) |
 | New web + completion/checkpoint without `lease_token` | 422 — fails closed |
 | New web + pre-BF10 DB | source-run endpoints **500** (`relation "source_runs" does not exist`); public reads and the recrawl queue still 200 |
 
@@ -185,12 +185,12 @@ Full cross-scope authorization matrix, measured over real HTTP: see
 
 ```bash
 initdb -D "$PGDATA" -U postgres --auth=trust -E UTF8 --locale=C
-pg_ctl -D "$PGDATA" -o "-p 55432 -k /tmp/ba-pg-sock -c listen_addresses=127.0.0.1" start
+pg_ctl -D "$PGDATA" -o "-p 55432 -k <short socket dir> -c listen_addresses=127.0.0.1" start
 createdb -h 127.0.0.1 -p 55432 -U postgres ba_prod_clone
 
-git worktree add ../prodsrc f0a2ceb
-(cd ../prodsrc && bun install && DATABASE_URL=… bunx drizzle-kit push --force)
-psql … -f seed-prod-like.sql
+git worktree add <dir> f0a2ceb
+(cd <dir> && bun install && DATABASE_URL=… bunx drizzle-kit push --force)
+psql … -f docs/rehearsal-seed-prod-like.sql
 
 DATABASE_URL=… bun run db:migrate
 ```

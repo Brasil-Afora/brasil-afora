@@ -2,12 +2,12 @@
 
 ## Worker cadence
 
-1. Call recrawl scheduling periodically with the maintenance token.
+1. Call recrawl scheduling hourly with `SCHEDULER_TOKEN` (see `docs/OPERATOR_RUNBOOKS.md` for the full, current runbooks).
 2. Workers claim bounded jobs using `FOR UPDATE SKIP LOCKED`.
 3. Fetch and submit a v1 ingestion using the job source document.
 4. Complete the job with success/material-change metadata or a bounded error.
 5. Run application-link checks more often near deadlines and for published-active records.
-6. Deliver outbox events with a separate worker token.
+6. Deliver outbox events with `OUTBOX_WORKER_TOKEN`. Each worker presents only its own scoped credential.
 
 Locks expire, retries back off, and jobs/events dead-letter after bounded attempts. Reviewer-requested recrawls are idempotent.
 

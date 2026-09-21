@@ -20,12 +20,13 @@ The executable schemas are strict Zod definitions in `src/contracts/opportunity-
 
 - `POST /api/v1/ingestions` — `Authorization: Bearer $INGESTION_API_TOKEN`; maximum 10 MiB; contract version `1.0`.
 - `POST /api/v1/outbox/deliveries` — `$OUTBOX_WORKER_TOKEN`; bounded claim/delivery.
-- `POST /api/v1/maintenance/recrawls/schedule`
-- `POST /api/v1/maintenance/recrawls/claims`
-- `POST /api/v1/maintenance/recrawls/{uuid}/completion`
-- `POST /api/v1/application-rounds/{uuid}/link-checks`
+- `POST /api/v1/maintenance/recrawls/schedule` — `$SCHEDULER_TOKEN` (`queue:schedule`).
+- `POST /api/v1/maintenance/recrawls/claims` — `$SOURCE_WORKER_TOKEN` (source documents), `$LINK_WORKER_TOKEN` (application links), or `$SOURCE_RUN_OPERATOR_TOKEN` (source documents; the only credential that may claim by explicit `job_ids`). An omitted `job_kinds` narrows to the credential's own kinds.
+- `POST /api/v1/maintenance/recrawls/{uuid}/checkpoint` and `/completion` — any credential holding `queue:write`, and only for a job that credential itself claimed (BF-08 lease fencing).
+- `POST|GET /api/v1/maintenance/source-runs`, `…/{uuid}/candidates`, `…/{uuid}/completion` — `$SOURCE_RUN_OPERATOR_TOKEN` (`source-run:manage`).
+- `POST /api/v1/application-rounds/{uuid}/link-checks` — `$LINK_WORKER_TOKEN` (`link-check:run`). Returns `201 {"data": <assessment>, "meta": {"previous_status", "material_change"}}`; verification is capped at 45 s.
 
-Maintenance endpoints use `$MAINTENANCE_WORKER_TOKEN`. All service tokens must be at least 32 characters and are intentionally scoped separately.
+Each maintenance credential carries only the capabilities its actor needs; the full model is in `docs/PRODUCTION_TOPOLOGY.md` §4. The historical single `MAINTENANCE_WORKER_TOKEN` is retired and never accepted. Every service token must be at least 32 characters, and no two may share a value — the web refuses to authenticate any maintenance request (503) while two do. An admin session holds every maintenance capability.
 
 ## Write invariants
 

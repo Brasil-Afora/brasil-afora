@@ -13,7 +13,7 @@
 3. Run `bun run data:audit` and `npm run semantic:audit` in dry-run mode and review both reports.
 4. Apply only deterministic review-task backfill with `npm run semantic:backfill`.
 5. Deploy ingestion/reviewer evidence panels with no automatic publication.
-6. Configure separate 32+ character ingestion, maintenance, and outbox tokens.
+6. Configure separate 32+ character credentials — ingestion, outbox, and the four scoped maintenance credentials (scheduler, source worker, link worker, source-run operator). The production sequence is `docs/PRODUCTION_ROLLOUT_SEQUENCE.md`.
 7. Ingest a small reviewed official source, correct it, approve it, deliver outbox, and verify the public UI.
 8. Enable structured reads behind `NEXT_PUBLIC_STRUCTURED_OPPORTUNITIES=true` for a canary.
 9. Run recrawl/link-check and verify material update or closure behavior.
