@@ -47,6 +47,8 @@ beforeEach(() => {
     delete process.env[credential.environmentVariable];
   }
   delete process.env.MAINTENANCE_WORKER_TOKEN;
+  delete process.env.INGESTION_API_TOKEN;
+  delete process.env.OUTBOX_WORKER_TOKEN;
   configureAllCredentials();
 });
 
@@ -153,6 +155,30 @@ describe("maintenance credential scopes", () => {
     expect(result.response?.status).toBe(503);
   });
 
+  it("fails closed when a maintenance credential reuses the ingestion secret", async () => {
+    // INGESTION_API_TOKEN lives in another auth module, but sharing its value
+    // would let the scheduler's host submit ingestions (and vice versa).
+    process.env.INGESTION_API_TOKEN = SCHEDULER;
+    const result = await requireMaintenanceCapability(
+      bearer(SCHEDULER),
+      "queue:schedule"
+    );
+    expect(result.principal).toBeNull();
+    expect(result.response?.status).toBe(503);
+  });
+
+  it("does not tell an unauthenticated caller which credential is broken", async () => {
+    process.env.LINK_WORKER_TOKEN = SOURCE_WORKER;
+    const result = await requireMaintenanceCapability(
+      bearer(null),
+      "queue:schedule"
+    );
+    const body = JSON.stringify(await result.response?.json());
+    expect(result.response?.status).toBe(503);
+    expect(body).not.toContain("LINK_WORKER_TOKEN");
+    expect(body).not.toContain("SOURCE_WORKER_TOKEN");
+  });
+
   it("fails closed on a credential that is too short to be a secret", async () => {
     process.env.SCHEDULER_TOKEN = "short";
     const result = await requireMaintenanceCapability(
@@ -221,6 +247,19 @@ describe("claim job-kind scoping", () => {
     expect(claimableJobKinds(principalFor(MAINTENANCE_CAPABILITIES))).toEqual([
       "application_link",
       "source_document",
+    ]);
+  });
+});
+
+describe("link worker verification capability", () => {
+  it("lets the link worker run link checks but nothing it does not need", () => {
+    const link = MAINTENANCE_CREDENTIALS.find(
+      (credential) => credential.environmentVariable === "LINK_WORKER_TOKEN"
+    );
+    expect([...(link?.capabilities ?? [])].sort()).toEqual([
+      "link-check:run",
+      "queue:claim:application_link",
+      "queue:write",
     ]);
   });
 });

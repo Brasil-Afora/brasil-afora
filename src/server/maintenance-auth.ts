@@ -1,6 +1,6 @@
 import "server-only";
 
-import { timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -60,7 +60,13 @@ export const MAINTENANCE_CREDENTIALS: readonly CredentialDefinition[] = [
     principalId: "source-worker",
   },
   {
-    capabilities: ["queue:claim:application_link", "queue:write"],
+    // The link worker verifies through the web's link-check route instead of
+    // holding a database credential of its own, so it needs link-check:run.
+    capabilities: [
+      "queue:claim:application_link",
+      "queue:write",
+      "link-check:run",
+    ],
     environmentVariable: "LINK_WORKER_TOKEN",
     principalId: "link-worker",
   },
@@ -74,6 +80,16 @@ export const MAINTENANCE_CREDENTIALS: readonly CredentialDefinition[] = [
     principalId: "source-run-operator",
   },
 ] as const;
+
+/**
+ * Bearer credentials owned by other auth modules. They hold no maintenance
+ * capability, but a maintenance credential sharing a value with one of them
+ * would let the holder of either act as both.
+ */
+const OTHER_SERVICE_CREDENTIALS = [
+  "INGESTION_API_TOKEN",
+  "OUTBOX_WORKER_TOKEN",
+];
 
 export interface MaintenancePrincipal {
   capabilities: readonly MaintenanceCapability[];
@@ -93,27 +109,41 @@ const readBearerToken = (request: NextRequest): string | null => {
   return authorization.slice("Bearer ".length).trim() || null;
 };
 
-const equalSecrets = (left: string, right: string): boolean => {
-  const leftBytes = Buffer.from(left);
-  const rightBytes = Buffer.from(right);
-  return (
-    leftBytes.length === rightBytes.length &&
-    timingSafeEqual(leftBytes, rightBytes)
-  );
-};
+// Comparing fixed-length digests keeps the comparison time independent of the
+// supplied token's length as well as its content.
+const digest = (value: string): Buffer =>
+  createHash("sha256").update(value).digest();
+
+const equalSecrets = (left: string, right: string): boolean =>
+  timingSafeEqual(digest(left), digest(right));
 
 const configuredValue = (environmentVariable: string): string | null =>
   process.env[environmentVariable]?.trim() || null;
 
-const misconfigured = (code: string, message: string): NextResponse =>
-  NextResponse.json({ error: { code, message } }, { status: 503 });
+const misconfigured = (code: string, detail: string): NextResponse => {
+  // The detail names environment variables, so it goes to the server log only;
+  // an unauthenticated caller learns that the credential set is unsound and
+  // nothing about which part of it.
+  console.error(`[maintenance-auth] ${code}: ${detail}`);
+  return NextResponse.json(
+    {
+      error: {
+        code,
+        message: "Maintenance credentials are misconfigured on the server.",
+      },
+    },
+    { status: 503 }
+  );
+};
 
 /**
  * Refuse to authenticate at all while the credential set is unsound.
  *
  * Two credentials sharing one secret would collapse their capability sets back
  * into a single omnipotent token, so that is treated as a misconfiguration
- * rather than as a union of scopes.
+ * rather than as a union of scopes. This deliberately fails every maintenance
+ * route, admin sessions included: an unsound credential set is an incident, and
+ * stopping is safer than continuing to authenticate against it.
  */
 export const maintenanceCredentialConfigurationError =
   (): NextResponse | null => {
@@ -138,48 +168,61 @@ export const maintenanceCredentialConfigurationError =
       }
       seen.set(value, credential.environmentVariable);
     }
+    for (const environmentVariable of OTHER_SERVICE_CREDENTIALS) {
+      const value = configuredValue(environmentVariable);
+      const duplicate = value === null ? undefined : seen.get(value);
+      if (duplicate) {
+        return misconfigured(
+          "MAINTENANCE_AUTH_SCOPE_COLLAPSE",
+          `${environmentVariable} and ${duplicate} must not share the same secret.`
+        );
+      }
+    }
     return null;
   };
 
 /**
  * Resolve a bearer token to a configured service credential, or null.
  *
- * Exported so the credential table can be asserted without reaching the admin
- * session fallback, which needs a database.
+ * Every configured credential is compared, with no early return, so the time
+ * taken does not reveal which slot matched. Exported so the credential table
+ * can be asserted without reaching the admin session fallback, which needs a
+ * database.
  */
 export const resolveMaintenanceCredential = (
   suppliedToken: string
 ): CredentialDefinition | null => {
+  let matched: CredentialDefinition | null = null;
   for (const credential of MAINTENANCE_CREDENTIALS) {
     const value = configuredValue(credential.environmentVariable);
-    if (
+    const equal =
       value !== null &&
       value.length >= MINIMUM_TOKEN_LENGTH &&
-      equalSecrets(value, suppliedToken)
-    ) {
-      return credential;
+      equalSecrets(value, suppliedToken);
+    if (equal && matched === null) {
+      matched = credential;
     }
   }
-  return null;
+  return matched;
 };
 
-const forbidden = (capability: MaintenanceCapability): NextResponse =>
+const forbidden = (required: string): NextResponse =>
   NextResponse.json(
     {
       error: {
         code: "MAINTENANCE_SCOPE_FORBIDDEN",
-        message: `This credential is not authorized for ${capability}.`,
+        message: `This credential is not authorized for ${required}.`,
       },
     },
     { status: 403 }
   );
 
 /**
- * Authorize one named maintenance capability.
+ * Authorize a request that needs at least one of the given capabilities.
  *
  * Service credentials are checked first and are never widened by the admin
- * fallback: a credential that authenticates but lacks the capability is
- * rejected with 403 rather than being retried as a human session.
+ * fallback: a credential that authenticates but lacks every listed capability
+ * is rejected with 403 rather than being retried as a human session.
  */
 export const requireAnyMaintenanceCapability = async (
   request: NextRequest,
@@ -199,7 +242,10 @@ export const requireAnyMaintenanceCapability = async (
           credential.capabilities.includes(capability)
         )
       ) {
-        return { principal: null, response: forbidden(capabilities[0]) };
+        return {
+          principal: null,
+          response: forbidden(capabilities.join(" or ")),
+        };
       }
       return {
         principal: {
@@ -252,7 +298,7 @@ export const jobKindScopeError = (
 ): NextResponse | null => {
   const allowed = claimableJobKinds(principal);
   if (allowed.length === 0) {
-    return forbidden("queue:claim:source_document");
+    return forbidden("any queue:claim capability");
   }
   if (!requestedJobKinds) {
     return null;
@@ -261,14 +307,8 @@ export const jobKindScopeError = (
     (jobKind) => !allowed.includes(jobKind as ClaimableJobKind)
   );
   if (refused.length > 0) {
-    return NextResponse.json(
-      {
-        error: {
-          code: "MAINTENANCE_SCOPE_FORBIDDEN",
-          message: `This credential is not authorized to claim: ${refused.join(", ")}.`,
-        },
-      },
-      { status: 403 }
+    return forbidden(
+      refused.map((jobKind) => `queue:claim:${jobKind}`).join(" or ")
     );
   }
   return null;

@@ -443,6 +443,29 @@ export const claimRecrawlJobs = (
   // BF-10: a supervised source run claims only the jobs it enqueued.
   jobIds?: string[]
 ): Promise<RecrawlJob[]> =>
+  // An explicitly empty kind list means "no kinds", never "every kind". Only an
+  // omitted list is unfiltered, and no HTTP caller can omit it.
+  jobKinds && jobKinds.length === 0
+    ? Promise.resolve([])
+    : claimRecrawlJobsInTransaction(
+        database,
+        workerId,
+        limit,
+        now,
+        jobKinds,
+        leaseDurationMs,
+        jobIds
+      );
+
+const claimRecrawlJobsInTransaction = (
+  database: Database,
+  workerId: string,
+  limit: number,
+  now: Date,
+  jobKinds: string[] | undefined,
+  leaseDurationMs: number,
+  jobIds: string[] | undefined
+): Promise<RecrawlJob[]> =>
   database.transaction(async (transaction) => {
     const staleBefore = new Date(now.getTime() - leaseDurationMs);
     const jobKindFilter =
