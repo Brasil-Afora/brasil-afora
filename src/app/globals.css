@@ -81,6 +81,22 @@
   --font-bebas: var(--font-bebas-neue);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-reading: var(--font-atkinson-next), var(--font-geist-sans), sans-serif;
+  --font-hand: var(--font-caveat), cursive;
+
+  /* Brand world: navy ground, one hot amber, hairline navy rules. */
+  --color-navy-950: #03111f;
+  --color-navy-900: #071628;
+  --color-navy-850: #0a1c31;
+  --color-navy-800: #0e233a;
+  --color-navy-700: #1a3148;
+  --color-navy-600: #2a4563;
+  --color-mist: #aabad4;
+  --color-mist-dim: #8093b0;
+  --color-signal: #ff9b0f;
+  --color-signal-strong: #ffb33f;
+  --color-fund: #1d4fc0;
+  --color-verified: #0cb261;
 }
 
 .dark {
@@ -125,6 +141,58 @@
 .font-blackout {
   font-family: var(--font-bebas), sans-serif;
   letter-spacing: 0.05em;
+}
+
+::selection {
+  color: var(--color-navy-950);
+  background-color: var(--color-signal);
+}
+
+html {
+  scrollbar-color: var(--color-navy-600) var(--color-navy-950);
+}
+
+/* Amber lines that draw themselves: the home page's one motion grammar.
+   Paths use pathLength="1"; without motion they simply render drawn. */
+@keyframes ba-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ba-write {
+  from {
+    clip-path: inset(-20% 100% -20% 0);
+  }
+  to {
+    clip-path: inset(-20% 0 -20% 0);
+  }
+}
+
+.ba-stroke {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ba-hand-note {
+    animation: ba-write 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+  }
+
+  .ba-hand-note .ba-stroke {
+    animation: ba-draw 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.3s both;
+  }
+
+  @supports (animation-timeline: view()) {
+    .ba-route {
+      animation: ba-draw linear both;
+      animation-timeline: view();
+      animation-range: entry var(--route-start, 10%) cover var(--route-end, 45%);
+    }
+  }
 }
 
 .scrollbar-hide {

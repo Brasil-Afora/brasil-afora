@@ -1,6 +1,12 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
-import { Bebas_Neue, Geist, Geist_Mono } from "next/font/google";
+import {
+  Atkinson_Hyperlegible_Next,
+  Bebas_Neue,
+  Caveat,
+  Geist,
+  Geist_Mono,
+} from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -38,6 +44,20 @@ const bebasNeue = Bebas_Neue({
   variable: "--font-bebas-neue",
   subsets: ["latin"],
   weight: "400",
+});
+
+const atkinsonNext = Atkinson_Hyperlegible_Next({
+  variable: "--font-atkinson-next",
+  subsets: ["latin", "latin-ext"],
+  // next/font has no fallback metrics for this family yet.
+  adjustFontFallback: false,
+  fallback: ["system-ui", "sans-serif"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -100,7 +120,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} ${atkinsonNext.variable} ${caveat.variable} h-full antialiased`}
       lang="pt-BR"
     >
       <body className="flex min-h-full flex-col">

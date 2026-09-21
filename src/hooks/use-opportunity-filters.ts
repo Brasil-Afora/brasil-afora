@@ -29,6 +29,13 @@ interface NationalFilters extends BaseFilters {
 
 type Filters = InternationalFilters | NationalFilters;
 
+// Session storage keys the catalogs read their filters from. Other surfaces
+// (the home page category shortcuts) write here to open a catalog pre-filtered.
+export const OPPORTUNITY_FILTER_STORAGE_KEYS = {
+  international: "internacionalFiltros",
+  national: "nacionalFiltros",
+} as const;
+
 const OPPORTUNITY_TYPE_SPLIT_REGEX = /\s*[;,|]\s*|\s+\/\s+|\s+e\s+/i;
 
 const splitOpportunityTypes = (tipo: string): string[] =>

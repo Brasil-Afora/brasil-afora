@@ -12,7 +12,9 @@ import {
   verifiedInternationalOpportunities,
 } from "@/data/verified-opportunities";
 import { useOportunidadesInternacionais } from "@/hooks/use-oportunidades-internacionais";
-import useOpportunityFilters from "@/hooks/use-opportunity-filters";
+import useOpportunityFilters, {
+  OPPORTUNITY_FILTER_STORAGE_KEYS,
+} from "@/hooks/use-opportunity-filters";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
 import InternacionalFilter from "./internacional-filter";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
@@ -53,7 +55,7 @@ const InternacionalMain = () => {
   } = useOpportunityFilters<Opportunity, OpportunitiesFiltros>(
     oportunidadesInternacionais,
     initialFiltros,
-    "internacionalFiltros",
+    OPPORTUNITY_FILTER_STORAGE_KEYS.international,
     "international"
   );
 

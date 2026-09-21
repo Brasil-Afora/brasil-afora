@@ -13,7 +13,9 @@ import {
   verifiedNationalOpportunities,
 } from "@/data/verified-opportunities";
 import { useOportunidadesNacionais } from "@/hooks/use-oportunidades-nacionais";
-import useOpportunityFilters from "@/hooks/use-opportunity-filters";
+import useOpportunityFilters, {
+  OPPORTUNITY_FILTER_STORAGE_KEYS,
+} from "@/hooks/use-opportunity-filters";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
 import NacionalFilter from "./nacional-filter";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
@@ -51,7 +53,7 @@ const NacionalMain = () => {
   } = useOpportunityFilters<Opportunity, OpportunitiesFiltros>(
     oportunidadesNacionais,
     initialFiltros,
-    "nacionalFiltros",
+    OPPORTUNITY_FILTER_STORAGE_KEYS.national,
     "national"
   );
 

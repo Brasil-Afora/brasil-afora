@@ -23,17 +23,27 @@ import {
 } from "@/lib/opportunities-api";
 import { opportunityQueryKeys } from "./opportunity-query-keys";
 
-export const useInternationalOpportunitiesQuery = () => {
+interface ListQueryOptions {
+  enabled?: boolean;
+}
+
+export const useInternationalOpportunitiesQuery = ({
+  enabled = true,
+}: ListQueryOptions = {}) => {
   return useQuery({
     queryKey: opportunityQueryKeys.internationalList(),
     queryFn: getInternationalOpportunities,
+    enabled,
   });
 };
 
-export const useNationalOpportunitiesQuery = () => {
+export const useNationalOpportunitiesQuery = ({
+  enabled = true,
+}: ListQueryOptions = {}) => {
   return useQuery({
     queryKey: opportunityQueryKeys.nationalList(),
     queryFn: getNationalOpportunities,
+    enabled,
   });
 };
 

@@ -2,16 +2,18 @@
 
 ## Folder purpose
 
-Component for the product's home page landing.
+The product's home page (`/`): hero with live search and category shortcuts, the verified opportunity selection, the why-list and map teaser, and the contribute band.
 
 ## Rules for agents
 
-- Avoid coupling heavy business logic to the home page.
-- Preserve current visuals and existing transitions.
-- When adding new sections, maintain consistency in typography and spacing.
+- Avoid coupling heavy business logic to the home page; shared rules live in `home-data.ts` and `src/lib`.
+- Sections are server components. Only `home-search.tsx` and `home-category-shortcuts.tsx` are client components; keep new interactivity in small client islands.
+- Verification language ("Verificada", "fontes oficiais") applies only to the curated set in `src/data/showcase-opportunities.json`; never extend it to the catalog.
+- Follow the visual system in `/DESIGN.md` (navy + one amber, Atkinson Hyperlegible Next, drawn-line motion) and the surface brief in `/.impeccable/surfaces/`.
 
 ## Architecture patterns
 
-- Homepage acts as a marketing/landing page with minimal business logic.
-- Visual consistency and animation transitions should be maintained across updates.
-- New sections should follow existing typographic and spacing patterns.
+- `home-data.ts` turns the verified data into view models: featured cards (open deadlines in Brasília time, nearest first), search entries and map destinations.
+- The page (`src/app/(marketing)/page.tsx`) revalidates hourly so countdowns and expired opportunities stay current without a client-side date check.
+- Category shortcuts pre-apply catalog filters by writing the catalog's session-storage key (`OPPORTUNITY_FILTER_STORAGE_KEYS`) before navigating.
+- Search fetches the full catalogs only after the user focuses the field, and falls back to the verified set when the API fails.
