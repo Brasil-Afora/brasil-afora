@@ -49,7 +49,7 @@ const HomeHero = ({ verifiedEntries }: { verifiedEntries: SearchEntry[] }) => (
         />
         <div className="absolute inset-0 hidden bg-[linear-gradient(to_top,var(--color-navy-950)_0%,transparent_28%),linear-gradient(to_bottom,rgba(3,17,31,0.45)_0%,transparent_22%)] lg:block" />
       </div>
-      <HandNote className="right-5 bottom-8 text-[1.45rem] sm:right-10 sm:text-[1.7rem] lg:right-[7%] lg:bottom-[16%] lg:text-[2rem]" />
+      <HandNote className="right-5 bottom-8 text-[1.45rem] sm:right-10 sm:text-[1.7rem] lg:right-[3%] lg:bottom-[16%] lg:text-[1.6rem] xl:right-[7%] xl:text-[2rem]" />
     </div>
 
     <div className="mx-auto w-full max-w-[84rem] px-5 pt-2 pb-12 sm:px-8 lg:pt-14 lg:pb-12">
@@ -65,7 +65,7 @@ const HomeHero = ({ verifiedEntries }: { verifiedEntries: SearchEntry[] }) => (
           <HomeSearch verifiedEntries={verifiedEntries} />
         </div>
       </div>
-      <div className="mt-5 max-w-[56rem]">
+      <div className="mt-5 max-w-[44rem] xl:max-w-[56rem]">
         <HomeCategoryShortcuts />
       </div>
       <p className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-slate-200">
