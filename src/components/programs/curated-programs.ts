@@ -137,6 +137,14 @@ export const toCuratedProgram = (
     fontes: r.sources,
   };
 };
+// Reviewed starter aliases refer to the same program despite changed display names.
+const STARTER_NAMES: Record<string, string> = {
+  "prep-program-fundacao-estudar": "Prep Program 2027",
+  chevening: "Chevening Scholarships — Brasil",
+  "educationusa-oportunidades-academicas": "Oportunidades Acadêmicas",
+  "lideres-estudar": "Programa Líderes Estudar",
+  "brasa-pre": "BRASA Pré — Graduação Américas",
+};
 const key = (p: Program) =>
   identityKey({ name: p.nome, organization: p.instituicaoResponsavel });
 /** Published records supersede starter records by identity, never by shared domain. */
@@ -152,6 +160,9 @@ export const mergePrograms = (
     const existing = [...merged.values()].find(
       (p) =>
         key(p) === key(program) ||
+        (STARTER_NAMES[program.id] === p.nome &&
+          normalizeOfficialUrl(p.linkOficial) ===
+            normalizeOfficialUrl(program.linkOficial)) ||
         (p.nome === program.nome &&
           normalizeOfficialUrl(p.linkOficial) ===
             normalizeOfficialUrl(program.linkOficial))

@@ -122,4 +122,18 @@ describe("published programs", () => {
     ]);
     expect(merged[0].aliases).toContain("starter-id");
   });
+  it("merges the reviewed renamed Prep starter and preserves its route", () => {
+    const current = {
+      ...toCuratedProgram(publication),
+      nome: "Prep Program 2027",
+    };
+    const starter = {
+      ...current,
+      id: "prep-program-fundacao-estudar",
+      nome: "Prep Program",
+    };
+    const result = mergePrograms([current], [starter]);
+    expect(result).toHaveLength(1);
+    expect(result[0].aliases).toContain(starter.id);
+  });
 });
