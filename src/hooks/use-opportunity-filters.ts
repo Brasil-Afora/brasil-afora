@@ -2,7 +2,10 @@
 
 import type { Dispatch, SetStateAction } from "react";
 import { useMemo, useState } from "react";
-import { FILTER_ALIASES } from "@/components/opportunities/filter-options";
+import {
+  FILTER_ALIASES,
+  FILTER_OPTIONS,
+} from "@/components/opportunities/filter-options";
 import {
   isVerifiedInternationalOpportunityId,
   isVerifiedNationalOpportunityId,
@@ -67,6 +70,18 @@ const matchesAnyOption = (text: string, selected: string[]): boolean => {
     optionStems(option).some((stem) => haystack.includes(stem))
   );
 };
+
+/** Use the same matching rule as filtering, including multi-country records. */
+export const availableCountryOptions = (
+  opportunities: { pais: string }[]
+): string[] =>
+  FILTER_OPTIONS.paises
+    .filter((country) =>
+      opportunities.some((opportunity) =>
+        matchesAnyOption(opportunity.pais, [country])
+      )
+    )
+    .sort((a, b) => a.localeCompare(b, "pt-BR"));
 
 /**
  * Age ranges are free text ("16 a 18 anos em 19/07/2027", "Qualquer idade").

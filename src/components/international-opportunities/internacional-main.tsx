@@ -17,6 +17,7 @@ import {
 import { useOportunidadesInternacionais } from "@/hooks/use-oportunidades-internacionais";
 import useOpportunityFilters, {
   applyOpportunityFilters,
+  availableCountryOptions,
   OPPORTUNITY_FILTER_STORAGE_KEYS,
 } from "@/hooks/use-opportunity-filters";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
@@ -121,6 +122,16 @@ const InternacionalMain = ({ verifiedLocations }: InternacionalMainProps) => {
     "international"
   );
 
+  const availableFields = useMemo(
+    () =>
+      fields.map((field) =>
+        field.key === "pais"
+          ? { ...field, options: availableCountryOptions(merged) }
+          : field
+      ),
+    [merged]
+  );
+
   const items = useMemo(() => {
     const now = new Date();
     return filteredData.map((opportunity) =>
@@ -142,7 +153,7 @@ const InternacionalMain = ({ verifiedLocations }: InternacionalMainProps) => {
         href: "/oportunidades/nacionais",
         label: "Ver oportunidades no Brasil",
       }}
-      fields={fields}
+      fields={availableFields}
       filtros={filtros}
       filtrosTemporarios={filtrosTemporarios}
       header={header}
