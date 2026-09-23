@@ -73,7 +73,8 @@ const marksOf = (destinations: MapDestination[]): Mark[] =>
     CLUSTER_RADIUS_DEG
   )
     .map((cluster) => ({
-      count: cluster.weight,
+      // One opportunity can list several cities; a mark counts it once.
+      count: new Set(cluster.items.map((item) => item.name)).size,
       lat: -cluster.y,
       lon: cluster.x,
     }))

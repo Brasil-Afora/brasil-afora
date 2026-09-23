@@ -24,7 +24,9 @@ import {
   countryByIso,
   EMPTY_FILTERS,
   filterOptions,
+  itemsAt,
   type MapFilters,
+  type MapPlace,
   pinsOf,
   soonestOf,
   summarizeCountries,
@@ -93,6 +95,7 @@ const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
   const nationalQuery = useNationalOpportunitiesQuery();
   const [filters, setFilters] = useState<MapFilters>(EMPTY_FILTERS);
   const [selectedIso, select] = useCountryParam();
+  const [place, setPlace] = useState<MapPlace | null>(null);
   const panelRef = useRef<HTMLElement>(null);
   const searchId = useId();
   const verifiedId = useId();
@@ -136,17 +139,26 @@ const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
     if (!selectedIso) {
       return [];
     }
-    const base = applyMapFilters(items, { ...filters, types: [] });
+    const unfiltered = applyMapFilters(items, { ...filters, types: [] });
+    const base = place ? itemsAt(unfiltered, place) : unfiltered;
     return (
       summarizeCountries(base).countries.find(
         (country) => country.iso === selectedIso
       )?.types ?? []
     );
-  }, [filters, items, selectedIso]);
+  }, [filters, items, place, selectedIso]);
 
-  // A new country starts at the top of its list.
+  // A new country starts at the top of its list, with all its cities.
   const choose = (iso: string | null) => {
+    setPlace(null);
     select(iso);
+    panelRef.current?.scrollTo({ top: 0 });
+  };
+
+  // A city chosen on the map: its country, narrowed to that city.
+  const choosePlace = (next: MapPlace) => {
+    select(next.iso);
+    setPlace(next);
     panelRef.current?.scrollTo({ top: 0 });
   };
 
@@ -266,7 +278,9 @@ const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
           <OpportunityMap
             countries={countries}
             onSelect={choose}
+            onSelectPlace={choosePlace}
             pins={pins}
+            place={place}
             selected={selected}
           />
           {selected && (
@@ -299,6 +313,7 @@ const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
               nationalQuery.isPending
             }
             onClearFilters={clearFilters}
+            onClearPlace={() => setPlace(null)}
             onRetry={() => {
               internationalQuery.refetch().catch(() => undefined);
               nationalQuery.refetch().catch(() => undefined);
@@ -310,6 +325,7 @@ const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
                 types: toggle(previous.types, type),
               }))
             }
+            place={place}
             selected={selected}
             soonest={soonest}
             total={filtered.length}

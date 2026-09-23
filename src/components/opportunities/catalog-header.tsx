@@ -56,14 +56,19 @@ interface Mark extends GeoPoint {
   count: number;
 }
 
-const marksOf = (points: GeoPoint[], radius: number): Mark[] =>
+/** A pin, and the opportunity it belongs to when known: one opportunity can
+ * list several cities, and a mark counts it once. */
+export type HeaderPin = GeoPoint & { id?: string };
+
+const marksOf = (points: HeaderPin[], radius: number): Mark[] =>
   clusterByDistance(
     points,
     ({ lat, lon }) => ({ x: lon, y: -lat }),
     () => 1,
     radius
   ).map((cluster) => ({
-    count: cluster.weight,
+    count: new Set(cluster.items.map((point, index) => point.id ?? `#${index}`))
+      .size,
     lat: -cluster.y,
     lon: cluster.x,
   }));
@@ -81,7 +86,7 @@ export const CatalogMap = ({
   pins,
 }: {
   map: CatalogMapWindow;
-  pins: GeoPoint[];
+  pins: HeaderPin[];
 }) => {
   const width = map.east - map.west;
   const height = map.north - map.south;
@@ -205,7 +210,7 @@ const CatalogHeader = ({
   pins,
 }: {
   config: CatalogHeaderConfig;
-  pins: GeoPoint[];
+  pins: HeaderPin[];
 }) => {
   const Icon = config.icon;
   const { backdrop } = config;

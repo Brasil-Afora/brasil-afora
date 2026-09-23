@@ -22,7 +22,9 @@ import sharp from "sharp";
 
 const [source, outDir] = process.argv.slice(2);
 if (!(source && outDir)) {
-  console.error("usage: node scripts/build-map-crops.mjs <8192x4096 map> <output dir>");
+  console.error(
+    "usage: node scripts/build-map-crops.mjs <8192x4096 map> <output dir>"
+  );
   process.exit(1);
 }
 
@@ -49,7 +51,9 @@ const CROPS = {
 };
 
 mkdirSync(outDir, { recursive: true });
-for (const [name, [west, east, north, south, width, height]] of Object.entries(CROPS)) {
+for (const [name, [west, east, north, south, width, height]] of Object.entries(
+  CROPS
+)) {
   const region = {
     height: Math.round(((north - south) / 180) * MAP_HEIGHT),
     left: Math.round(((west + 180) / 360) * MAP_WIDTH),

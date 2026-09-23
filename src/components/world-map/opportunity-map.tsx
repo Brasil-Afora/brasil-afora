@@ -14,7 +14,9 @@ import {
   type CountrySummary,
   type MapCountry,
   type MapPin,
+  type MapPlace,
   type Polygon,
+  placesLabel,
 } from "./map-data";
 
 // The night-lights world as Leaflet tiles in plate carrée (EPSG:4326), so the
@@ -62,9 +64,17 @@ const CLUSTER_RADIUS_PX = 30;
 /** Routes from Brasília go to this many places at most, the busiest ones:
  * one route per city turned a country with fifty of them into a solid fan. */
 const MAX_ROUTES = 6;
-const CLUSTER_MIN_SIZE = 24;
-const CLUSTER_MAX_SIZE = 48;
-const CLUSTER_GROWTH = 6;
+/** A place's disc grows with the square root of its count, gently: 11
+ * opportunities are 28px, 22 are 31px, and 96 or more stop at 44px, so the
+ * busiest city stands out without swallowing its neighbours (at 5px per
+ * square root, São Paulo's 96 was a 64px blob next to 13s and 7s). One
+ * opportunity stays a plain dot. */
+const PIN_SIZE = 20;
+const DISC_BASE = 20;
+const DISC_GROWTH = 2.4;
+const DISC_MAX = 44;
+/** How close choosing a city flies: the city with its surroundings. */
+const PLACE_ZOOM = 5;
 
 /** Where every route starts: Brasília, the middle of the country. */
 const ORIGIN: GeoPoint = { lat: -15.79, lon: -47.88 };
@@ -72,7 +82,10 @@ const ORIGIN: GeoPoint = { lat: -15.79, lon: -47.88 };
 interface OpportunityMapProps {
   countries: CountrySummary[];
   onSelect: (iso: string | null) => void;
+  /** A city (or a few close together) chosen on the map. */
+  onSelectPlace: (place: MapPlace) => void;
   pins: MapPin[];
+  place: MapPlace | null;
   /** The chosen country, which may have nothing open under the filters. */
   selected: MapCountry | null;
 }
@@ -149,7 +162,7 @@ const dotMarker = (
   L.marker([point.lat, point.lon], {
     icon: L.divIcon({ className, iconSize: [size, size] }),
     interactive,
-    keyboard: false,
+    keyboard: interactive,
   });
 
 const prefersReducedMotion = (): boolean =>
@@ -209,91 +222,186 @@ interface PinCluster extends GeoPoint {
   pins: MapPin[];
 }
 
+const discSize = (count: number): number =>
+  count <= 1
+    ? PIN_SIZE
+    : Math.min(
+        DISC_MAX,
+        Math.round(DISC_BASE + DISC_GROWTH * Math.sqrt(count))
+      );
+
+interface Placed {
+  /** Distinct opportunities: the union of the pins' ids. */
+  count: number;
+  pins: MapPin[];
+  /** Pin weight for the centre (a pin's own count). */
+  weight: number;
+  x: number;
+  y: number;
+}
+
+/** An opportunity listed in two of the cluster's cities counts once. */
+const distinctCount = (pins: MapPin[]): number =>
+  new Set(pins.flatMap((pin) => pin.ids)).size;
+
+/** Two discs whose edges would overlap, if any. */
+const findOverlap = (placed: Placed[]): [number, number] | null => {
+  for (let a = 0; a < placed.length; a++) {
+    for (let b = a + 1; b < placed.length; b++) {
+      const reach = (discSize(placed[a].count) + discSize(placed[b].count)) / 2;
+      if (
+        Math.hypot(placed[a].x - placed[b].x, placed[a].y - placed[b].y) < reach
+      ) {
+        return [a, b];
+      }
+    }
+  }
+  return null;
+};
+
 /**
  * The pins as they'd sit on screen at the map's current zoom, merged where
- * they'd touch (src/lib/cluster.ts), busiest first. Re-run after every zoom,
- * so clusters split as the map closes in.
+ * they'd touch (src/lib/cluster.ts), busiest first. Discs grow with their
+ * count, so a second pass merges any two that would still overlap. Re-run
+ * after every zoom, so clusters split as the map closes in.
  */
 const clusterPins = (map: L.Map, pins: MapPin[]): PinCluster[] => {
   const zoom = map.getZoom();
-  return clusterByDistance(
+  const placed: Placed[] = clusterByDistance(
     pins,
     (pin) => map.project([pin.lat, pin.lon], zoom),
     (pin) => pin.count,
     CLUSTER_RADIUS_PX
-  )
+  ).map((cluster) => ({
+    count: distinctCount(cluster.items),
+    pins: cluster.items,
+    weight: cluster.weight,
+    x: cluster.x,
+    y: cluster.y,
+  }));
+  let overlap = findOverlap(placed);
+  while (overlap) {
+    const [a, b] = overlap;
+    const [first, second] = [placed[a], placed[b]];
+    const weight = first.weight + second.weight;
+    const merged = [...first.pins, ...second.pins].sort(
+      (x, y) => y.count - x.count
+    );
+    placed[a] = {
+      count: distinctCount(merged),
+      pins: merged,
+      weight,
+      x: (first.x * first.weight + second.x * second.weight) / weight,
+      y: (first.y * first.weight + second.y * second.weight) / weight,
+    };
+    placed.splice(b, 1);
+    overlap = findOverlap(placed);
+  }
+  return placed
     .map((cluster) => {
       const { lat, lng } = map.unproject([cluster.x, cluster.y], zoom);
-      return { count: cluster.weight, lat, lon: lng, pins: cluster.items };
+      return { count: cluster.count, lat, lon: lng, pins: cluster.pins };
     })
     .sort((a, b) => b.count - a.count);
 };
 
-/** Grows with the log of the count: 3 and 30 read as different, and 150
- * still doesn't swamp a region. Big enough for the digits at every size. */
-const clusterSize = (count: number): number =>
-  Math.min(
-    CLUSTER_MAX_SIZE,
-    Math.round(CLUSTER_MIN_SIZE + CLUSTER_GROWTH * Math.log2(count))
-  );
-
-const clusterMarker = (cluster: PinCluster): L.Marker => {
-  const size = clusterSize(cluster.count);
+const discMarker = (cluster: PinCluster, chosen: boolean): L.Marker => {
+  const size = discSize(cluster.count);
   const label = document.createElement("span");
   label.textContent = String(cluster.count);
   return L.marker([cluster.lat, cluster.lon], {
     icon: L.divIcon({
-      className: "map-cluster",
+      className: `map-cluster${chosen ? " is-chosen" : ""}`,
       html: label,
       iconSize: [size, size],
     }),
-    keyboard: false,
+    keyboard: true,
   });
 };
 
-const placesLabel = (cluster: PinCluster): string => {
-  const others = cluster.pins.length - 1;
-  return `${cluster.pins[0]?.label ?? ""} e mais ${others} ${others === 1 ? "lugar" : "lugares"}`;
+/** At maximum zoom, close border cities need an explicit country choice. */
+const showBorderChoices = (
+  map: L.Map,
+  cluster: PinCluster,
+  onPlace: (place: MapPlace) => void
+) => {
+  const choices = document.createElement("div");
+  choices.className = "map-place-choices";
+  for (const iso of new Set(cluster.pins.map((pin) => pin.iso))) {
+    const own = cluster.pins.filter((pin) => pin.iso === iso);
+    const label = placesLabel(own.map((pin) => pin.label));
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = `${label} (${iso}) — ${plural(distinctCount(own))}`;
+    button.addEventListener("click", () => {
+      map.closePopup();
+      onPlace({ iso, keys: own.map((pin) => pin.key), label });
+    });
+    choices.append(button);
+  }
+  L.popup()
+    .setLatLng([cluster.lat, cluster.lon])
+    .setContent(choices)
+    .openOn(map);
+  choices.querySelector("button")?.focus();
 };
 
 /**
- * City pins, or a numbered marker where several would overlap. A single pin
- * chooses its country; a cluster flies in until it splits, and chooses the
- * country once it can't (two cities a few kilometres apart never separate).
+ * Every place on the map: a dot for one opportunity, a numbered disc sized by
+ * the count otherwise (one city or several close together). Clicking one
+ * chooses it: the list narrows to those cities and the camera flies in. A
+ * cluster that spans two countries zooms in instead, until it splits.
  */
 const drawPins = (
   map: L.Map,
   layer: L.LayerGroup,
   pins: MapPin[],
-  onSelect: (iso: string) => void
+  place: MapPlace | null,
+  onPlace: (place: MapPlace) => void
 ) => {
   layer.clearLayers();
+  const chosenKeys = new Set(place?.keys ?? []);
   for (const cluster of clusterPins(map, pins)) {
     const [first] = cluster.pins;
     if (!first) {
       continue;
     }
-    if (cluster.pins.length === 1) {
-      dotMarker(first, "map-pin", 20)
-        .bindTooltip(tooltipNode(first.label, plural(first.count)), {
-          className: "map-tooltip",
-          direction: "top",
-          offset: [0, -8],
-        })
-        .on("click", () => onSelect(first.iso))
-        .addTo(layer);
-      continue;
-    }
-    const size = clusterSize(cluster.count);
-    clusterMarker(cluster)
-      .bindTooltip(tooltipNode(placesLabel(cluster), plural(cluster.count)), {
+    const label = placesLabel(cluster.pins.map((pin) => pin.label));
+    const chosen = cluster.pins.some((pin) => chosenKeys.has(pin.key));
+    const marker =
+      cluster.count <= 1
+        ? dotMarker(first, `map-pin${chosen ? " is-chosen" : ""}`, PIN_SIZE)
+        : discMarker(cluster, chosen);
+    marker.on("add", () => {
+      const element = marker.getElement();
+      element?.setAttribute("aria-label", `${label}: ${plural(cluster.count)}`);
+      element?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          marker.fire("click");
+        }
+      });
+    });
+    const oneCountry = cluster.pins.every((pin) => pin.iso === first.iso);
+    marker
+      .bindTooltip(tooltipNode(label, plural(cluster.count)), {
         className: "map-tooltip",
         direction: "top",
-        offset: [0, -size / 2],
+        offset: [0, -discSize(cluster.count) / 2],
       })
       .on("click", () => {
+        if (oneCountry) {
+          const own = cluster.pins.filter((pin) => pin.iso === first.iso);
+          onPlace({
+            iso: first.iso,
+            keys: own.map((pin) => pin.key),
+            label: placesLabel(own.map((pin) => pin.label)),
+          });
+          return;
+        }
         if (map.getZoom() >= map.getMaxZoom()) {
-          onSelect(first.iso);
+          showBorderChoices(map, cluster, onPlace);
           return;
         }
         const bounds = L.latLngBounds(
@@ -311,29 +419,40 @@ const destinationsOf = (country: MapCountry, pins: MapPin[]): GeoPoint[] => {
   return targets.length > 0 ? targets : [country.anchor];
 };
 
-const selectionKey = (country: MapCountry | null, pins: MapPin[]): string =>
+const selectionKey = (
+  country: MapCountry | null,
+  pins: MapPin[],
+  place: MapPlace | null
+): string =>
   country
-    ? `${country.iso}|${destinationsOf(country, pins)
+    ? `${country.iso}|${place?.keys.join(",") ?? ""}|${destinationsOf(
+        country,
+        pins
+      )
         .map((point) => `${point.lat},${point.lon}`)
         .join(";")}`
     : "";
 
 /**
- * Routes from Brasília to the country's busiest places, as clustered at the
- * zoom the camera landed on (so a route ends on a marker you can see), at
- * most MAX_ROUTES of them; to the capital when nothing is pinned. None for
- * Brazil itself.
+ * Routes from Brasília to the country's busiest places — or to the chosen
+ * city — as clustered at the zoom the camera landed on (so a route ends on a
+ * marker you can see), at most MAX_ROUTES of them; to the capital when
+ * nothing is pinned. None for Brazil itself.
  */
 const drawRoutes = (
   map: L.Map,
   layer: L.LayerGroup,
   country: MapCountry,
-  pins: MapPin[]
+  pins: MapPin[],
+  place: MapPlace | null
 ) => {
   if (country.iso === BRAZIL_ISO) {
     return;
   }
-  const own = pins.filter((pin) => pin.iso === country.iso);
+  const keys = new Set(place?.keys ?? []);
+  const own = pins.filter((pin) =>
+    place ? keys.has(pin.key) : pin.iso === country.iso
+  );
   const destinations: GeoPoint[] =
     own.length > 0
       ? clusterPins(map, own).slice(0, MAX_ROUTES)
@@ -361,10 +480,78 @@ const drawLabel = (layer: L.LayerGroup, country: MapCountry) => {
     .addTo(layer);
 };
 
+/**
+ * Where the camera goes for a choice: the chosen city (close in), else the
+ * country's frame, else the opening view. The key says when it changed.
+ */
+const cameraTarget = (
+  selected: MapCountry | null,
+  place: MapPlace | null,
+  pins: MapPin[]
+): { bounds: L.LatLngBounds | null; key: string | null; maxZoom: number } => {
+  const placePins = place
+    ? pins.filter((pin) => place.keys.includes(pin.key))
+    : [];
+  if (place && placePins.length > 0) {
+    return {
+      bounds: L.latLngBounds(
+        placePins.map((pin): L.LatLngTuple => [pin.lat, pin.lon])
+      ).pad(CLUSTER_FRAME_PADDING),
+      key: `place:${place.keys.join(",")}`,
+      maxZoom: PLACE_ZOOM,
+    };
+  }
+  return {
+    bounds: selected ? frameOf(selected, pins) : null,
+    key: selected?.iso ?? null,
+    maxZoom: MAX_FIT_ZOOM,
+  };
+};
+
+/** The chosen country's label now, its routes once the camera lands. */
+const showSelection = (
+  map: L.Map,
+  routes: L.LayerGroup,
+  {
+    drawKey,
+    drawnRef,
+    flying,
+    pins,
+    place,
+    selected,
+  }: {
+    drawKey: string;
+    drawnRef: { current: string };
+    flying: boolean;
+    pins: MapPin[];
+    place: MapPlace | null;
+    selected: MapCountry | null;
+  }
+) => {
+  routes.clearLayers();
+  if (!selected) {
+    return;
+  }
+  drawLabel(routes, selected);
+  const draw = () => {
+    // A newer choice may have replaced this one during the flight.
+    if (drawnRef.current === drawKey) {
+      drawRoutes(map, routes, selected, pins, place);
+    }
+  };
+  if (flying && !prefersReducedMotion()) {
+    map.once("moveend", draw);
+  } else {
+    draw();
+  }
+};
+
 const OpportunityMap = ({
   countries,
   onSelect,
+  onSelectPlace,
   pins,
+  place,
   selected,
 }: OpportunityMapProps) => {
   const containerRef = useRef<HTMLElement>(null);
@@ -378,12 +565,15 @@ const OpportunityMap = ({
   const routeLayerRef = useRef<L.LayerGroup | null>(null);
   const countryPathsRef = useRef(new Map<string, CountryShapeLayer[]>());
   const onSelectRef = useRef(onSelect);
+  const onSelectPlaceRef = useRef(onSelectPlace);
+  const placeRef = useRef(place);
   const framedRef = useRef<string | null>(null);
   const drawnRef = useRef("");
   const selectedIsoRef = useRef<string | null>(null);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
+    onSelectPlaceRef.current = onSelectPlace;
   });
 
   // The map itself: tiles, faint borders and empty layers, created once.
@@ -435,8 +625,8 @@ const OpportunityMap = ({
     map.on("zoomend", () => {
       const layer = pinLayerRef.current;
       if (layer) {
-        drawPins(map, layer, pinsRef.current, (iso) =>
-          onSelectRef.current(iso)
+        drawPins(map, layer, pinsRef.current, placeRef.current, (chosen) =>
+          onSelectPlaceRef.current(chosen)
         );
       }
     });
@@ -503,15 +693,19 @@ const OpportunityMap = ({
   // map re-clusters them itself after every zoom; see the creation effect).
   useEffect(() => {
     pinsRef.current = pins;
+    placeRef.current = place;
     const map = mapRef.current;
     const layer = pinLayerRef.current;
     if (!(map && layer)) {
       return;
     }
-    drawPins(map, layer, pins, (iso) => onSelectRef.current(iso));
-  }, [pins]);
+    drawPins(map, layer, pins, place, (chosen) =>
+      onSelectPlaceRef.current(chosen)
+    );
+  }, [pins, place]);
 
-  // The chosen country: highlight, routes from Brasília, label and camera.
+  // The chosen country (and city): highlight, routes from Brasília, label
+  // and camera.
   useEffect(() => {
     const map = mapRef.current;
     const routes = routeLayerRef.current;
@@ -521,37 +715,36 @@ const OpportunityMap = ({
     selectedIsoRef.current = selected?.iso ?? null;
     markSelected(countryPathsRef.current, selectedIsoRef.current);
 
-    const key = selected?.iso ?? null;
-    const flying = framedRef.current !== key;
+    const target = cameraTarget(selected, place, pins);
+    const flying = framedRef.current !== target.key;
 
     // Redraw (and re-animate) the routes only when their ends change, not on
     // every keystroke in the search, and only once the camera has landed so
     // they draw themselves in the final view.
-    const drawKey = selectionKey(selected, pins);
+    const drawKey = selectionKey(selected, pins, place);
     if (drawnRef.current !== drawKey) {
       drawnRef.current = drawKey;
-      routes.clearLayers();
-      if (selected) {
-        drawLabel(routes, selected);
-        const draw = () => {
-          if (drawnRef.current === drawKey) {
-            drawRoutes(map, routes, selected, pins);
-          }
-        };
-        if (flying && !prefersReducedMotion()) {
-          map.once("moveend", draw);
-        } else {
-          draw();
-        }
-      }
+      showSelection(map, routes, {
+        drawKey,
+        drawnRef,
+        flying,
+        pins,
+        place,
+        selected,
+      });
     }
 
     // Fly only when the choice changes.
     if (flying) {
-      framedRef.current = key;
-      moveCamera(map, selected ? frameOf(selected, pins) : null);
+      framedRef.current = target.key;
+      // Selecting a city while already closer must not zoom back out and
+      // merge its marker with neighbouring cities again.
+      const maxZoom = place
+        ? Math.max(map.getZoom(), target.maxZoom)
+        : target.maxZoom;
+      moveCamera(map, target.bounds, maxZoom);
     }
-  }, [pins, selected]);
+  }, [pins, place, selected]);
 
   const zoomBy = (delta: number) => {
     mapRef.current?.setZoom((mapRef.current?.getZoom() ?? 0) + delta);
@@ -606,20 +799,20 @@ const OpportunityMap = ({
         className="pointer-events-none absolute bottom-4 left-4 z-[500] rounded-xl border border-navy-700/80 bg-navy-950/85 px-3.5 py-3 text-[12px] text-mist"
       >
         <p className="font-semibold text-slate-100">Inscrições abertas</p>
-        <div className="mt-2 flex items-center gap-3">
-          <span className="flex items-center gap-1.5">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <span className="flex items-center gap-1.5 whitespace-nowrap">
             <span className="map-swatch tier-1" />
             1–2
           </span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 whitespace-nowrap">
             <span className="map-swatch tier-2" />
             3–9
           </span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 whitespace-nowrap">
             <span className="map-swatch tier-3" />
             10+
           </span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 whitespace-nowrap">
             <span className="h-2 w-2 rounded-full bg-signal shadow-[0_0_8px_2px_rgba(255,155,15,0.55)]" />
             Cidade
           </span>

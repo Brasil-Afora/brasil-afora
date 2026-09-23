@@ -7,6 +7,7 @@ import {
   ChevronRightIcon,
   MapPinIcon,
   RotateCwIcon,
+  XIcon,
 } from "lucide-react";
 import Link from "next/link";
 import CatalogCover from "@/components/opportunities/catalog-cover";
@@ -17,8 +18,11 @@ import CountrySilhouette from "./country-silhouette";
 import {
   BRAZIL_ISO,
   type CountrySummary,
+  itemsAt,
   type MapCountry,
   type MapItem,
+  type MapPlace,
+  placesLabel,
 } from "./map-data";
 
 const INTERNATIONAL_CATALOG = "/oportunidades/internacionais";
@@ -49,10 +53,12 @@ const presetCountry = (name: string) => {
 const OpportunityItem = ({
   item,
   showPlace,
+  showCities = false,
 }: {
   item: MapItem;
   /** Where it is, when the list isn't already about one country. */
   showPlace: boolean;
+  showCities?: boolean;
 }) => (
   <li className="group relative flex gap-3 rounded-xl border border-navy-700 bg-navy-950/50 p-2.5 transition-colors hover:border-navy-600 hover:bg-navy-900">
     <CatalogCover
@@ -92,7 +98,15 @@ const OpportunityItem = ({
       {(showPlace || item.scope === "national") && item.place && (
         <p className="mt-0.5 flex items-center gap-1 truncate text-[12px] text-mist">
           <MapPinIcon aria-hidden="true" className="h-3 w-3 shrink-0" />
-          {item.place}
+          {showCities
+            ? placesLabel([
+                ...new Set(
+                  item.locations
+                    .filter((location) => location.precision !== "country")
+                    .map((location) => location.label)
+                ),
+              ]) || item.place
+            : item.place}
         </p>
       )}
     </div>
@@ -273,7 +287,9 @@ const CountryView = ({
   filtersActive,
   onBack,
   onClearFilters,
+  onClearPlace,
   onToggleType,
+  place,
   summary,
   typeCounts,
 }: {
@@ -282,12 +298,15 @@ const CountryView = ({
   filtersActive: boolean;
   onBack: () => void;
   onClearFilters: () => void;
+  onClearPlace: () => void;
   onToggleType: (type: string) => void;
+  place: MapPlace | null;
   summary: CountrySummary | null;
   /** Types open here under every filter but the type one, so chips stay put. */
   typeCounts: { count: number; label: string }[];
 }) => {
-  const items = summary?.items ?? [];
+  const everywhere = summary?.items ?? [];
+  const items = place ? itemsAt(everywhere, place) : everywhere;
   const isBrazil = country.iso === BRAZIL_ISO;
   const catalogHref = isBrazil ? NATIONAL_CATALOG : INTERNATIONAL_CATALOG;
 
@@ -317,10 +336,30 @@ const CountryView = ({
               "oportunidade aberta",
               "oportunidades abertas"
             )}
-            {isBrazil && items.length > 0 && " no Brasil"}
+            {isBrazil && items.length > 0 && !place && " no Brasil"}
           </p>
         </div>
       </div>
+
+      {place && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-signal bg-signal/15 py-1 pr-1 pl-3 text-[13px] text-white">
+            <MapPinIcon
+              aria-hidden="true"
+              className="h-3.5 w-3.5 shrink-0 text-signal"
+            />
+            {place.label}
+            <button
+              aria-label={`Mostrar todas as cidades de ${country.name}`}
+              className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-mist transition-colors hover:bg-navy-800 hover:text-white focus-visible:outline-2 focus-visible:outline-signal"
+              onClick={onClearPlace}
+              type="button"
+            >
+              <XIcon aria-hidden="true" className="h-3.5 w-3.5" />
+            </button>
+          </span>
+        </div>
+      )}
 
       {(typeCounts.length > 1 || activeTypes.length > 0) && (
         <ul aria-label="Filtrar por tipo" className="mt-4 flex flex-wrap gap-2">
@@ -348,7 +387,13 @@ const CountryView = ({
       {items.length > 0 ? (
         <ul className="mt-5 space-y-2.5">
           {items.map((item) => (
-            <OpportunityItem item={item} key={item.id} showPlace={false} />
+            <OpportunityItem
+              item={item}
+              key={item.id}
+              // With several cities chosen, each row says which one it's in.
+              showCities={Boolean(place && place.keys.length > 1)}
+              showPlace={Boolean(place && place.keys.length > 1)}
+            />
           ))}
         </ul>
       ) : (
@@ -393,9 +438,12 @@ export interface MapPanelProps {
   filtersActive: boolean;
   loading: boolean;
   onClearFilters: () => void;
+  onClearPlace: () => void;
   onRetry: () => void;
   onSelect: (iso: string | null) => void;
   onToggleType: (type: string) => void;
+  /** A city chosen on the map narrows the country's list to it. */
+  place: MapPlace | null;
   selected: MapCountry | null;
   /** The next few deadlines under the current filters. */
   soonest: MapItem[];
@@ -411,9 +459,11 @@ const MapPanel = ({
   filtersActive,
   loading,
   onClearFilters,
+  onClearPlace,
   onRetry,
   onSelect,
   onToggleType,
+  place,
   selected,
   soonest,
   total,
@@ -427,7 +477,9 @@ const MapPanel = ({
       filtersActive={filtersActive}
       onBack={() => onSelect(null)}
       onClearFilters={onClearFilters}
+      onClearPlace={onClearPlace}
       onToggleType={onToggleType}
+      place={place}
       summary={
         countries.find((country) => country.iso === selected.iso) ?? null
       }

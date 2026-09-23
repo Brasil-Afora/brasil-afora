@@ -184,6 +184,14 @@
   transition: transform 150ms ease-out;
 }
 
+/* The chosen place: a ring in the scope's ink around its disc or dot. */
+.opportunity-map .map-cluster.is-chosen span,
+.opportunity-map .map-pin.is-chosen::after {
+  box-shadow:
+    0 0 0 2px var(--color-navy-950),
+    0 0 0 4px var(--color-signal);
+}
+
 .opportunity-map .map-cluster:hover span {
   transform: scale(1.08);
 }
@@ -387,4 +395,24 @@
 /* Brasília: an ink dot with a white ring reads on land and on sea by day. */
 [data-theme="light"] .opportunity-map .map-origin {
   background: #17293f;
+}
+
+/* Border cities that cannot separate at maximum zoom remain selectable. */
+.opportunity-map .map-place-choices {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.opportunity-map .map-place-choices button {
+  padding: 0.5rem;
+  color: var(--color-navy-950);
+  text-align: left;
+  cursor: pointer;
+  background: var(--color-signal);
+  border-radius: 0.375rem;
+}
+
+.opportunity-map .map-place-choices button:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
 }

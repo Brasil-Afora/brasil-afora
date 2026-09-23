@@ -29,7 +29,9 @@ import sharp from "sharp";
 
 const source = process.argv[2];
 if (!source) {
-  console.error("usage: node scripts/build-map-day.mjs <world.topo.200407.3x21600x10800.jpg>");
+  console.error(
+    "usage: node scripts/build-map-day.mjs <world.topo.200407.3x21600x10800.jpg>"
+  );
   process.exit(1);
 }
 const OUTPUT = "public/map-day.jpg";
@@ -82,7 +84,9 @@ for (let i = 0; i < data.length; i += 3) {
   out[i + 2] = Math.round(water * SEA[2] + (1 - water) * clamp(B));
 }
 
-await sharp(out, { raw: { channels: 3, height: info.height, width: info.width } })
+await sharp(out, {
+  raw: { channels: 3, height: info.height, width: info.width },
+})
   .jpeg({ mozjpeg: true, quality: 88 })
   .toFile(OUTPUT);
 console.log(`${OUTPUT} (${WIDTH}×${HEIGHT})`);

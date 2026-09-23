@@ -59,6 +59,23 @@ const NOT_PLACES = new Set([
   "varios",
 ]);
 
+/**
+ * University towns that share a name with a bigger place. The index keeps the
+ * most populous city per name, which put "Princeton" in Florida, "Hanover" in
+ * Maryland and "Pasadena" in Texas; in a catalog of academic opportunities the
+ * name means the university town. Stanford is too small to be in the index at
+ * all. Add a town here when a record's pin lands on its namesake.
+ */
+const UNIVERSITY_TOWNS: Record<string, Record<string, City>> = {
+  US: {
+    amherst: { lat: 42.373, lon: -72.52, name: "amherst", population: 0 },
+    hanover: { lat: 43.702, lon: -72.29, name: "hanover", population: 0 },
+    pasadena: { lat: 34.148, lon: -118.145, name: "pasadena", population: 0 },
+    princeton: { lat: 40.349, lon: -74.659, name: "princeton", population: 0 },
+    stanford: { lat: 37.424, lon: -122.166, name: "stanford", population: 0 },
+  },
+};
+
 let citiesByCountry: Map<string, Map<string, City>> | null = null;
 
 /** Name → most populous city with that name (or alternate name), per country. */
@@ -83,16 +100,72 @@ const getCityIndex = (): Map<string, Map<string, City>> => {
       }
     }
   }
+  for (const [country, towns] of Object.entries(UNIVERSITY_TOWNS)) {
+    const names = citiesByCountry.get(country);
+    for (const [key, town] of Object.entries(towns)) {
+      names?.set(key, town);
+    }
+  }
   return citiesByCountry;
 };
 
+/** Words that stay lowercase inside a Portuguese place name. */
+const PARTICLES = new Set(["da", "das", "de", "do", "dos", "e"]);
+
+/** "rio de janeiro" -> "Rio de Janeiro", not "Rio De Janeiro". */
 const titleCase = (value: string): string =>
-  value.replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
+  value
+    .split(" ")
+    .map((word, index) =>
+      index > 0 && PARTICLES.has(word)
+        ? word
+        : word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join(" ");
+
+/** Words as written, accents and all (split on anything else). */
+const ORIGINAL_WORD = /[\p{L}\p{M}]+(?:['’][\p{L}\p{M}]+)?/gu;
+
+/**
+ * The name a record itself used for a matched city: "São Paulo", "Rio de
+ * Janeiro", "Londres". The index only holds plain ASCII names ("sao paulo",
+ * "london"), which read wrong on a Portuguese page, so the record's own words
+ * are found by normalizing them one at a time. All-lowercase text is
+ * title-cased; a match the words can't be traced to (never expected) falls
+ * back to the index name.
+ */
+const labelFor = (text: string, candidate: string, city: City): string => {
+  const words = text.match(ORIGINAL_WORD) ?? [];
+  const target = candidate.split(" ");
+  for (let start = 0; start + target.length <= words.length; start++) {
+    const run = words.slice(start, start + target.length);
+    if (
+      run.every((word, index) => normalizePlaceName(word) === target[index])
+    ) {
+      const written = run.join(" ");
+      return written === written.toLowerCase() ? titleCase(written) : written;
+    }
+  }
+  return titleCase(city.name);
+};
+
+interface FoundCity {
+  city: City;
+  label: string;
+}
+
+/** A city named twice in one record keeps the first way it was written. */
+const remember = (found: Map<string, FoundCity>, city: City, label: string) => {
+  const key = `${city.lat}:${city.lon}`;
+  if (!found.has(key)) {
+    found.set(key, { city, label });
+  }
+};
 
 /** Cities named in free text, longest names first, within the given countries. */
-const findCities = (text: string, countries: string[]): City[] => {
+const findCities = (text: string, countries: string[]): FoundCity[] => {
   const index = getCityIndex();
-  const found = new Map<string, City>();
+  const found = new Map<string, FoundCity>();
   for (const segment of normalizePlaceName(text).split(SEGMENT_SEPARATOR)) {
     const words = segment.match(WORD) ?? [];
     let start = 0;
@@ -111,7 +184,7 @@ const findCities = (text: string, countries: string[]): City[] => {
           .map((country) => index.get(country)?.get(candidate))
           .find(Boolean);
         if (city) {
-          found.set(`${city.lat}:${city.lon}`, city);
+          remember(found, city, labelFor(text, candidate, city));
           consumed = size;
           break;
         }
@@ -122,9 +195,9 @@ const findCities = (text: string, countries: string[]): City[] => {
   return [...found.values()];
 };
 
-const cityLocations = (cities: City[]): OpportunityLocation[] =>
-  cities.slice(0, MAX_LOCATIONS).map((city) => ({
-    label: titleCase(city.name),
+const cityLocations = (cities: FoundCity[]): OpportunityLocation[] =>
+  cities.slice(0, MAX_LOCATIONS).map(({ city, label }) => ({
+    label,
     lat: city.lat,
     lon: city.lon,
     precision: "city",

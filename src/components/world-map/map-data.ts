@@ -61,10 +61,55 @@ export interface CountrySummary extends MapCountry {
 }
 
 export interface MapPin extends GeoPoint {
+  /** Distinct opportunities here (ids.length). */
   count: number;
+  /** The opportunities located here. One can list several cities, so a
+   * cluster counts the union of its pins' ids, never the sum. */
+  ids: string[];
   iso: string;
+  /** The place's identity (placeKey), shared with the items located there. */
+  key: string;
   label: string;
 }
+
+/**
+ * One or more places chosen on the map: the list narrows to what's open
+ * there. `iso` is the country the places are in.
+ */
+export interface MapPlace {
+  iso: string;
+  keys: string[];
+  label: string;
+}
+
+/** The same key for a pin and for the locations that made it. */
+export const placeKey = ({ lat, lon }: GeoPoint): string =>
+  `${lat.toFixed(PIN_PRECISION)}:${lon.toFixed(PIN_PRECISION)}`;
+
+/** Items that take place in any of the chosen places. */
+export const itemsAt = (items: MapItem[], place: MapPlace): MapItem[] => {
+  const keys = new Set(place.keys);
+  return items.filter((item) =>
+    item.locations.some(
+      (location) =>
+        location.precision !== "country" && keys.has(placeKey(location))
+    )
+  );
+};
+
+/** "Boston", "Boston e Cambridge", "Boston, Cambridge e Providence", then
+ * "Boston, Cambridge, Providence e mais 4 lugares". Names heaviest first. */
+const NAMED_PLACES = 3;
+export const placesLabel = (names: string[]): string => {
+  if (names.length <= 1) {
+    return names[0] ?? "";
+  }
+  if (names.length <= NAMED_PLACES) {
+    return `${names.slice(0, -1).join(", ")} e ${names.at(-1)}`;
+  }
+  const others = names.length - NAMED_PLACES;
+  return `${names.slice(0, NAMED_PLACES).join(", ")} e mais ${others} ${others === 1 ? "lugar" : "lugares"}`;
+};
 
 export interface MapFilters {
   levels: string[];
@@ -382,14 +427,19 @@ export const pinsOf = (items: MapItem[]): MapPin[] => {
       if (!iso) {
         continue;
       }
-      const key = `${location.lat.toFixed(PIN_PRECISION)}:${location.lon.toFixed(PIN_PRECISION)}`;
+      const key = placeKey(location);
       const pin = pins.get(key);
       if (pin) {
-        pin.count++;
+        if (!pin.ids.includes(item.id)) {
+          pin.ids.push(item.id);
+          pin.count = pin.ids.length;
+        }
       } else {
         pins.set(key, {
           count: 1,
+          ids: [item.id],
           iso,
+          key,
           label: location.label,
           lat: location.lat,
           lon: location.lon,

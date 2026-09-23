@@ -97,7 +97,12 @@ export const OPPORTUNITY_PRESENTATION: CatalogPresentation<CatalogItem> = {
   },
   keyOf: (item) => `${item.scope}-${item.id}`,
   loading: "Carregando oportunidades…",
-  pinsOf: (items) => items.flatMap((item) => item.locations),
+  // Each pin keeps its opportunity, so a header mark counts an opportunity
+  // listed in several nearby cities once.
+  pinsOf: (items) =>
+    items.flatMap((item) =>
+      item.locations.map((location) => ({ ...location, id: item.id }))
+    ),
   renderCard: (item, eager) => <CatalogCard eager={eager} item={item} />,
   renderRow: (item) => <CatalogRow item={item} />,
   sortItems: sortCatalogItems,
