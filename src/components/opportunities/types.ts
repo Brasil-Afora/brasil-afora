@@ -31,9 +31,9 @@ export const isNationalOpportunity = (
 
 export const getOpportunityLocation = (opportunity: Opportunity): string => {
   if (isNationalOpportunity(opportunity)) {
-    return opportunity.cidadeEstado || "Brasil";
+    return opportunity.cidadeEstado || "Local em verificação";
   }
-  return opportunity.pais || "";
+  return opportunity.pais || "País em verificação";
 };
 
 export const getScholarshipTagClasses = (tipoBolsa: string): string => {

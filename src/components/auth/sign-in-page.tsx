@@ -20,8 +20,10 @@ const SignInPage = ({ redirectTo }: SignInPageProps) => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const requestedPath = redirectTo;
-  const fromPath = requestedPath?.startsWith("/") ? requestedPath : "/perfil";
-  const callbackURL = `${window.location.origin}${fromPath}`;
+  const fromPath =
+    requestedPath?.startsWith("/") && !requestedPath.startsWith("//")
+      ? requestedPath
+      : "/perfil";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +33,7 @@ const SignInPage = ({ redirectTo }: SignInPageProps) => {
     const { error: authError } = await signIn.email({
       email,
       password,
-      callbackURL,
+      callbackURL: `${window.location.origin}${fromPath}`,
     });
 
     setIsLoading(false);
@@ -50,7 +52,7 @@ const SignInPage = ({ redirectTo }: SignInPageProps) => {
 
     await signIn.social({
       provider: "google",
-      callbackURL,
+      callbackURL: `${window.location.origin}${fromPath}`,
     });
 
     setIsGoogleLoading(false);

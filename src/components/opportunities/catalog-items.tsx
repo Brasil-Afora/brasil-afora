@@ -42,7 +42,7 @@ const Deadline = ({
   stacked?: boolean;
 }) => (
   <span className="tabular-nums">
-    Prazo {item.deadline}
+    {item.lifecycleLabel ?? `Prazo ${item.deadline}`}
     {item.daysLeft !== null && (
       <span
         className={`font-semibold ${stacked ? "block" : "ml-2"} ${isUrgent(item) ? "text-signal" : "text-slate-100"}`}
@@ -55,7 +55,9 @@ const Deadline = ({
 
 const Countdown = ({ item }: { item: CatalogItem }) =>
   item.daysLeft === null ? (
-    <span />
+    <span className="font-semibold text-[14px] text-mist">
+      {item.lifecycleLabel}
+    </span>
   ) : (
     <span
       className={`inline-flex items-center gap-1.5 font-semibold text-[14px] tabular-nums ${isUrgent(item) ? "text-signal" : "text-slate-100"}`}

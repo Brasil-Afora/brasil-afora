@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
+import { test } from "vitest";
+import {
+  resolveInternationalLocations,
+  resolveNationalLocations,
+} from "@/server/geo/resolve-location";
 import {
   countryByIso,
   itemsAt,
@@ -8,12 +12,8 @@ import {
   pinsOf,
   placeKey,
   placesLabel,
-} from "../src/components/world-map/map-data";
-import MapPanel from "../src/components/world-map/map-panel";
-import {
-  resolveInternationalLocations,
-  resolveNationalLocations,
-} from "../src/server/geo/resolve-location";
+} from "./map-data";
+import MapPanel from "./map-panel";
 
 const country = countryByIso("US");
 assert.ok(country);

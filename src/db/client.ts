@@ -11,7 +11,12 @@ const pool =
   globalThis.__brasilAforaPgPool ??
   new Pool({
     connectionString: env.DATABASE_URL,
+    ...(env.DATABASE_SSL_CA
+      ? { ssl: { ca: env.DATABASE_SSL_CA, rejectUnauthorized: true } }
+      : {}),
   });
+
+export const pgPool = pool;
 
 if (process.env.NODE_ENV !== "production") {
   globalThis.__brasilAforaPgPool = pool;

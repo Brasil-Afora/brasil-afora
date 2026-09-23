@@ -6,6 +6,12 @@ import type {
   NationalOpportunity,
 } from "@/lib/opportunities-api";
 import {
+  formatLastVerifiedAt,
+  getApplicationTarget,
+  getOpportunityLifecycleLabel,
+  shouldShowDeadlineCountdown,
+} from "@/lib/opportunity-lifecycle";
+import {
   type CatalogCover,
   type CatalogScope,
   type CatalogTag,
@@ -51,6 +57,7 @@ export interface DetailContact {
 
 export interface OpportunityDetail {
   /** Prose about applying that isn't a list of steps. */
+  applicationTarget: ReturnType<typeof getApplicationTarget>;
   applyParagraphs: string[];
   applySteps: DetailStep[];
   checkedAt: string | null;
@@ -63,6 +70,7 @@ export interface OpportunityDetail {
   facts: DetailFact[];
   id: string;
   institution: string;
+  lifecycleLabel: string | null;
   locations: OpportunityLocation[];
   name: string;
   officialDomain: string | null;
@@ -207,9 +215,15 @@ const shared = (
 ) => {
   const officialLink = stated(opportunity.linkOficial);
   return {
-    checkedAt: verified ? formatIsoDateBr(VERIFIED_OPPORTUNITIES_DATE) : null,
+    applicationTarget: getApplicationTarget(opportunity),
+    lifecycleLabel: getOpportunityLifecycleLabel(opportunity),
+    checkedAt: verified
+      ? formatIsoDateBr(VERIFIED_OPPORTUNITIES_DATE)
+      : formatLastVerifiedAt(opportunity.lastVerifiedAt),
     contact: contactOf(stated(opportunity.contato)),
-    daysLeft: getBrasiliaDaysUntil(opportunity.prazoInscricao, now),
+    daysLeft: shouldShowDeadlineCountdown(opportunity)
+      ? getBrasiliaDaysUntil(opportunity.prazoInscricao, now)
+      : null,
     deadline: opportunity.prazoInscricao,
     id: opportunity.id,
     institution: stated(opportunity.instituicaoResponsavel) ?? "",
