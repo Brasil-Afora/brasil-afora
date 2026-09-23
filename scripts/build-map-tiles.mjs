@@ -3,6 +3,11 @@
 //
 //   node scripts/build-map-tiles.mjs
 //
+// or any other 8192×4096 equirectangular source into another folder, e.g. the
+// daylight twin used by the light theme:
+//
+//   node scripts/build-map-tiles.mjs public/map-day.jpg public/map-tiles/day-v1
+//
 // Tiles follow Leaflet's EPSG:4326 grid: at zoom z the world is
 // 512·2^z × 256·2^z pixels in 256px tiles, x from lon −180, y from lat 90.
 // Zoom 4 is the source's own resolution.
@@ -13,8 +18,8 @@ import { mkdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 
-const SOURCE = "public/map.jpg";
-const OUTPUT = "public/map-tiles/v1";
+const SOURCE = process.argv[2] ?? "public/map.jpg";
+const OUTPUT = process.argv[3] ?? "public/map-tiles/v1";
 const TILE = 256;
 const MAX_ZOOM = 4;
 const QUALITY = 72;
