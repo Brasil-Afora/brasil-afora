@@ -195,10 +195,13 @@ const levelsOf = (nivelEnsino: string): string[] =>
 const nameKey = (name: string): string =>
   name.trim().toLocaleLowerCase("pt-BR");
 
-const isOpen = (item: CatalogItem): boolean =>
-  (item.daysLeft !== null && item.daysLeft >= 0) ||
-  item.lifecycleLabel === "Inscrições contínuas" ||
-  item.lifecycleLabel === "Inscrições abertas";
+export const isMapOpportunityOpen = (item: CatalogItem): boolean =>
+  item.curatedStatus
+    ? ["open", "rolling"].includes(item.curatedStatus) &&
+      (item.daysLeft === null || item.daysLeft >= 0)
+    : (item.daysLeft !== null && item.daysLeft >= 0) ||
+      item.lifecycleLabel === "Inscrições contínuas" ||
+      item.lifecycleLabel === "Inscrições abertas";
 
 /** Published catalog records supersede starter records with matching names. */
 const mergeByName = <T extends { nome: string }>(
@@ -288,7 +291,7 @@ export const buildMapItems = ({
     type: opportunity.tipo.trim(),
   }));
 
-  return [...abroad, ...home].filter(isOpen);
+  return [...abroad, ...home].filter(isMapOpportunityOpen);
 };
 
 // ---------------------------------------------------------------------------
@@ -384,7 +387,9 @@ export const summarizeCountries = (
       return {
         ...country,
         items: sorted,
-        next: sorted[0] ?? null,
+        next:
+          sorted.find((item) => item.deadline && item.daysLeft !== null) ??
+          null,
         types: typesOf(sorted),
       };
     })

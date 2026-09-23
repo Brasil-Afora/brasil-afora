@@ -30,6 +30,7 @@ export interface CatalogTag {
 export interface CatalogItem {
   audience: string;
   cover: CatalogCover;
+  curatedStatus?: string;
   daysLeft: number | null;
   deadline: string;
   href: string;
@@ -157,6 +158,7 @@ export const toInternationalItem = (
       ? getBrasiliaDaysUntil(opportunity.prazoInscricao, now)
       : null,
     lifecycleLabel: getOpportunityLifecycleLabel(opportunity),
+    curatedStatus: opportunity.curatedStatus,
     deadline: opportunity.prazoInscricao,
     locations: opportunity.localizacoes ?? [],
     href: `/oportunidades/internacionais/${opportunity.id}`,
@@ -192,6 +194,7 @@ export const toNationalItem = (
       ? getBrasiliaDaysUntil(opportunity.prazoInscricao, now)
       : null,
     lifecycleLabel: getOpportunityLifecycleLabel(opportunity),
+    curatedStatus: opportunity.curatedStatus,
     deadline: opportunity.prazoInscricao,
     locations: opportunity.localizacoes ?? [],
     href: `/oportunidades/nacionais/${opportunity.id}`,

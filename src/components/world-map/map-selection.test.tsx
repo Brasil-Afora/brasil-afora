@@ -7,6 +7,7 @@ import {
 } from "@/server/geo/resolve-location";
 import {
   countryByIso,
+  isMapOpportunityOpen,
   itemsAt,
   type MapItem,
   pinsOf,
@@ -129,4 +130,20 @@ test("resolver preserves accents and university towns for multi-city records", (
   assert.ok(locations[0].lat > 40 && locations[0].lat < 41);
   assert.ok(locations[1].lat > 25 && locations[1].lat < 26);
   assert.equal(placesLabel(["Boston", "Cambridge"]), "Boston e Cambridge");
+});
+
+test("map excludes upcoming curated rounds with a future deadline", () => {
+  assert.equal(
+    isMapOpportunityOpen({ ...item("future", []), curatedStatus: "upcoming" }),
+    false
+  );
+  assert.equal(
+    isMapOpportunityOpen({
+      ...item("rolling", []),
+      curatedStatus: "rolling",
+      daysLeft: null,
+      deadline: "",
+    }),
+    true
+  );
 });
