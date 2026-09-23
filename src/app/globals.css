@@ -37,7 +37,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -78,7 +78,6 @@
   --radius-4xl: calc(var(--radius) * 2.6);
   --font-heading: var(--font-geist-sans);
   --font-inter: var(--font-geist-sans);
-  --font-bebas: var(--font-bebas-neue);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-reading: var(--font-atkinson-next), var(--font-geist-sans), sans-serif;
@@ -97,6 +96,8 @@
   --color-signal-strong: #ffb33f;
   --color-fund: #1d4fc0;
   --color-atlantic: #5b9bff;
+  /* Programas e Bolsas scope accent (DESIGN.md, The Scope Accent Rule). */
+  --color-lilac: #b9a2ff;
   --color-verified: #0cb261;
 }
 
@@ -138,15 +139,271 @@
   font-family: var(--font-inter), sans-serif;
 }
 
-.font-bebas,
-.font-blackout {
-  font-family: var(--font-bebas), sans-serif;
-  letter-spacing: 0.05em;
+.font-wordmark {
+  font-family:
+    var(--font-wordmark), var(--font-geist-sans), system-ui, sans-serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
 }
 
-.font-wordmark {
-  font-family: var(--font-wordmark), sans-serif;
-  letter-spacing: 0.01em;
+/* ---------------------------------------------------------------------------
+ * Light academic theme (Fundação Estudar-inspired): warm paper ground, navy
+ * ink, golden amber kept for action. Dark navy stays the default; this block
+ * only applies under `[data-theme="light"]`, toggled in the header and
+ * persisted via localStorage + cookie (`use-theme`).
+ *
+ * How it works: the design system runs on the navy/mist/signal tokens plus
+ * the slate ramp for panels and ink text, so remapping those variables flips
+ * most surfaces at once. Hard-coded `text-white` (headings on navy grounds
+ * that become paper) is bridged to ink, except on fills that stay dark
+ * (badges, chips) and on photography (the handwritten note). Amber fills
+ * (`bg-signal`) keep the brand value; only amber *text* deepens for contrast.
+ * ------------------------------------------------------------------------- */
+[data-theme="light"] {
+  --color-navy-950: #faf7f1;
+  --color-navy-900: #ffffff;
+  --color-navy-850: #f4efe4;
+  --color-navy-800: #ece4d3;
+  --color-navy-700: #ddd2bd;
+  --color-navy-600: #c6b897;
+  --color-mist: #46586f;
+  --color-mist-dim: #5d6f88;
+  --color-atlantic: #1e56c8;
+  --color-lilac: #5f45b8;
+
+  --color-slate-100: #1b2f47;
+  --color-slate-200: #3c4f66;
+  --color-slate-300: #5a6d85;
+  --color-slate-400: #75859b;
+  --color-slate-500: #8b99ad;
+  --color-slate-800: #e9e1d0;
+  --color-slate-900: #ffffff;
+  --color-slate-950: #f0e9d9;
+  color-scheme: light;
+}
+
+/* Headings/cards that sat on navy grounds now sit on paper. */
+[data-theme="light"]
+  .text-white:not(.bg-fund):not(.bg-blue-500):not(.bg-red-500):not(
+    .bg-slate-700
+  ):not(.ba-hand-note) {
+  color: #17293f;
+}
+
+[data-theme="light"] .hover\:text-white:hover {
+  color: #17293f;
+}
+
+[data-theme="light"] .group:hover .group-hover\:text-white {
+  color: #17293f;
+}
+
+/* Amber text deepens to stay legible on paper; amber fills keep the brand. */
+[data-theme="light"] .text-signal {
+  color: #b45309;
+}
+
+[data-theme="light"] .group:hover .group-hover\:text-signal {
+  color: #b45309;
+}
+
+[data-theme="light"]
+  .aria-\[current\=location\]\:text-signal[aria-current="location"] {
+  color: #b45309;
+}
+
+/* Labels on amber fills always need the deep navy, in either theme. */
+[data-theme="light"] .text-navy-950,
+[data-theme="light"] .text-navy-900 {
+  color: #03111f;
+}
+
+[data-theme="light"] .hover\:text-navy-950:hover {
+  color: #03111f;
+}
+
+[data-theme="light"] .group:hover .group-hover\:text-navy-950 {
+  color: #03111f;
+}
+
+[data-theme="light"] .placeholder\:text-mist::placeholder {
+  color: #8b99ad;
+}
+
+/* Hero photos (home-hero-photos.tsx): one pool of photos shared by both
+   themes. The picture stays when the theme flips; only the grade changes,
+   which each photo can override per theme (`--ba-tone-dark` /
+   `--ba-tone-light`, set inline from `toneDark` / `toneLight`). Each photo
+   crossfades over the one before it and settles from a touch of scale. */
+.ba-hero-slide {
+  opacity: 0;
+  filter: var(--ba-tone-dark, brightness(0.82) saturate(1.08));
+  transform: scale(1.035);
+  transition:
+    opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 2.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] .ba-hero-slide {
+  filter: var(--ba-tone-light, saturate(1.05) contrast(1.03));
+}
+
+.ba-hero-slide[data-state="current"] {
+  z-index: 1;
+  opacity: 1;
+  transform: none;
+}
+
+/* The outgoing photo stays fully visible underneath until it is replaced. */
+.ba-hero-slide[data-state="previous"] {
+  z-index: 0;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ba-hero-slide {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* A soft shade under the handwritten note so its white ink reads on bright
+   photos (sunlit pavement, lit water) as well as on dark ones. */
+.ba-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 50% 46% at 80% 76%,
+    rgb(3 17 31 / 0.42),
+    transparent 72%
+  );
+  transition: opacity 0.6s ease-out;
+}
+
+/* Light hero: the photo is a plate on the paper, not a dissolve. A dark
+   photo can't fade into paper: every step of the fade mixes shadow with
+   cream, which reads as a grey smear. So in light the masks and fades go,
+   and the photo keeps hard edges: an inset print above the headline on
+   phones, and on desktop a plate beside the text block, top and bottom
+   aligned to it, rounded where it meets the paper and bleeding off the right
+   edge. The copy column narrows so nothing runs under it, and the credit
+   sits under the plate like a print caption. */
+[data-theme="light"] .ba-hero-dissolve {
+  display: none;
+}
+
+[data-theme="light"] .ba-hero-mask {
+  mask-image: none;
+}
+
+[data-theme="light"] .ba-hero-frame {
+  margin: 1rem 1.25rem 0;
+  /* Holds the plate's place on the paper while the photo loads. */
+  background-color: var(--color-navy-800);
+  border-radius: 18px;
+}
+
+[data-theme="light"] .ba-hero-caption {
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 40rem) {
+  [data-theme="light"] .ba-hero-frame {
+    margin-inline: 2rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  [data-theme="light"] .ba-hero-frame {
+    top: 3.5rem;
+    bottom: 3rem;
+    left: 60%;
+    width: auto;
+    margin: 0;
+    border-radius: 18px 0 0 18px;
+  }
+
+  [data-theme="light"] .ba-hero-caption {
+    margin-bottom: 0;
+  }
+
+  /* Text starts at the 2rem gutter; keep 2.5rem of paper before the plate. */
+  [data-theme="light"] .ba-hero-copy {
+    max-width: min(44rem, calc(60vw - 4.5rem));
+  }
+}
+
+@media (min-width: 80rem) {
+  [data-theme="light"] .ba-hero-frame {
+    left: calc(max(0px, 50% - 42rem) + 2rem + 44rem + 3.5rem);
+  }
+
+  [data-theme="light"] .ba-hero-copy {
+    max-width: 44rem;
+  }
+}
+
+/* Catalog photo headers (catalog-header.tsx, Programas e Bolsas): on the
+   navy ground the photo is brought down to the Low-Key level and dissolves
+   like the maps; on paper it becomes a plate, for the same reason as the
+   light hero above. */
+.ba-catalog-photo-image {
+  filter: brightness(0.86) saturate(1.04);
+}
+
+[data-theme="light"] .ba-catalog-photo {
+  mask-image: none;
+}
+
+[data-theme="light"] .ba-catalog-photo-image {
+  filter: saturate(1.05) contrast(1.03);
+}
+
+[data-theme="light"] .ba-catalog-photo-frame {
+  margin: 1rem 1.25rem 0;
+  background-color: var(--color-navy-800);
+  border-radius: 18px;
+}
+
+@media (min-width: 40rem) {
+  [data-theme="light"] .ba-catalog-photo-frame {
+    margin-inline: 2rem;
+  }
+}
+
+/* On desktop the plate starts where the copy column ends (container gutter,
+   the 64px icon ring and its 20px gap, the 36rem subtitle, 2.5rem of paper)
+   and bleeds off the right edge. */
+@media (min-width: 64rem) {
+  [data-theme="light"] .ba-catalog-photo-frame {
+    top: 2.5rem;
+    bottom: 2.5rem;
+    left: calc(max(0px, 50% - 42rem) + 2rem + 84px + 36rem + 2.5rem);
+    width: auto;
+    margin: 0;
+    border-radius: 18px 0 0 18px;
+  }
+}
+
+/* The white SVG mark recolors to navy ink in light mode (computed filter:
+   white -> rgb(22, 41, 63), ~#17293f). Transparent pixels stay transparent. */
+[data-theme="light"] .ba-logo {
+  filter: brightness(0) invert(0.13) sepia(0.95) saturate(3) hue-rotate(168deg);
+}
+
+/* The header goes solid paper in light mode (no transparent-over-photo
+   state); Fundação Estudar-style. Text flips via the bridges above. */
+[data-theme="light"] .ba-header {
+  background-color: rgb(250 247 241 / 0.94);
+  border-color: #e3d9c6;
+}
+
+html[data-theme="light"] {
+  scrollbar-color: #c6b897 #faf7f1;
 }
 
 ::selection {
@@ -155,6 +412,7 @@
 }
 
 html {
+  color-scheme: dark;
   scrollbar-color: var(--color-navy-600) var(--color-navy-950);
 }
 
@@ -199,6 +457,19 @@ html {
       animation-range: entry var(--route-start, 10%) cover var(--route-end, 45%);
     }
   }
+}
+
+/* Until the hero's first photo has loaded there is nothing for the note or
+   its shade to sit on, so both wait; the note's write-in plays once it
+   lands (home-hero-photos.tsx sets data-ready). */
+.ba-hero-frame:not([data-ready]) .ba-hero-scrim,
+.ba-hero-frame:not([data-ready]) .ba-hand-note {
+  opacity: 0;
+}
+
+.ba-hero-frame:not([data-ready]) .ba-hand-note,
+.ba-hero-frame:not([data-ready]) .ba-hand-note .ba-stroke {
+  animation-play-state: paused;
 }
 
 .scrollbar-hide {

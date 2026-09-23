@@ -1,4 +1,8 @@
 import type { MetadataRoute } from "next";
+import {
+  getPrograms,
+  PROGRAMS_PATH,
+} from "@/components/programs/program-model";
 
 const DEFAULT_SITE_URL = "https://brasil-afora.vercel.app";
 const TRAILING_SLASH_PATTERN = /\/$/;
@@ -48,5 +52,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 0.9,
     },
+    {
+      url: `${siteUrl}${PROGRAMS_PATH}`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    ...getPrograms().map((program) => ({
+      url: `${siteUrl}${PROGRAMS_PATH}/${program.id}`,
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
   ];
 }

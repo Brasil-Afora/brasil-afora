@@ -530,7 +530,7 @@ const AdminPage = () => {
 
   if (isSessionPending || isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-navy-950 via-navy-900 to-navy-950 text-white">
         Carregando painel administrativo...
       </div>
     );
@@ -538,7 +538,7 @@ const AdminPage = () => {
 
   if (!session?.user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-black text-white">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-navy-950 via-navy-900 to-navy-950 text-white">
         Sessao invalida. Faca login novamente.
       </div>
     );
@@ -546,7 +546,7 @@ const AdminPage = () => {
 
   if (!isAdmin) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-black p-6 text-center text-white">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-navy-950 via-navy-900 to-navy-950 p-6 text-center text-white">
         <div className="max-w-xl rounded-xl border border-red-500/40 bg-red-950/30 p-6">
           <h1 className="mb-2 font-bold text-2xl text-red-300">
             Acesso negado
@@ -558,7 +558,7 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black p-6 font-inter text-white">
+    <div className="min-h-screen bg-gradient-to-br from-navy-950 via-navy-900 to-navy-950 p-6 font-inter text-white">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 flex items-center gap-3">
           <ShieldUserIcon className="h-8 w-8 text-amber-500" />

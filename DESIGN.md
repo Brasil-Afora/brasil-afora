@@ -15,6 +15,7 @@ colors:
   signal-amber-bright: "#ffb33f"
   funding-blue: "#1d4fc0"
   atlantic-blue: "#5b9bff"
+  lilac: "#b9a2ff"
   verified-green: "#0cb261"
 typography:
   display:
@@ -85,10 +86,10 @@ typography:
     fontWeight: 700
     lineHeight: 1.2
   wordmark:
-    fontFamily: "Bebas Neue, sans-serif"
+    fontFamily: "Sora, system-ui, sans-serif"
     fontSize: "1.875rem"
-    fontWeight: 400
-    letterSpacing: "0.05em"
+    fontWeight: 600
+    letterSpacing: "-0.02em"
   hand:
     fontFamily: "Caveat, cursive"
     fontSize: "2rem"
@@ -152,12 +153,12 @@ components:
 
 **Creative North Star: "The Departure Board at Dusk"**
 
-The home page reads like a departure board: where, for whom, and until when, before anything else. A dusk skyline dissolves into deep navy; one hot amber marks what you can act on. The world was pinned by the owner's mockup (2026-09-21) and built code-first. Every reading surface uses Atkinson Hyperlegible Next, a face drawn for legibility, because the audience runs from 12-year-olds on phones to postgraduates.
+The home page reads like a departure board: where, for whom, and until when, before anything else. Universities at night dissolve into deep navy (by day, on paper, in the light theme); one hot amber marks what you can act on. The world was pinned by the owner's mockup (2026-09-21) and built code-first. Every reading surface uses Atkinson Hyperlegible Next, a face drawn for legibility, because the audience runs from 12-year-olds on phones to postgraduates.
 
 **Key Characteristics:**
 - Deep navy ground with hairline navy rules instead of heavy containers.
 - A single amber for action, the active nav, urgent deadlines and drawn routes.
-- Real photographs (campuses, a dusk skyline, a night map) as the only imagery; no illustration, no crests.
+- Real photographs (campuses and libraries by night and by day, a night map) as the only imagery; no illustration, no crests.
 - Facts rendered as data: deadline dates in tabular figures, a countdown beside each.
 - One handwritten note per page, on a photograph.
 
@@ -169,6 +170,7 @@ The home page reads like a departure board: where, for whom, and until when, bef
 ### Secondary
 - **Funding Blue** (`funding-blue`): the first tag on a card, which states the funding fact ("Bolsa integral", "Bolsa variável") or the program type.
 - **Atlantic Blue** (`atlantic-blue`): the international catalog's scope accent: the word "Internacionais" in its title, its header icon, the filter panel's icon and "Limpar filtros" link.
+- **Lilac** (`lilac`, `#5f45b8` on paper): the Programas e Bolsas scope accent, in the same three places. It's the only hue that reads apart from amber, both blues and green without borrowing a meaning from them.
 - **Verified Green** (`verified-green`): only the "Verificada" badge, with navy text for contrast.
 
 ### Neutral
@@ -181,14 +183,14 @@ The home page reads like a departure board: where, for whom, and until when, bef
 ### Named Rules
 **The One Amber Rule.** Amber means "act here" or "this is close". It never decorates a heading, an icon ring or a background field, with one deliberate exception below.
 
-**The Scope Accent Rule.** Each catalog owns one accent for its title word, header icon and filter-panel links: Atlantic Blue for Internacional, Signal Amber for Nacional (the pairing the site already used before the redesign). The map page takes Signal Amber too, the color of its lit countries. Buttons stay amber everywhere.
+**The Scope Accent Rule.** Each catalog owns one accent for its title word, header icon and filter-panel links: Atlantic Blue for Internacional, Signal Amber for Nacional (the pairing the site already used before the redesign), Lilac for Programas e Bolsas. The map page takes Signal Amber too, the color of its lit countries. Buttons stay amber everywhere.
 
 **The Scoped Trust Rule.** Green and the "Verificada" badge appear only on opportunities from the curated verified set. Catalog items never borrow them.
 
 ## Typography
 
 **Display / reading:** Atkinson Hyperlegible Next (400–700).
-**Wordmark:** Bebas Neue, only in the logo lockup ("BRASIL" white, "AFORA" amber).
+**Wordmark:** Sora 600, only in the logo lockup ("Brasil" white, "Afora" amber, Title Case).
 **Hand:** Caveat 600, only for the single photo note.
 
 ### Hierarchy
@@ -206,7 +208,7 @@ The home page reads like a departure board: where, for whom, and until when, bef
 
 ## Layout
 
-A single centered container (`container`, 84rem) with a 20px gutter on phones and 32px from 640px up; the header shares the same container so the logo aligns with content. The desktop hero is a text column (max 44rem) over a photo that owns the right 58% of the band and bleeds to the viewport edge. Opportunity cards sit in one column on phones, two from 640px, and auto-fit columns of at least 17rem from 1280px. The why-list and map card pair up from 1024px (roughly 1 : 1.05). Category chips wrap on larger screens and become a single horizontally scrolling row on phones.
+A single centered container (`container`, 84rem) with a 20px gutter on phones and 32px from 640px up; the header shares the same container so the logo aligns with content. The desktop hero is a text column (max 44rem) over a photo that owns the right 58% of the band and bleeds to the viewport edge (in the light theme, a plate beside the column instead). Opportunity cards sit in one column on phones, two from 640px, and auto-fit columns of at least 17rem from 1280px. The why-list and map card pair up from 1024px (roughly 1 : 1.05). Category chips wrap on larger screens and become a single horizontally scrolling row on phones.
 
 ## Elevation & Depth
 
@@ -251,6 +253,15 @@ Built only from what the scraper and catalog actually carry; a field the source 
 - **Application steps:** the student's own checklist. Each step is a native checkbox drawn as a numbered ring; ticked steps fill ink with a check, the first unticked one gets an amber ring and "Próxima etapa", and a segmented bar counts progress. Nothing is inferred from dates. Progress is kept per opportunity in this browser (`brasil-afora:etapas:<scope>:<id>`) until it moves to the profile as "applications in progress".
 - **Sidebar:** deadline card with countdown and CTA, source card (verified: checked on the official source and when; catalog: last update and the official domain), a mini map with the place's pins, and three similar open opportunities. On phones a bottom bar keeps the deadline and "Site oficial" in reach.
 
+### Programas e Bolsas (/programas-e-bolsas)
+The third catalog: recurring programs (bolsas, mentorias, preparatórios, programas de acesso, intercâmbios, formação) rather than one-off opportunities. It sits in the nav between Nacional and Mapa ("Programas" below 1024px), and a home chip ("Mentorias e preparatórios") opens it pre-filtered.
+- **Header:** the catalog header with a photograph instead of a map: the Suzzallo Library reading room, lamps lit. The other two headers show the night lights of a territory; this one shows the lights where the preparation happens. It dissolves into the navy like the maps, and on paper it becomes a plate that starts where the copy column ends (a dark photo can't fade into paper). Credited under the photo.
+- **Not on the map.** Programs have no pins, no "Onde acontece" map card, and no presence on /mapa.
+- **Time is a round, not a deadline.** An opportunity counts down to one date and disappears after it; a program stays listed and shows where its enrollment round stands: *Abertas · faltam N dias* (amber dot, amber text within 21 days, plus the "Prazo próximo" badge), *Em breve* (ringed dot, with the forecast), *Encerradas* (with the next round), *Inscrições o ano todo*, or *Datas a confirmar* (with the source's note). Derived from dates on the client, never stored.
+- **Card:** the opportunity card's shell and cover (night map of the destination with the organization's icon on a white tile). The funding-blue tag is the program type, or the scholarship's size for a Bolsa; up to two benefit tags follow. Meta rows: para quem, formato (modalidade · duração), destino. The footer holds the round status instead of a countdown.
+- **Filters:** tipo, para quem (nível), o que oferece, para estudar (no Brasil / no exterior), modalidade, inscrições. No age, deadline-window or verified controls: the sources state none of them.
+- **Program page:** the opportunity page's hero, facts card, section tabs (Visão geral, Para quem é, O que oferece, Como participar) and step checklist. The sidebar has an "Inscrições" card with the round's dates, a "Quem oferece" card, and related programs. No "Salvar" yet (favorites are database-backed; programs aren't there yet), and no verification language: programs are catalog information.
+
 ### Map page (/mapa)
 The night-lights world at full resolution (EPSG:4326 tiles to zoom 4), always filling its frame and opening on the Atlantic. Countries with open opportunities glow amber in three steps (1, 2–4, 5+), blended in "screen" mode so their own city lights stay white; every other border is a faint mist line. Amber dots mark cities, and a white ring marks Brasília.
 - **Choosing a country** (on the map, or in the list beside it) flies there. The outlines fade out during the flight and back in on landing, then the routes from Brasília draw themselves. The chosen country gets a brighter outline and a label. The choice is kept in the URL (`?pais=ca`), and the detail page's "Onde acontece" card links to it.
@@ -266,10 +277,34 @@ Only what the account and this browser actually hold; the mockup's academic prof
 - **Parecidas com as suas:** three open catalog cards of the same type or country.
 - **Sidebar:** "Prazos próximos" (open, not yet sent, within 30 days; amber within 21) and "Sua conta" (name, email, member since, a line saying the tracking lives in this browser, admin link, Sair).
 
+### Hero photo
+
+One pool of twenty-four Wikimedia Commons photos (`src/components/homepage/hero-photos.ts`), universities rather than skylines, shared by both themes (owner, 2026-09-22): the same photo appears on the navy ground and on the paper plate, and only the grade changes. The pool mixes golden hour, blue hour, night, warm interiors and daylight, and covers the destinations the catalog actually sends students to — Edinburgh, Harvard, MIT, Oxford, Cambridge, Columbia, Princeton, Stanford, Yale, Toronto, UBC, Trinity College Dublin, Coimbra, Heidelberg, the Suzzallo reading room, and four Brazilian ones (USP's Museu Paulista, UFRJ, UFPR and Rio's Real Gabinete Português de Leitura). Coimbra is there because it takes ENEM, and Yale, Toronto and UBC appear on the home's verified cards. The `day/` and `night/` folders describe the light in the photo, not the theme.
+
+- Only the current, previous and next photos are mounted, and a photo fades in only once it has loaded. The first photo is preloaded; the rest load lazily as the rotation reaches them.
+- The start photo is keyed to the hour on the server (the page revalidates hourly), so returning visitors don't always open on the same city and nothing swaps after hydration.
+- Each photo carries its own focal point (`position`). Night subjects sit center-right, where the dissolve is opaque. An optional `tone` overrides the grade (Edinburgh keeps its warm dusk grade).
+**The Low-Key Night Rule.** On the navy ground every photo is brought to roughly the same level, so it sits behind the headline instead of competing with it: Edinburgh is the reference (mean luminance ~72–80 in the visible part of the frame), and `toneDark` pulls the brighter ones down — a sunlit campus lands around 0.5 brightness, which turns its blue sky into deep navy. Deep-night photos were tried and dropped (owner, 2026-09-22): a lit building against black goes grey or glows like a box, while a warm sky behind a dark subject melts into the navy. On the paper plate the reverse applies: the darkest photos get a `toneLight` lift so they read as prints rather than black rectangles. A photo brighter than that, or one with a cold or green cast, gets a per-photo `tone` that pulls it into line — green especially, because green belongs to "Verificada" and a floodlit lawn muddles that signal. Measured before and after in the session that added the set (2026-09-22); the range now runs 31–79. Photos that can't be graded into the set are replaced, not kept.
+
+- One image is mounted per slide and the themes share it, so nothing loads twice and flipping the theme keeps the picture on screen.
+- Its credit (place · Foto: author, license, both linked) shows under the photo while it is on screen; the footer says so. Sources and changes are in `public/home/SOURCES.md`.
+
 ### Map teaser
 The night-lights map of the Americas and Atlantic, brightened slightly, with amber routes drawn from Brasília to each open verified destination and pins for national ones, plus a country legend.
 
-**The Drawn Line Rule.** The only motion is amber lines drawing themselves: the photo note's underline on load and the map routes as they scroll into view. Under reduced motion they render already drawn.
+**The Drawn Line Rule.** The only drawn motion is amber lines drawing themselves: the photo note's underline on load and the map routes as they scroll into view. Under reduced motion they render already drawn.
+
+**The Hero Photo Exception.** The one other motion, asked for by the owner (2026-09-22): the hero photo slowly crossfades through its set (8s hold, 1.6s fade, the incoming photo settling from a 3.5% scale). It holds still under reduced motion and in hidden tabs, and a pause button sits beside the credit. Nothing else on the page fades or slides.
+
+## Light theme
+
+Dark navy stays the default. The academic light theme (Fundação Estudar-inspired: warm paper, navy ink, golden amber for action) applies under `[data-theme="light"]`, toggled by the sun/moon button in the header and persisted in `localStorage` + cookie (`ba-theme`, see `src/hooks/use-theme.ts`). A `next/script` bootstrap in `src/app/layout.tsx` applies the stored value before first paint.
+
+- **Tokens:** navy ground/surface/field/rule remap to paper/white/inset/hairline (`#faf7f1` → `#ddd2bd`); `mist`/`mist-dim` deepen to ink tones; `atlantic` deepens to `#1e56c8`; the slate ramp flips (900/950 become white/paper wells, 100/200 become ink). Amber fills keep the brand `#ff9b0f`; amber *text* deepens to `#b45309` for contrast. (Keep `@theme` non-inline in `globals.css` — `inline` bakes token values into utilities and the light remap stops working.)
+- **Bridges:** hard-coded `text-white` on grounds that become paper flips to ink, except on fills that stay dark (fund/blue/red/slate-700 badges) and on photography (the handwritten note). Labels on amber fills are pinned to deep navy in either theme.
+- **Header:** goes solid paper in light mode (no transparent-over-photo state).
+- **Photography** (hero, catalog maps, covers, night map) stays as-is; white text over photos stays white. The hero pool is shared with the dark theme and only its grade changes (see The Low-Key Night Rule).
+- **Hero photo is a plate, not a dissolve.** A dark photo can't fade into paper: every step of the fade mixes shadow with cream into a grey smear, so light mode drops the masks and fades. On desktop the photo is a hard-edged plate beside the text block, aligned to its top and bottom, rounded (18px) on the left and bleeding off the right edge; the copy column (chips included) narrows to clear it, and the credit sits under the plate like a print caption. On phones it is an inset 18px print above the headline. The plate shows a paper-dark tone (`navy-800`) until its photo loads. The handwritten note stays on the photo, white, over a soft shade.
 
 ## Do's and Don'ts
 
@@ -282,4 +317,4 @@ The night-lights map of the Americas and Atlantic, brightened slightly, with amb
 - **Don't** put eyebrow/kicker labels above headings.
 - **Don't** use amber as decoration or green outside the verified set.
 - **Don't** draw fake university crests or logos; use the institution name with a landmark icon.
-- **Don't** add a second handwritten note or a second motion idea.
+- **Don't** add a second handwritten note or a motion idea beyond the drawn lines and the hero crossfade.

@@ -2,19 +2,19 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import {
   Atkinson_Hyperlegible_Next,
-  Bebas_Neue,
   Caveat,
   Geist,
   Geist_Mono,
-  Space_Grotesk,
+  Sora,
 } from "next/font/google";
+import Script from "next/script";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { siteCopy } from "@/lib/copy/pt-br";
 import "./globals.css";
 
-const SITE_TITLE = "Brasil Afora: encontre oportunidades acadêmicas";
-const SITE_DESCRIPTION =
-  "Conecte-se às melhores oportunidades, bolsas e feiras, no Brasil e no mundo. Tudo em um só lugar para impulsionar seu futuro!";
+const SITE_TITLE = siteCopy.title;
+const SITE_DESCRIPTION = siteCopy.description;
 const FALLBACK_SITE_URL = "https://brasil-afora.vercel.app";
 
 const getMetadataBase = (): URL => {
@@ -41,16 +41,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas-neue",
-  subsets: ["latin"],
-  weight: "400",
-});
-
-const wordmark = Space_Grotesk({
+const wordmark = Sora({
   variable: "--font-wordmark",
-  subsets: ["latin"],
-  weight: ["500", "700"],
+  subsets: ["latin", "latin-ext"],
+  weight: ["500", "600", "700"],
+  display: "swap",
 });
 
 const atkinsonNext = Atkinson_Hyperlegible_Next({
@@ -127,10 +122,15 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} ${wordmark.variable} ${atkinsonNext.variable} ${caveat.variable} h-full antialiased`}
-      lang="pt-BR"
+      className={`${geistSans.variable} ${geistMono.variable} ${wordmark.variable} ${atkinsonNext.variable} ${caveat.variable} h-full antialiased`}
+      data-theme="dark"
+      lang={siteCopy.locale}
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
+        <Script id="ba-theme-init" strategy="beforeInteractive">
+          {`(function(){try{var m=document.cookie.match(/(?:^|; )ba-theme=(dark|light)/);var t=m?m[1]:localStorage.getItem("ba-theme");if(t!=="light"&&t!=="dark"){t="dark";}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="dark";}})();`}
+        </Script>
         <QueryProvider>{children}</QueryProvider>
         <Toaster />
       </body>

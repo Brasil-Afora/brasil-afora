@@ -5,7 +5,9 @@ import { useMemo } from "react";
 import type { CatalogFilterField } from "@/components/opportunities/catalog-filters";
 import type { CatalogHeaderConfig } from "@/components/opportunities/catalog-header";
 import { toNationalItem } from "@/components/opportunities/catalog-model";
-import CatalogPage from "@/components/opportunities/catalog-page";
+import CatalogPage, {
+  OPPORTUNITY_PRESENTATION,
+} from "@/components/opportunities/catalog-page";
 import { FILTER_OPTIONS } from "@/components/opportunities/filter-options";
 import { BRAZIL_MAP } from "@/components/opportunities/map-windows";
 import {
@@ -69,7 +71,7 @@ const header: CatalogHeaderConfig = {
   accentWord: "Nacionais",
   breadcrumb: "Nacional",
   icon: MapPinnedIcon,
-  map: BRAZIL_MAP,
+  backdrop: { kind: "map", map: BRAZIL_MAP },
   subtitle:
     "Olimpíadas, feiras de ciências, imersões e programas de liderança para estudantes em todo o Brasil.",
   titleLead: "Oportunidades",
@@ -136,6 +138,7 @@ const NacionalMain = ({ verifiedLocations }: NacionalMainProps) => {
       header={header}
       initialFilters={initialFiltros}
       items={items}
+      presentation={OPPORTUNITY_PRESENTATION}
       setFiltros={setFiltros}
       setFiltrosTemporarios={setFiltrosTemporarios}
       sortStorageKey="nacionalOrdenacao"

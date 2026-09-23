@@ -2,7 +2,7 @@
 
 ## Folder purpose
 
-The shared catalog used by the international and national listing pages (`catalog-*`), plus filter options and shared types.
+The shared catalog used by the international, national and Programas e Bolsas listing pages (`catalog-*`), plus filter options and shared types.
 
 ## Rules for agents
 
@@ -16,6 +16,9 @@ The shared catalog used by the international and national listing pages (`catalo
 ## Architecture patterns
 
 - `*-main.tsx` (per domain) fetches, merges verified + catalog data, applies filters and maps records to `CatalogItem` view models; `catalog-page.tsx` renders everything else.
+- `CatalogPage` is generic over the item: each catalog passes a `CatalogPresentation` (card, row, sort, count/empty/contribute copy, optional map pins). Opportunities use `OPPORTUNITY_PRESENTATION`; programs bring their own (`src/components/programs/`).
+- The header backdrop is either the territory's night map (`kind: "map"`) or a credited photograph (`kind: "photo"`).
+- The age, deadline-window and verified controls render only when the catalog's filter state carries `idade`, `prazo` or `apenasVerificadas`.
 - `catalog-page.tsx` gates results on hydration, so prerendered HTML never contains build-time deadlines or countdowns.
 - Sort order lives in session storage per catalog; grid/list view in local storage.
 - The mobile sheet edits a draft copy of the filters and previews the result count before applying.

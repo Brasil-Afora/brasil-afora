@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useClickOutside from "@/hooks/use-click-outside";
 import { getSession, signOut } from "@/lib/auth-client";
+import { navCopy } from "@/lib/copy/pt-br";
 
 const FIRST_NAME_SPLIT_REGEX = /\s+/;
 
@@ -13,6 +14,8 @@ interface HeaderNavLink {
   end: boolean;
   href: string;
   label: string;
+  /** Shown instead of `label` where the desktop bar is tight. */
+  shortLabel?: string;
 }
 
 interface UseHeaderStateResult {
@@ -50,8 +53,8 @@ const useHeaderState = (): UseHeaderStateResult => {
 
   const isAuthenticated = !!session?.user;
   const firstName = getFirstName(session?.user?.name);
-  const profileDisplayName = firstName || "Perfil";
-  const mobileAccountDisplayName = firstName || "Minha Conta";
+  const profileDisplayName = firstName || navCopy.profile;
+  const mobileAccountDisplayName = firstName || navCopy.myAccount;
   const isAdmin =
     ((session?.user as { role?: string } | undefined)?.role ?? "") === "admin";
 
@@ -143,17 +146,29 @@ const useHeaderState = (): UseHeaderStateResult => {
     triggerSessionLoad();
   }, [shouldPrefetchSession, triggerSessionLoad]);
 
-  const navLinks = useMemo(
+  const navLinks = useMemo<HeaderNavLink[]>(
     () => [
-      { href: "/", label: "Início", end: true },
+      { href: "/", label: navCopy.home, end: true },
       {
         href: "/oportunidades/internacionais",
-        label: "Internacional",
+        label: navCopy.international,
         end: false,
       },
-      { href: "/oportunidades/nacionais", label: "Nacional", end: false },
-      { href: "/mapa", label: "Mapa", end: false },
-      ...(isAdmin ? [{ href: "/admin", label: "Admin", end: false }] : []),
+      {
+        href: "/oportunidades/nacionais",
+        label: navCopy.national,
+        end: false,
+      },
+      {
+        href: "/programas-e-bolsas",
+        label: navCopy.programs,
+        shortLabel: navCopy.programsShort,
+        end: false,
+      },
+      { href: "/mapa", label: navCopy.map, end: false },
+      ...(isAdmin
+        ? [{ href: "/admin", label: navCopy.admin, end: false }]
+        : []),
     ],
     [isAdmin]
   );

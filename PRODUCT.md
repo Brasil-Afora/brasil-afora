@@ -21,6 +21,7 @@ A curated "Verificada" selection whose eligibility for Brazilian students, deadl
 ## Operating Context
 
 - Two catalogs: internacionais and nacionais, each with filters (idade, nível de ensino, tipo, taxa; plus país, idioma and tipo de bolsa for internacionais, modalidade for nacionais). Filters persist per session.
+- A third section, Programas e Bolsas (`/programas-e-bolsas`), for recurring programs: scholarships, mentorships, prep and access programs. It is a hand-entered starter set in `src/data/programs.ts` until the scraper/admin model is decided. Programs stay listed when a round closes (with the next round's forecast), and they are not on the map.
 - Detail pages per opportunity; a world map (`/mapa`) where clicking a country lists its opportunities.
 - Public reading without an account; an account is only needed to save favorites. Admins create and edit opportunities.
 - New opportunities can be suggested through a Google Form; contact is by e-mail (passaporteglobalbr@gmail.com).
@@ -33,14 +34,14 @@ A curated "Verificada" selection whose eligibility for Brazilian students, deadl
 
 ## Brand Commitments
 
-- Name: Brasil Afora. Wordmark "BRASIL" white plus "AFORA" amber in Bebas Neue, with `public/logo-20260413.png`.
+- Name: Brasil Afora. Wordmark "Brasil" white plus "Afora" amber in Sora 600 (Title Case), with `public/logo-20260413.png`.
 - Dark navy ground with amber as the brand accent.
 - The home page follows the mockup the owner supplied on 2026-09-21 (dark navy hero with a dusk city photo, search bar, category chips, verified opportunity cards, why-strip and map teaser).
 
 ## Evidence on Hand
 
 - Curated opportunities with images and licenses: `src/data/showcase-opportunities.json`, `public/opportunities/showcase/` (sources in `SOURCES.md`).
-- Home hero photo: `public/home/edinburgh-evening-skyline.jpg` (CC BY-SA 2.0, credited on the page and in `public/home/SOURCES.md`).
+- Home hero photos: twenty-four university photos from Wikimedia Commons, shared by both themes (`public/home/edinburgh-evening-skyline.jpg` and `public/home/hero/`), each credited on the page while shown and in `public/home/SOURCES.md`.
 - World night map: `public/map.jpg`.
 - No testimonials, user counts, partner logos or institution crests exist. Do not fabricate them.
 

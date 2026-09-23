@@ -5,7 +5,9 @@ import { useMemo } from "react";
 import type { CatalogFilterField } from "@/components/opportunities/catalog-filters";
 import type { CatalogHeaderConfig } from "@/components/opportunities/catalog-header";
 import { toInternationalItem } from "@/components/opportunities/catalog-model";
-import CatalogPage from "@/components/opportunities/catalog-page";
+import CatalogPage, {
+  OPPORTUNITY_PRESENTATION,
+} from "@/components/opportunities/catalog-page";
 import { FILTER_OPTIONS } from "@/components/opportunities/filter-options";
 import { WORLD_MAP } from "@/components/opportunities/map-windows";
 import {
@@ -83,7 +85,7 @@ const header: CatalogHeaderConfig = {
   accentWord: "Internacionais",
   breadcrumb: "Internacional",
   icon: GlobeIcon,
-  map: WORLD_MAP,
+  backdrop: { kind: "map", map: WORLD_MAP },
   subtitle:
     "Bolsas de estudo, intercâmbios, summer programs e cursos para estudantes brasileiros em todo o mundo.",
   titleLead: "Oportunidades",
@@ -154,6 +156,7 @@ const InternacionalMain = ({ verifiedLocations }: InternacionalMainProps) => {
       header={header}
       initialFilters={initialFiltros}
       items={items}
+      presentation={OPPORTUNITY_PRESENTATION}
       setFiltros={setFiltros}
       setFiltrosTemporarios={setFiltrosTemporarios}
       sortStorageKey="internacionalOrdenacao"

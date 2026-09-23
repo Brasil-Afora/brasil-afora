@@ -25,6 +25,7 @@ import {
   SectionNav,
   SourceCard,
   SourceGap,
+  StatusBadges,
   StepsChecklist,
 } from "./detail-parts";
 import DetailSimilar from "./detail-similar";
@@ -55,7 +56,8 @@ interface OpportunityDetailPageProps {
   map: MapWindow;
 }
 
-const share = async (detail: OpportunityDetail) => {
+/** Native share sheet where there is one; otherwise copies the link. */
+export const shareDetail = async (detail: { name: string }) => {
   const url = window.location.href;
   if (typeof navigator.share === "function") {
     try {
@@ -278,12 +280,13 @@ const OpportunityDetailPage = ({
             officialLink={detail.officialLink}
             onSave={favorite.onToggle}
             onShare={() => {
-              share(detail).catch(() => undefined);
+              shareDetail(detail).catch(() => undefined);
             }}
           />
         }
         backHref={backHref}
         backLabel={backLabel}
+        badges={<StatusBadges detail={detail} />}
         detail={detail}
       />
 
