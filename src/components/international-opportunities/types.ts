@@ -1,4 +1,9 @@
+import type { StructuredSemanticField } from "@/lib/opportunities-api";
+
 export interface Opportunity {
+  applicationLinkStatus?: string | null;
+  applicationUrl?: string | null;
+  canApply?: boolean | null;
   cidade: string;
   coberturaBolsa: string;
   contato: string;
@@ -10,6 +15,8 @@ export interface Opportunity {
   id: string;
   imagem: string;
   instituicaoResponsavel: string;
+  lastVerifiedAt?: string | null;
+  lifecycleStatus?: string | null;
   linkOficial: string;
   nivelEnsino: string;
   nome: string;
@@ -18,6 +25,7 @@ export interface Opportunity {
   processoInscricao: string;
   requisitosEspecificos: string;
   requisitosIdioma: string;
+  semanticFields?: Record<string, StructuredSemanticField>;
   taxaAplicacao: string;
   tipo: string;
   tipoBolsa: string;

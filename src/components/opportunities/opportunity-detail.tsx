@@ -174,9 +174,10 @@ const MobileActionBar = ({ detail }: { detail: OpportunityDetail }) => {
             {detail.deadline}
           </span>
           <br />
-          {state === "closed"
-            ? "Inscrições encerradas"
-            : detail.daysLeft !== null && formatDaysLeft(detail.daysLeft)}
+          {detail.lifecycleLabel ??
+            (state === "closed"
+              ? "Inscrições encerradas"
+              : detail.daysLeft !== null && formatDaysLeft(detail.daysLeft))}
         </p>
         <a
           className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-signal px-5 font-semibold text-[15px] text-navy-950"

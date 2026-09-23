@@ -671,8 +671,19 @@ export const DeadlineCard = ({ detail }: { detail: OpportunityDetail }) => {
           aria-hidden="true"
           className={`h-1.5 w-1.5 rounded-full ${urgent ? "bg-signal" : "bg-mist"}`}
         />
-        {status}
+        {detail.lifecycleLabel ?? status}
       </p>
+      {detail.applicationTarget.available && (
+        <a
+          className="mt-4 flex h-11 items-center justify-center rounded-xl bg-signal font-semibold text-navy-950"
+          href={detail.applicationTarget.href}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          {detail.applicationTarget.label}
+          <span className="sr-only">(abre em nova aba)</span>
+        </a>
+      )}
       {detail.officialLink && (
         <a
           className="mt-5 flex h-11 items-center justify-center gap-2 rounded-xl bg-signal font-semibold text-[15px] text-navy-950 transition-colors hover:bg-signal-strong"

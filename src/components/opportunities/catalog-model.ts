@@ -4,6 +4,10 @@ import type {
   InternationalOpportunity,
   NationalOpportunity,
 } from "@/lib/opportunities-api";
+import {
+  getOpportunityLifecycleLabel,
+  shouldShowDeadlineCountdown,
+} from "@/lib/opportunity-lifecycle";
 
 export type CatalogScope = "international" | "national";
 
@@ -25,6 +29,7 @@ export interface CatalogItem {
   id: string;
   institution: string;
   level: string;
+  lifecycleLabel?: string | null;
   /** Where it takes place, resolved on the server; empty when nationwide or online. */
   locations: OpportunityLocation[];
   name: string;
@@ -138,7 +143,10 @@ export const toInternationalItem = (
       opportunity.nome,
       opportunity.instituicaoResponsavel
     ),
-    daysLeft: getBrasiliaDaysUntil(opportunity.prazoInscricao, now),
+    daysLeft: shouldShowDeadlineCountdown(opportunity)
+      ? getBrasiliaDaysUntil(opportunity.prazoInscricao, now)
+      : null,
+    lifecycleLabel: getOpportunityLifecycleLabel(opportunity),
     deadline: opportunity.prazoInscricao,
     locations: opportunity.localizacoes ?? [],
     href: `/oportunidades/internacionais/${opportunity.id}`,
@@ -170,7 +178,10 @@ export const toNationalItem = (
       opportunity.nome,
       opportunity.instituicaoResponsavel
     ),
-    daysLeft: getBrasiliaDaysUntil(opportunity.prazoInscricao, now),
+    daysLeft: shouldShowDeadlineCountdown(opportunity)
+      ? getBrasiliaDaysUntil(opportunity.prazoInscricao, now)
+      : null,
+    lifecycleLabel: getOpportunityLifecycleLabel(opportunity),
     deadline: opportunity.prazoInscricao,
     locations: opportunity.localizacoes ?? [],
     href: `/oportunidades/nacionais/${opportunity.id}`,

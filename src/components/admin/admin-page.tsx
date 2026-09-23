@@ -1,6 +1,7 @@
 "use client";
 
 import { ShieldUserIcon } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { FILTER_OPTIONS } from "@/components/opportunities/filter-options";
 import ConfirmationModal from "@/components/ui/confirmation-modal";
@@ -560,11 +561,19 @@ const AdminPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy-950 via-navy-900 to-navy-950 p-6 font-inter text-white">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex items-center gap-3">
-          <ShieldUserIcon className="h-8 w-8 text-amber-500" />
-          <h1 className="font-bold text-3xl text-amber-500">
-            Painel Administrativo
-          </h1>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <ShieldUserIcon className="h-8 w-8 text-amber-500" />
+            <h1 className="font-bold text-3xl text-amber-500">
+              Painel Administrativo
+            </h1>
+          </div>
+          <Link
+            className="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-slate-950 text-sm"
+            href="/admin/review"
+          >
+            Abrir fila de revisão
+          </Link>
         </div>
 
         <AdminTabs activeTab={activeTab} onTabChange={handleTabChange} />

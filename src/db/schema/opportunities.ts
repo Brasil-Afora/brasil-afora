@@ -1,4 +1,5 @@
 import { date, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { lifecycleState, publicationVersions } from "@/db/schema/ingestion";
 
 export const opportunities = pgTable("opportunities", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -22,6 +23,16 @@ export const opportunities = pgTable("opportunities", {
   selectionSteps: text("selection_steps").notNull(),
   applicationProcess: text("application_process").notNull(),
   officialLink: text("official_link").notNull(),
+  officialInformationUrl: text("official_information_url"),
+  applicationUrl: text("application_url"),
+  publicationVersionId: uuid("publication_version_id").references(
+    () => publicationVersions.id
+  ),
+  lifecycleStatus: lifecycleState("lifecycle_status"),
+  lastVerifiedAt: timestamp("last_verified_at", {
+    withTimezone: true,
+    mode: "date",
+  }),
   contact: text("contact").notNull(),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())

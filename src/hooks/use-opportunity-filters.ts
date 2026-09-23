@@ -12,6 +12,8 @@ import type {
   InternationalOpportunity,
   NationalOpportunity,
 } from "@/lib/opportunities-api";
+import { applyBaseFilters } from "./opportunity-semantic-filters";
+
 import useSessionStorage from "./use-session-storage";
 
 type Opportunity = InternationalOpportunity | NationalOpportunity;
@@ -99,8 +101,15 @@ const matchesBaseFilters = (
   type: CatalogType,
   now: Date
 ): boolean => {
+  const hasSemantics =
+    opportunity.semanticFields !== undefined ||
+    opportunity.structuredAgeRules !== undefined;
+  if (hasSemantics && applyBaseFilters([opportunity], filtros).length === 0) {
+    return false;
+  }
   const age = Number(filtros.idade);
   if (
+    !hasSemantics &&
     filtros.idade !== "" &&
     !Number.isNaN(age) &&
     !isAgeAccepted(opportunity.faixaEtaria ?? "", age)
@@ -120,6 +129,7 @@ const matchesBaseFilters = (
     return false;
   }
   if (
+    !hasSemantics &&
     filtros.taxaAplicacao.length > 0 &&
     !matchesAnyOption(opportunity.taxaAplicacao, filtros.taxaAplicacao)
   ) {
