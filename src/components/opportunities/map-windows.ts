@@ -1,5 +1,7 @@
 // Night-lights map crops of public/map.jpg (equirectangular) and the
-// longitude/latitude window each one covers. Overlays project points with
+// longitude/latitude window each one covers. Each has a daylight twin cut at
+// the same window from public/map-day.jpg (scripts/build-map-crops.mjs), shown
+// in the light theme. Overlays project points with
 // x = lon - west, y = north - lat inside that window.
 //
 // NOTE: filenames carry a version suffix on purpose. The image URL is part of
@@ -8,6 +10,8 @@
 // same URL) will silently misalign every pin and route drawn on the map.
 
 export interface MapWindow {
+  /** The same window of the daylight map, for the light theme. */
+  daySrc: string;
   east: number;
   north: number;
   south: number;
@@ -17,6 +21,7 @@ export interface MapWindow {
 
 /** Home map, international header and international detail pages. */
 export const WORLD_MAP: MapWindow = {
+  daySrc: "/catalog/day/header-mundo-v2.jpg",
   src: "/catalog/header-mundo-v2.jpg",
   west: -130,
   east: 160,
@@ -26,6 +31,7 @@ export const WORLD_MAP: MapWindow = {
 
 /** National header and national detail pages. */
 export const BRAZIL_MAP: MapWindow = {
+  daySrc: "/catalog/day/header-brasil.jpg",
   src: "/catalog/header-brasil.jpg",
   west: -82,
   east: -18,

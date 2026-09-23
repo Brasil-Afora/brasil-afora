@@ -5,6 +5,8 @@ import "leaflet/dist/leaflet.css";
 import "./opportunity-map.css";
 import { GlobeIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
+import useDocumentTheme from "@/hooks/use-document-theme";
+import { clusterByDistance } from "@/lib/cluster";
 import type { GeoPoint } from "@/lib/geo";
 import {
   allCountryOutlines,
@@ -20,7 +22,12 @@ import {
 // reprojection. Countries with open opportunities glow amber; pins mark the
 // cities; choosing a country flies there and draws its routes from Brasília.
 
-const TILE_URL = "/map-tiles/v1/{z}/{x}/{y}.webp";
+/** Night lights on the navy ground; on paper, the same world by day (NASA's
+ * Blue Marble, cut to the identical grid by scripts/build-map-tiles.mjs). */
+const TILE_URLS = {
+  dark: "/map-tiles/v1/{z}/{x}/{y}.webp",
+  light: "/map-tiles/day-v1/{z}/{x}/{y}.webp",
+} as const;
 /** Zoom level at which the tiles are the source's own pixels. */
 const NATIVE_ZOOM = 4;
 /** Past the source's pixels, but not so far that the lights turn to mush. */
@@ -33,11 +40,31 @@ const WORLD = L.latLngBounds([-60, -180], [84, 180]);
 /** Opening view: the Atlantic, with Brazil and most destinations in frame. */
 const HOME_CENTER: L.LatLngTuple = [16, -32];
 const FLY_SECONDS = 1.1;
+/** How far past the viewport, in viewports, the country shapes are drawn.
+ * Leaflet redraws its vector layer only when a move ends, so a drag shows
+ * whatever was drawn when it began: at its default (0.1) a pan of more than
+ * a tenth of the frame reaches the edge of the drawing, and the lit
+ * countries stop at a hard line until you let go. At 1.5, one drag can
+ * cross a screen and a half, and at the opening zoom the drawing already
+ * holds the whole world. */
+const VECTOR_PADDING = 1.5;
 const FRAME_PADDING = 0.18;
+/** Room around a cluster's places when flying in to split it. */
+const CLUSTER_FRAME_PADDING = 0.6;
 const ROUTE_BOW = 0.22;
 const ROUTE_STEPS = 48;
-const MANY_OPPORTUNITIES = 5;
-const SOME_OPPORTUNITIES = 2;
+// Country tiers: 1–2, 3–9, 10+. Sized for a catalog of hundreds, where the
+// old 1 / 2–4 / 5+ put every country that mattered in the top step.
+const MANY_OPPORTUNITIES = 10;
+const SOME_OPPORTUNITIES = 3;
+/** Pins closer than this on screen merge into one marker with a count. */
+const CLUSTER_RADIUS_PX = 30;
+/** Routes from Brasília go to this many places at most, the busiest ones:
+ * one route per city turned a country with fifty of them into a solid fan. */
+const MAX_ROUTES = 6;
+const CLUSTER_MIN_SIZE = 24;
+const CLUSTER_MAX_SIZE = 48;
+const CLUSTER_GROWTH = 6;
 
 /** Where every route starts: Brasília, the middle of the country. */
 const ORIGIN: GeoPoint = { lat: -15.79, lon: -47.88 };
@@ -133,11 +160,16 @@ const coverZoom = (map: L.Map): number =>
   Math.ceil(map.getBoundsZoom(WORLD, true) * 4) / 4;
 
 /**
- * Flies to a country's frame, or back to the opening view. Leaflet scales its
- * vector layer during a flight and redraws it only on landing, so outlines
- * would swell and blur; they fade out for the trip and back in on arrival.
+ * Flies to a country's frame (or a cluster's), or back to the opening view.
+ * Leaflet scales its vector layer during a flight and redraws it only on
+ * landing, so outlines would swell and blur; they're hidden for the trip and
+ * shown again on arrival.
  */
-const moveCamera = (map: L.Map, target: L.LatLngBounds | null) => {
+const moveCamera = (
+  map: L.Map,
+  target: L.LatLngBounds | null,
+  maxZoom = MAX_FIT_ZOOM
+) => {
   const animate = !prefersReducedMotion();
   if (animate) {
     const container = map.getContainer();
@@ -148,7 +180,7 @@ const moveCamera = (map: L.Map, target: L.LatLngBounds | null) => {
     map.flyToBounds(target, {
       animate,
       duration: FLY_SECONDS,
-      maxZoom: MAX_FIT_ZOOM,
+      maxZoom,
     });
   } else {
     map.flyTo(HOME_CENTER, map.getMinZoom(), {
@@ -171,6 +203,108 @@ const markSelected = (
   }
 };
 
+interface PinCluster extends GeoPoint {
+  count: number;
+  /** Heaviest first. */
+  pins: MapPin[];
+}
+
+/**
+ * The pins as they'd sit on screen at the map's current zoom, merged where
+ * they'd touch (src/lib/cluster.ts), busiest first. Re-run after every zoom,
+ * so clusters split as the map closes in.
+ */
+const clusterPins = (map: L.Map, pins: MapPin[]): PinCluster[] => {
+  const zoom = map.getZoom();
+  return clusterByDistance(
+    pins,
+    (pin) => map.project([pin.lat, pin.lon], zoom),
+    (pin) => pin.count,
+    CLUSTER_RADIUS_PX
+  )
+    .map((cluster) => {
+      const { lat, lng } = map.unproject([cluster.x, cluster.y], zoom);
+      return { count: cluster.weight, lat, lon: lng, pins: cluster.items };
+    })
+    .sort((a, b) => b.count - a.count);
+};
+
+/** Grows with the log of the count: 3 and 30 read as different, and 150
+ * still doesn't swamp a region. Big enough for the digits at every size. */
+const clusterSize = (count: number): number =>
+  Math.min(
+    CLUSTER_MAX_SIZE,
+    Math.round(CLUSTER_MIN_SIZE + CLUSTER_GROWTH * Math.log2(count))
+  );
+
+const clusterMarker = (cluster: PinCluster): L.Marker => {
+  const size = clusterSize(cluster.count);
+  const label = document.createElement("span");
+  label.textContent = String(cluster.count);
+  return L.marker([cluster.lat, cluster.lon], {
+    icon: L.divIcon({
+      className: "map-cluster",
+      html: label,
+      iconSize: [size, size],
+    }),
+    keyboard: false,
+  });
+};
+
+const placesLabel = (cluster: PinCluster): string => {
+  const others = cluster.pins.length - 1;
+  return `${cluster.pins[0]?.label ?? ""} e mais ${others} ${others === 1 ? "lugar" : "lugares"}`;
+};
+
+/**
+ * City pins, or a numbered marker where several would overlap. A single pin
+ * chooses its country; a cluster flies in until it splits, and chooses the
+ * country once it can't (two cities a few kilometres apart never separate).
+ */
+const drawPins = (
+  map: L.Map,
+  layer: L.LayerGroup,
+  pins: MapPin[],
+  onSelect: (iso: string) => void
+) => {
+  layer.clearLayers();
+  for (const cluster of clusterPins(map, pins)) {
+    const [first] = cluster.pins;
+    if (!first) {
+      continue;
+    }
+    if (cluster.pins.length === 1) {
+      dotMarker(first, "map-pin", 20)
+        .bindTooltip(tooltipNode(first.label, plural(first.count)), {
+          className: "map-tooltip",
+          direction: "top",
+          offset: [0, -8],
+        })
+        .on("click", () => onSelect(first.iso))
+        .addTo(layer);
+      continue;
+    }
+    const size = clusterSize(cluster.count);
+    clusterMarker(cluster)
+      .bindTooltip(tooltipNode(placesLabel(cluster), plural(cluster.count)), {
+        className: "map-tooltip",
+        direction: "top",
+        offset: [0, -size / 2],
+      })
+      .on("click", () => {
+        if (map.getZoom() >= map.getMaxZoom()) {
+          onSelect(first.iso);
+          return;
+        }
+        const bounds = L.latLngBounds(
+          cluster.pins.map((pin): L.LatLngTuple => [pin.lat, pin.lon])
+        );
+        moveCamera(map, bounds.pad(CLUSTER_FRAME_PADDING), map.getMaxZoom());
+      })
+      .addTo(layer);
+  }
+};
+
 /** Where the routes go: the country's city pins, or its capital. */
 const destinationsOf = (country: MapCountry, pins: MapPin[]): GeoPoint[] => {
   const targets = pins.filter((pin) => pin.iso === country.iso);
@@ -184,8 +318,14 @@ const selectionKey = (country: MapCountry | null, pins: MapPin[]): string =>
         .join(";")}`
     : "";
 
-/** Routes from Brasília to the country's pins; none for Brazil itself. */
+/**
+ * Routes from Brasília to the country's busiest places, as clustered at the
+ * zoom the camera landed on (so a route ends on a marker you can see), at
+ * most MAX_ROUTES of them; to the capital when nothing is pinned. None for
+ * Brazil itself.
+ */
 const drawRoutes = (
+  map: L.Map,
   layer: L.LayerGroup,
   country: MapCountry,
   pins: MapPin[]
@@ -193,7 +333,12 @@ const drawRoutes = (
   if (country.iso === BRAZIL_ISO) {
     return;
   }
-  for (const destination of destinationsOf(country, pins)) {
+  const own = pins.filter((pin) => pin.iso === country.iso);
+  const destinations: GeoPoint[] =
+    own.length > 0
+      ? clusterPins(map, own).slice(0, MAX_ROUTES)
+      : [country.anchor];
+  for (const destination of destinations) {
     const route = L.polyline(routePoints(ORIGIN, destination), {
       className: "map-route",
       interactive: false,
@@ -224,6 +369,10 @@ const OpportunityMap = ({
 }: OpportunityMapProps) => {
   const containerRef = useRef<HTMLElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const pinsRef = useRef(pins);
+  const theme = useDocumentTheme();
+  const themeRef = useRef(theme);
   const countryLayerRef = useRef<L.LayerGroup | null>(null);
   const pinLayerRef = useRef<L.LayerGroup | null>(null);
   const routeLayerRef = useRef<L.LayerGroup | null>(null);
@@ -249,6 +398,7 @@ const OpportunityMap = ({
       maxBounds: WORLD,
       maxBoundsViscosity: 1,
       maxZoom: MAX_ZOOM,
+      renderer: L.svg({ padding: VECTOR_PADDING }),
       wheelPxPerZoomLevel: 110,
       zoomControl: false,
       zoomDelta: 0.5,
@@ -257,12 +407,16 @@ const OpportunityMap = ({
     map.setMinZoom(coverZoom(map));
     map.setView(HOME_CENTER, map.getMinZoom(), { animate: false });
 
-    L.tileLayer(TILE_URL, {
+    tileLayerRef.current = L.tileLayer(TILE_URLS[themeRef.current], {
       bounds: L.latLngBounds([-90, -180], [90, 180]),
-      className: "map-night",
+      className: "map-tiles",
+      // Leaflet waits for the gesture to end before loading tiles on touch
+      // devices. The whole set is 3 MB, so load them as the map moves.
+      keepBuffer: 4,
       maxNativeZoom: NATIVE_ZOOM,
       maxZoom: MAX_ZOOM,
       noWrap: true,
+      updateWhenIdle: false,
     }).addTo(map);
 
     map.createPane("routes").style.zIndex = "420";
@@ -278,6 +432,14 @@ const OpportunityMap = ({
     routeLayerRef.current = L.layerGroup().addTo(map);
     pinLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
+    map.on("zoomend", () => {
+      const layer = pinLayerRef.current;
+      if (layer) {
+        drawPins(map, layer, pinsRef.current, (iso) =>
+          onSelectRef.current(iso)
+        );
+      }
+    });
     // A fresh map has nothing drawn or framed yet.
     drawnRef.current = "";
     framedRef.current = null;
@@ -294,6 +456,12 @@ const OpportunityMap = ({
       mapRef.current = null;
     };
   }, []);
+
+  // The theme can flip while the map is open; swap the tile set in place.
+  useEffect(() => {
+    themeRef.current = theme;
+    tileLayerRef.current?.setUrl(TILE_URLS[theme]);
+  }, [theme]);
 
   // Lit countries: fill strength by how many opportunities are open there.
   useEffect(() => {
@@ -331,23 +499,16 @@ const OpportunityMap = ({
     markSelected(paths, selectedIsoRef.current);
   }, [countries]);
 
-  // City pins, drawn above the countries.
+  // City pins, drawn above the countries, clustered for the current zoom (the
+  // map re-clusters them itself after every zoom; see the creation effect).
   useEffect(() => {
+    pinsRef.current = pins;
+    const map = mapRef.current;
     const layer = pinLayerRef.current;
-    if (!layer) {
+    if (!(map && layer)) {
       return;
     }
-    layer.clearLayers();
-    for (const pin of pins) {
-      dotMarker(pin, "map-pin", 20)
-        .bindTooltip(tooltipNode(pin.label, plural(pin.count)), {
-          className: "map-tooltip",
-          direction: "top",
-          offset: [0, -8],
-        })
-        .on("click", () => onSelectRef.current(pin.iso))
-        .addTo(layer);
-    }
+    drawPins(map, layer, pins, (iso) => onSelectRef.current(iso));
   }, [pins]);
 
   // The chosen country: highlight, routes from Brasília, label and camera.
@@ -374,7 +535,7 @@ const OpportunityMap = ({
         drawLabel(routes, selected);
         const draw = () => {
           if (drawnRef.current === drawKey) {
-            drawRoutes(routes, selected, pins);
+            drawRoutes(map, routes, selected, pins);
           }
         };
         if (flying && !prefersReducedMotion()) {
@@ -447,15 +608,16 @@ const OpportunityMap = ({
         <p className="font-semibold text-slate-100">Inscrições abertas</p>
         <div className="mt-2 flex items-center gap-3">
           <span className="flex items-center gap-1.5">
-            <span className="map-swatch tier-1" />1
+            <span className="map-swatch tier-1" />
+            1–2
           </span>
           <span className="flex items-center gap-1.5">
             <span className="map-swatch tier-2" />
-            2–4
+            3–9
           </span>
           <span className="flex items-center gap-1.5">
             <span className="map-swatch tier-3" />
-            5+
+            10+
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-signal shadow-[0_0_8px_2px_rgba(255,155,15,0.55)]" />

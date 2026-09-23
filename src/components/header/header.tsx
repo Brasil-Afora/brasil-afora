@@ -296,12 +296,16 @@ const Header = ({ transparent = false }: HeaderProps) => {
         </div>
       </div>
 
-      <Button
+      {/* The scrim is a plain button, not the ui Button: the ghost variant's
+          class merge dropped `bg-black`, and `bg-opacity-*` is gone in
+          Tailwind 4, so the page behind the open drawer wasn't dimmed at all.
+          Out of the tab order: the drawer has its own close button. */}
+      <button
         aria-label="Fechar menu"
-        className={`fixed inset-0 z-40 h-auto w-full bg-black bg-opacity-75 transition-opacity duration-300 min-[1000px]:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-40 h-auto w-full cursor-default bg-black/55 transition-opacity duration-300 min-[1000px]:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={closeMobileMenu}
+        tabIndex={-1}
         type="button"
-        variant="ghost"
       />
       <div
         className={`fixed top-0 left-0 z-50 h-full w-64 transform bg-slate-900 shadow-xl transition-transform duration-500 ease-in-out min-[1000px]:hidden ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}

@@ -1,7 +1,10 @@
 import { ChevronRightIcon, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
+import { clusterByDistance } from "@/lib/cluster";
 import type { GeoPoint } from "@/lib/geo";
+import MapImage from "./map-image";
 import type { MapWindow } from "./map-windows";
 
 export type CatalogMapWindow = MapWindow;
@@ -38,20 +41,35 @@ export interface CatalogHeaderConfig {
   titleLead: string;
 }
 
-const PIN_PRECISION = 2;
 // Radii relative to the map's height, which is the dimension fixed in pixels,
 // so pins look the same size on the world and the Brazil maps.
 const HALO_RATIO = 26;
 const DOT_RATIO = 80;
+/** Places closer than two halos share one mark, which grows with the log of
+ * its count: a catalog of hundreds would otherwise pile its dots into one
+ * amber stain over São Paulo or the US Northeast. */
+const CLUSTER_RATIO = 13;
+const MAX_HALO_GROWTH = 2.2;
+const MAX_DOT_GROWTH = 1.8;
 
-const uniquePins = (points: GeoPoint[]): GeoPoint[] => {
-  const seen = new Map<string, GeoPoint>();
-  for (const point of points) {
-    const key = `${point.lat.toFixed(PIN_PRECISION)}:${point.lon.toFixed(PIN_PRECISION)}`;
-    seen.set(key, point);
-  }
-  return [...seen.values()];
-};
+interface Mark extends GeoPoint {
+  count: number;
+}
+
+const marksOf = (points: GeoPoint[], radius: number): Mark[] =>
+  clusterByDistance(
+    points,
+    ({ lat, lon }) => ({ x: lon, y: -lat }),
+    () => 1,
+    radius
+  ).map((cluster) => ({
+    count: cluster.weight,
+    lat: -cluster.y,
+    lon: cluster.x,
+  }));
+
+const growth = (count: number, max: number): number =>
+  Math.min(max, 1 + 0.35 * Math.log2(count));
 
 /**
  * The night-lights map for the catalog's territory, with a pin wherever the
@@ -67,27 +85,40 @@ export const CatalogMap = ({
 }) => {
   const width = map.east - map.west;
   const height = map.north - map.south;
-  const visiblePins = uniquePins(pins).filter(
-    (pin) =>
-      pin.lon >= map.west &&
-      pin.lon <= map.east &&
-      pin.lat <= map.north &&
-      pin.lat >= map.south
+  const visiblePins = marksOf(
+    pins.filter(
+      (pin) =>
+        pin.lon >= map.west &&
+        pin.lon <= map.east &&
+        pin.lat <= map.north &&
+        pin.lat >= map.south
+    ),
+    height / CLUSTER_RATIO
   );
 
   return (
+    // On the navy ground this is a full-bleed map dissolving into the page.
+    // On paper it becomes the print itself — the aspect ratio below is what
+    // lets it be fitted rather than cropped (globals.css, .ba-catalog-map).
     <div
-      className="absolute inset-y-0 left-1/2 h-full -translate-x-1/2 lg:right-0 lg:left-auto lg:translate-x-0"
-      style={{ aspectRatio: `${width} / ${height}` }}
+      className="ba-catalog-map absolute inset-y-0 left-1/2 h-full -translate-x-1/2 lg:right-0 lg:left-auto lg:translate-x-0"
+      style={
+        {
+          aspectRatio: `${width} / ${height}`,
+          "--ba-map-ratio": width / height,
+        } as CSSProperties
+      }
     >
-      <div className="absolute inset-0 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_25%,black_75%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_14%,black_80%,transparent_100%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,black_30%),linear-gradient(to_bottom,transparent_0%,black_14%,black_80%,transparent_100%)]">
-        <Image
+      <div className="ba-catalog-map-mask absolute inset-0 [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent_0%,black_25%,black_75%,transparent_100%),linear-gradient(to_bottom,transparent_0%,black_14%,black_80%,transparent_100%)] lg:[mask-image:linear-gradient(to_right,transparent_0%,black_30%),linear-gradient(to_bottom,transparent_0%,black_14%,black_80%,transparent_100%)]">
+        <MapImage
           alt=""
-          className="object-fill brightness-[2.1] contrast-[1.05] saturate-[0.85]"
+          className="object-fill"
+          day={map.daySrc}
+          fetchPriority="high"
           fill
-          preload
+          night={map.src}
+          nightClassName="brightness-[2.1] contrast-[1.05] saturate-[0.85]"
           sizes="(min-width: 1024px) 40rem, 100vw"
-          src={map.src}
         />
       </div>
       <svg
@@ -106,13 +137,13 @@ export const CatalogMap = ({
                 cy={y}
                 fill="var(--color-signal)"
                 fillOpacity={0.2}
-                r={height / HALO_RATIO}
+                r={(height / HALO_RATIO) * growth(pin.count, MAX_HALO_GROWTH)}
               />
               <circle
                 cx={x}
                 cy={y}
                 fill="var(--color-signal)"
-                r={height / DOT_RATIO}
+                r={(height / DOT_RATIO) * growth(pin.count, MAX_DOT_GROWTH)}
               />
             </g>
           );
@@ -180,10 +211,13 @@ const CatalogHeader = ({
   const { backdrop } = config;
 
   return (
-    <section className="relative isolate overflow-hidden border-navy-700/50 border-b">
+    <section
+      className="ba-catalog-header relative isolate overflow-hidden border-navy-700/50 border-b"
+      data-backdrop={backdrop.kind}
+    >
       <div
         aria-hidden="true"
-        className={`relative h-36 overflow-hidden sm:h-44 lg:absolute lg:inset-y-0 lg:right-0 lg:-z-10 lg:h-auto lg:w-[62%] ${backdrop.kind === "photo" ? "ba-catalog-photo-frame" : ""}`}
+        className={`relative h-36 overflow-hidden sm:h-44 lg:absolute lg:inset-y-0 lg:right-0 lg:-z-10 lg:h-auto lg:w-[62%] ${backdrop.kind === "photo" ? "ba-catalog-photo-frame" : "ba-catalog-map-frame"}`}
       >
         {backdrop.kind === "map" ? (
           <CatalogMap map={backdrop.map} pins={pins} />
@@ -193,7 +227,7 @@ const CatalogHeader = ({
       </div>
       {backdrop.kind === "photo" && <PhotoCredit photo={backdrop.photo} />}
 
-      <div className="mx-auto w-full max-w-[84rem] px-5 pt-3 pb-9 sm:px-8 lg:flex lg:min-h-[20rem] lg:flex-col lg:justify-center lg:py-10">
+      <div className="ba-catalog-copy mx-auto w-full max-w-[84rem] px-5 pt-3 pb-9 sm:px-8 lg:flex lg:min-h-[20rem] lg:flex-col lg:justify-center lg:py-10">
         <nav aria-label="Trilha de navegação">
           <ol className="flex items-center gap-2 text-[13px] text-mist">
             <li>
@@ -220,7 +254,7 @@ const CatalogHeader = ({
           >
             <Icon className="h-8 w-8" strokeWidth={1.6} />
           </span>
-          <div>
+          <div className="ba-catalog-title">
             <h1 className="text-balance font-bold text-[clamp(2.1rem,1.3rem+2.3vw,3.2rem)] text-white leading-[1.05] tracking-[-0.02em]">
               {config.titleLead}{" "}
               <span className={config.accentClassName}>

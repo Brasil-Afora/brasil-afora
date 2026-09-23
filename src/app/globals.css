@@ -409,6 +409,122 @@
   }
 }
 
+/* Catalog map headers (Internacional, Nacional). On the navy ground the
+   night-lights map dissolves into the page. On paper that dissolve is the
+   grey smear the hero plate exists to avoid, so the map becomes a print too
+   — but a *fitted* one. A photo can be cropped to any frame; a map can't,
+   because its pins are the content, and the two territories have different
+   shapes (the world is 290:114, Brazil 64:44). So the print always keeps
+   the map's own ratio (`--ba-map-ratio`, set inline from the map window):
+   the whole territory shows and every pin stays in register.
+
+   Where it sits:
+   - Below 80rem, above the title, like the photo print on phones: as wide
+     as the text column, but never taller than `--ba-map-print-h`, so Brazil
+     (nearly square) doesn't become a wall on a tablet. Beside a 36rem
+     subtitle at these widths the column would only be ~260px wide, and the
+     world would shrink to a thumbnail strip.
+   - From 80rem, beside the title in the photo print's column, fitted to it
+     and flush with the container's right edge like every other print.
+     Fitting needs the column's height, which only a size container knows.
+     (Fixing the height and capping the width instead distorts the map: the
+     cap never transfers back through the ratio to an explicit height.) */
+[data-theme="light"] .ba-catalog-header {
+  --ba-map-print-h: 11rem;
+  background-color: var(--color-navy-850);
+}
+
+[data-theme="light"] .ba-catalog-map-mask {
+  mask-image: none;
+}
+
+/* Undo the navy layout (`lg:absolute lg:inset-y-0 lg:w-[62%]`, fixed
+   heights) so the frame flows above the title and takes its print's height. */
+[data-theme="light"] .ba-catalog-map-frame {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: auto;
+  height: auto;
+  margin: 1rem 1.25rem 0;
+  overflow: visible;
+}
+
+[data-theme="light"] .ba-catalog-map {
+  position: relative;
+  inset: auto;
+  width: min(100%, calc(var(--ba-map-print-h) * var(--ba-map-ratio)));
+  height: auto;
+  overflow: hidden;
+  /* The day map's sea, so the print reads as a print while it loads. */
+  background-color: rgb(180 200 213);
+  border-radius: 18px;
+  /* Tailwind 4 positions with the `translate` property, not `transform`:
+     the navy layout's centring (-translate-x-1/2) is cancelled here. */
+  translate: none;
+}
+
+@media (min-width: 40rem) {
+  [data-theme="light"] .ba-catalog-header {
+    --ba-map-print-h: 15rem;
+  }
+
+  [data-theme="light"] .ba-catalog-map-frame {
+    margin-inline: 2rem;
+  }
+}
+
+/* From 64rem the copy block sits in the navy layout's vertical centring;
+   stacked, the print should sit on the same gutter as the breadcrumb. */
+@media (min-width: 64rem) {
+  [data-theme="light"] .ba-catalog-map-frame {
+    margin: 2.5rem max(2rem, calc(50% - 40rem)) 0;
+  }
+}
+
+/* Stacked on a laptop-width screen, the copy block would keep the navy
+   layout's 20rem min-height and vertical centring, and float 85px below the
+   print while the print sat 40px under the header. It takes the stacked
+   rhythm instead: the print's own 2.5rem above it, 1.75rem to the
+   breadcrumb, 2.5rem to the rule. */
+@media (64rem <= width < 80rem) {
+  [data-theme="light"] [data-backdrop="map"] .ba-catalog-copy {
+    min-height: 0;
+    padding-top: 1.75rem;
+    padding-bottom: 2.5rem;
+  }
+}
+
+@media (min-width: 80rem) {
+  /* The column beside the title: the same box the photo print fills. */
+  [data-theme="light"] .ba-catalog-map-frame {
+    position: absolute;
+    top: 2.5rem;
+    right: max(2rem, calc(50% - 40rem));
+    bottom: 2.5rem;
+    left: calc(max(0px, 50% - 42rem) + 2rem + 84px + 36rem + 2.5rem);
+    margin: 0;
+    container-type: size;
+  }
+
+  [data-theme="light"] .ba-catalog-map {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: auto;
+    width: min(100cqw, calc(100cqh * var(--ba-map-ratio)));
+    translate: 0 -50%;
+  }
+
+  /* A print has edges, so the title can no longer run under it the way it
+     runs over the dissolving map on navy: "Oportunidades Internacionais"
+     is ~850px at full size. It keeps to the subtitle's column and breaks
+     onto two lines. */
+  [data-theme="light"] .ba-catalog-title {
+    max-width: 36rem;
+  }
+}
+
 /* The white SVG mark recolors to navy ink in light mode (computed filter:
    white -> rgb(22, 41, 63), ~#17293f). Transparent pixels stay transparent. */
 [data-theme="light"] .ba-logo {
@@ -418,7 +534,9 @@
 /* The header goes solid paper in light mode (no transparent-over-photo
    state); Fundação Estudar-style. Text flips via the bridges above. */
 [data-theme="light"] .ba-header {
-  background-color: rgb(250 247 241 / 0.94);
+  /* Solid, like the navy header once scrolled: at 94% the page's own text
+     showed through as a ghost behind the logo. */
+  background-color: rgb(250 247 241);
   border-color: #e3d9c6;
 }
 
@@ -547,4 +665,12 @@ select:disabled {
     opacity: 0;
     transform: translateY(115vh) rotate(540deg);
   }
+}
+
+/* Map imagery twins (map-image.tsx): the night-lights image on the navy
+   ground, its daylight twin on paper. The hidden one is lazy and not
+   displayed, so it is never fetched until the theme flips to it. */
+[data-theme="light"] .ba-when-dark,
+:root:not([data-theme="light"]) .ba-when-light {
+  display: none;
 }

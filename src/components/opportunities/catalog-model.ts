@@ -9,7 +9,14 @@ export type CatalogScope = "international" | "national";
 
 export type CatalogCover =
   | { kind: "photo"; src: string }
-  | { kind: "map"; logo: string | null; monogram: string; src: string };
+  | {
+      /** The same region of the daylight map, for the light theme. */
+      daySrc: string;
+      kind: "map";
+      logo: string | null;
+      monogram: string;
+      src: string;
+    };
 
 export interface CatalogTag {
   label: string;
@@ -80,8 +87,10 @@ export const coverFor = (
   institution: string
 ): CatalogCover => {
   const src = `${COVER_DIR}/cover-${region}.jpg`;
+  const daySrc = `${COVER_DIR}/day/cover-${region}.jpg`;
   if (!isUsableImage(image)) {
     return {
+      daySrc,
       kind: "map",
       logo: null,
       monogram: monogramFor(name, institution),
@@ -90,6 +99,7 @@ export const coverFor = (
   }
   if (isLogoImage(image)) {
     return {
+      daySrc,
       kind: "map",
       logo: image,
       monogram: monogramFor(name, institution),

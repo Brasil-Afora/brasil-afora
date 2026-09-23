@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import type { CatalogCover as CatalogCoverData } from "./catalog-model";
+import MapImage from "./map-image";
 
 interface CatalogCoverProps {
   className: string;
@@ -63,8 +64,9 @@ const LogoTile = ({
 };
 
 /**
- * A real photograph when the record has one; otherwise the regional
- * night-lights map with the institution's logo (or monogram) on a tile.
+ * A real photograph when the record has one; otherwise the regional map
+ * (night lights on navy, daylight on paper) with the institution's logo (or
+ * monogram) on a tile.
  */
 const CatalogCover = ({
   className,
@@ -86,13 +88,17 @@ const CatalogCover = ({
       />
     ) : (
       <>
-        <Image
+        <MapImage
           alt=""
-          className="object-cover brightness-[1.35] saturate-[0.85] transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          day={cover.daySrc}
+          // Both twins stay lazy (map-image.tsx); first-row covers still
+          // jump the queue once they're on screen.
+          fetchPriority={eager ? "high" : "auto"}
           fill
-          loading={eager ? "eager" : "lazy"}
+          night={cover.src}
+          nightClassName="brightness-[1.35] saturate-[0.85]"
           sizes={sizes}
-          src={cover.src}
         />
         <div className="absolute inset-0 flex items-center justify-center">
           <LogoTile

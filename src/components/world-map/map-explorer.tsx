@@ -259,7 +259,10 @@ const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_24rem]">
-        <div className="relative h-[62svh] min-h-[22rem] overflow-hidden rounded-2xl border border-navy-700 lg:h-[clamp(32rem,calc(100svh-13rem),40rem)]">
+        {/* `isolate` keeps Leaflet's pane z-indexes (400+) and the map's own
+            controls (500) inside this box. Without it they outrank the sticky
+            header and the mobile drawer (z-50) and paint over both. */}
+        <div className="relative isolate h-[62svh] min-h-[22rem] overflow-hidden rounded-2xl border border-navy-700 lg:h-[clamp(32rem,calc(100svh-13rem),40rem)]">
           <OpportunityMap
             countries={countries}
             onSelect={choose}
@@ -327,6 +330,12 @@ const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
           GeoNames
         </a>{" "}
         (CC BY 4.0); fronteiras do Natural Earth.
+        {/* The daylight map is only on screen in the light theme; so is its
+            credit (globals.css, .ba-when-light). */}
+        <span className="ba-when-light">
+          {" "}
+          Mapa diurno: NASA Earth Observatory (Blue Marble).
+        </span>
       </p>
     </>
   );

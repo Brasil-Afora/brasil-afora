@@ -34,6 +34,7 @@ import type {
   FactIcon,
   OpportunityDetail,
 } from "./detail-model";
+import MapImage from "./map-image";
 import type { MapWindow } from "./map-windows";
 
 const FACT_ICONS: Record<FactIcon, LucideIcon> = {
@@ -773,12 +774,14 @@ export const PlaceCard = ({
           className="relative mt-4 overflow-hidden rounded-lg bg-navy-950 ring-1 ring-navy-700"
           style={{ aspectRatio: `${width} / ${height}` }}
         >
-          <Image
+          <MapImage
             alt=""
-            className="object-fill brightness-[1.7] saturate-[0.85]"
+            className="object-fill"
+            day={map.daySrc}
             fill
+            night={map.src}
+            nightClassName="brightness-[1.7] saturate-[0.85]"
             sizes="21rem"
-            src={map.src}
           />
           <svg
             aria-hidden="true"

@@ -21,7 +21,7 @@
   outline: none;
 }
 
-.opportunity-map .map-night {
+.opportunity-map .map-tiles {
   filter: brightness(1.6) saturate(0.85);
 }
 
@@ -32,19 +32,32 @@
   mix-blend-mode: plus-lighter;
 }
 
+/* The blend group for the shapes below is the map pane: tiles and shapes,
+   nothing else. Without the explicit isolation Chrome blended the shape
+   layer against the wrong backdrop once the pane had been moved or zoomed:
+   the lit countries came out faint, and a hard-edged rectangle of tint that
+   followed no border appeared over them (reported on /mapa, 2026-09-23). */
+.opportunity-map .leaflet-map-pane {
+  isolation: isolate;
+}
+
 /* Shapes and routes blend in "screen" mode: the amber tints the dark land
    while every city light stays white, so the night lights read through. */
 .opportunity-map .leaflet-overlay-pane,
 .opportunity-map .leaflet-routes-pane {
   mix-blend-mode: screen;
-  transition: opacity 450ms ease-out;
 }
 
-/* During a flight the vector layer is only being stretched, not redrawn. */
+/* During a flight the vector layer is only being stretched, not redrawn, so
+   it's hidden until the camera lands. Hidden and shown at once, not faded:
+   an opacity transition on this layer left Chrome compositing a stale copy
+   of it after the flight (reproduced opening /mapa?pais=ca), so the lit
+   countries didn't show and a hard-edged block of old tint sat over the map
+   until something else forced a repaint. The routes still draw themselves
+   on landing (below), so the flight still ends in motion. */
 .opportunity-map.is-flying .leaflet-overlay-pane,
 .opportunity-map.is-flying .leaflet-routes-pane {
   opacity: 0;
-  transition-duration: 120ms;
 }
 
 /* Every border, faint, so the lit countries have context. */
@@ -143,6 +156,38 @@
   transform: scale(1.3);
 }
 
+/* Several places close together: one marker with the number of
+   opportunities, an amber disc on a soft halo like a single pin, grown with
+   the count (opportunity-map.tsx, clusterSize). Deep-navy digits, like every
+   label on an amber fill. */
+.opportunity-map .map-cluster {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: rgb(255 155 15 / 0.22);
+  border-radius: 50%;
+}
+
+.opportunity-map .map-cluster span {
+  display: grid;
+  place-items: center;
+  width: 72%;
+  height: 72%;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: #03111f;
+  background: var(--color-signal);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--color-navy-950);
+  transition: transform 150ms ease-out;
+}
+
+.opportunity-map .map-cluster:hover span {
+  transform: scale(1.08);
+}
+
 /* Brasília, where every route starts. */
 .opportunity-map .map-origin {
   background: var(--color-navy-950);
@@ -197,7 +242,9 @@
   padding: 6px 10px;
   font-size: 13px;
   line-height: 1.35;
-  color: var(--color-white);
+  /* Ink, not white: on paper navy-900 becomes white, and white text on it
+     disappeared. slate-100 is near-white on navy and ink on paper. */
+  color: var(--color-slate-100);
   background: var(--color-navy-900);
   border: 1px solid var(--color-navy-600);
   border-radius: 8px;
@@ -230,4 +277,114 @@
 
 .opportunity-map .map-label.leaflet-tooltip-top::before {
   border-top-color: rgb(255 155 15 / 0.6);
+}
+
+/* ---------------------------------------------------------------------------
+ * Light theme: the same world by day (map-tiles/day-v1, NASA's Blue Marble
+ * graded for paper — see scripts/build-map-day.mjs). The night tiles'
+ * brightening, their additive seams and the "screen" blend all assume dark
+ * imagery, so each is undone here.
+ * ------------------------------------------------------------------------- */
+[data-theme="light"] .opportunity-map.leaflet-container {
+  /* The day map's sea, so space around the world at low zoom reads as sea. */
+  background: rgb(180 200 213);
+}
+
+[data-theme="light"] .opportunity-map .map-tiles {
+  filter: none;
+}
+
+/* Leaflet places tiles edge to edge, and at a fractional zoom each tile (its
+   own GPU layer) is scaled and antialiased on its own, so their edges don't
+   quite meet. On the night map the hairline between them shows near-black
+   background and disappears; on the day map it shows the light sea as a line
+   along every tile edge. Each day tile draws one pixel past its edge instead,
+   so its neighbour covers the hairline (a 0.4% stretch). Overlapping tiles
+   must stack, not add, or the overlap would brighten: hence the plain blend.
+   `!important` because Leaflet sizes tiles with inline styles. */
+[data-theme="light"] .opportunity-map .leaflet-tile-container img {
+  mix-blend-mode: normal;
+}
+
+[data-theme="light"] .opportunity-map img.leaflet-tile {
+  width: 257px !important;
+  height: 257px !important;
+}
+
+/* Amber has to read on a daylight map, not glow on a night one. "Screen"
+   can only lighten, and "multiply" turned a 10–28% amber fill into almost
+   nothing on bright imagery (the owner couldn't find the lit countries or
+   the route). So on paper the shapes are painted plainly, the fills are
+   stronger, and the lines take the light theme's deep amber (#b45309, the
+   same as amber text on paper). */
+[data-theme="light"] .opportunity-map .leaflet-overlay-pane,
+[data-theme="light"] .opportunity-map .leaflet-routes-pane {
+  mix-blend-mode: normal;
+}
+
+[data-theme="light"] .opportunity-map .map-country {
+  stroke: #b45309;
+  stroke-opacity: 0.85;
+  stroke-width: 1.4;
+}
+
+[data-theme="light"] .opportunity-map .map-country.tier-1 {
+  fill-opacity: 0.22;
+}
+
+[data-theme="light"] .opportunity-map .map-country.tier-2 {
+  fill-opacity: 0.34;
+}
+
+[data-theme="light"] .opportunity-map .map-country.tier-3 {
+  fill-opacity: 0.48;
+}
+
+[data-theme="light"] .opportunity-map .map-country:hover {
+  fill-opacity: 0.55;
+  stroke-opacity: 1;
+}
+
+[data-theme="light"] .opportunity-map .map-country.is-selected {
+  fill-opacity: 0.4;
+  stroke: #b45309;
+  stroke-opacity: 1;
+  stroke-width: 2.6;
+}
+
+[data-theme="light"] .opportunity-map .map-country-dot {
+  background: rgb(255 155 15 / 0.5);
+  border-color: #b45309;
+}
+
+/* Routes cross forest, desert and sea in one line; a thin white casing keeps
+   the amber legible over all three. */
+[data-theme="light"] .opportunity-map .map-route {
+  filter: drop-shadow(0 0 1.5px rgb(255 255 255 / 0.95));
+  stroke: #b45309;
+  stroke-opacity: 1;
+  stroke-width: 2.6;
+}
+
+/* The legend's swatches at the same strengths. */
+[data-theme="light"] .map-swatch {
+  background: rgb(255 155 15 / var(--swatch-alpha, 0.34));
+  border-color: #b45309;
+}
+
+[data-theme="light"] .map-swatch.tier-1 {
+  --swatch-alpha: 0.22;
+}
+
+[data-theme="light"] .map-swatch.tier-2 {
+  --swatch-alpha: 0.34;
+}
+
+[data-theme="light"] .map-swatch.tier-3 {
+  --swatch-alpha: 0.48;
+}
+
+/* Brasília: an ink dot with a white ring reads on land and on sea by day. */
+[data-theme="light"] .opportunity-map .map-origin {
+  background: #17293f;
 }

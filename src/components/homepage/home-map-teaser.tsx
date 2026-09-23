@@ -1,29 +1,38 @@
 "use client";
 
 import { ArrowRightIcon } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
+import MapImage from "@/components/opportunities/map-image";
 import { WORLD_MAP } from "@/components/opportunities/map-windows";
 import {
   useInternationalOpportunitiesQuery,
   useNationalOpportunitiesQuery,
 } from "@/hooks/queries/use-opportunity-queries";
 import useScrollReveal from "@/hooks/use-scroll-reveal";
+import { clusterByDistance } from "@/lib/cluster";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
 import type { GeoPoint, MapDestination } from "@/lib/geo";
 
 // The world crop and its window live in map-windows.ts (see the cache note
 // there before re-cropping). The SVG overlay works in lon+180 / 90-lat units,
 // so its viewBox is the same window.
-const MAP_IMAGE = WORLD_MAP.src;
 const VIEW = WORLD_MAP;
 const VIEW_WIDTH = VIEW.east - VIEW.west;
 const VIEW_HEIGHT = VIEW.north - VIEW.south;
 const ARC_BOW = 0.22;
 const ROUTE_STAGGER = 8;
-const MAX_ROUTES = 14;
+/** At most this many routes (see routeTargets): one per destination fanned
+ * a catalog of hundreds into a solid sheaf over the US. */
+const MAX_ROUTES = 8;
 const PIN_PRECISION = 1;
+/** Places closer than this (degrees, ~11px on the teaser) share one mark. */
+const CLUSTER_RADIUS_DEG = 5;
+const HALO_RADIUS = 3.2;
+const DOT_RADIUS = 1.3;
+/** A mark grows with the log of its count, up to these multiples. */
+const MAX_HALO_GROWTH = 2.3;
+const MAX_DOT_GROWTH = 1.8;
 const REVEAL_OPTIONS = { threshold: 0.1 };
 
 /** Origin of the routes: Brasília, the geographic middle of the country. */
@@ -51,9 +60,48 @@ const isInView = ({ lat, lon }: GeoPoint): boolean =>
   lat <= VIEW.north &&
   lat >= VIEW.south;
 
-const uniquePoints = (destinations: MapDestination[]): MapDestination[] => [
-  ...new Map(destinations.map((item) => [pointKey(item), item])).values(),
-];
+interface Mark extends GeoPoint {
+  count: number;
+}
+
+/** Destinations merged where their marks would touch, busiest first. */
+const marksOf = (destinations: MapDestination[]): Mark[] =>
+  clusterByDistance(
+    destinations,
+    ({ lat, lon }) => ({ x: lon, y: -lat }),
+    () => 1,
+    CLUSTER_RADIUS_DEG
+  )
+    .map((cluster) => ({
+      count: cluster.weight,
+      lat: -cluster.y,
+      lon: cluster.x,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+const growth = (count: number, max: number): number =>
+  Math.min(max, 1 + 0.4 * Math.log2(count));
+
+const byCount = (a: Mark, b: Mark): number => b.count - a.count;
+
+/**
+ * Where the routes go: each country's busiest place first, so the fan shows
+ * how far the catalog reaches instead of how deep it goes in one country (the
+ * busiest places overall are all in the US); spare slots go to the next
+ * busiest places anywhere.
+ */
+const routeTargets = (destinations: MapDestination[]): Mark[] => {
+  const byCountry = new Map<string, MapDestination[]>();
+  for (const destination of destinations) {
+    const list = byCountry.get(destination.country) ?? [];
+    list.push(destination);
+    byCountry.set(destination.country, list);
+  }
+  const perCountry = [...byCountry.values()].map(marksOf);
+  const firsts = perCountry.flatMap((marks) => marks.slice(0, 1));
+  const rest = perCountry.flatMap((marks) => marks.slice(1));
+  return [...firsts.sort(byCount), ...rest.sort(byCount)].slice(0, MAX_ROUTES);
+};
 
 /** Opportunities per country (an opportunity with two cities counts once). */
 const countByCountry = (destinations: MapDestination[]) => {
@@ -126,10 +174,10 @@ const HomeMapTeaser = ({
   );
   const destinations = [...verifiedDestinations, ...catalogDestinations];
   const visible = destinations.filter(isInView);
-  const routes = uniquePoints(
+  const routes = routeTargets(
     visible.filter((item) => item.scope === "international")
-  ).slice(0, MAX_ROUTES);
-  const pins = uniquePoints(visible);
+  );
+  const pins = marksOf(visible);
   const origin = project(ROUTE_ORIGIN);
 
   return (
@@ -164,12 +212,14 @@ const HomeMapTeaser = ({
           ref={mapRef}
           style={{ aspectRatio: `${VIEW_WIDTH} / ${VIEW_HEIGHT}` }}
         >
-          <Image
+          <MapImage
             alt=""
-            className="object-cover brightness-[1.6] saturate-[0.8]"
+            className="object-cover"
+            day={VIEW.daySrc}
             fill
+            night={VIEW.src}
+            nightClassName="brightness-[1.6] saturate-[0.8]"
             sizes="(min-width: 1024px) 40rem, 100vw"
-            src={MAP_IMAGE}
           />
           <svg
             aria-hidden="true"
@@ -204,13 +254,13 @@ const HomeMapTeaser = ({
                     cy={point.y}
                     fill="var(--color-signal)"
                     fillOpacity={0.22}
-                    r={3.2}
+                    r={HALO_RADIUS * growth(destination.count, MAX_HALO_GROWTH)}
                   />
                   <circle
                     cx={point.x}
                     cy={point.y}
                     fill="var(--color-signal)"
-                    r={1.3}
+                    r={DOT_RADIUS * growth(destination.count, MAX_DOT_GROWTH)}
                   />
                 </g>
               );
