@@ -12,19 +12,24 @@ import {
   publicationVersions,
 } from "@/db/schema/ingestion";
 
+import { getCuratedCatalogMetadata } from "./curated-catalog-metadata";
+
+type CatalogPublicOpportunity = PublicOpportunityV1 &
+  Omit<ReturnType<typeof getCuratedCatalogMetadata>, "modality">;
+
 type Database = NodePgDatabase<typeof schema>;
 
 export interface PublicOpportunityPage {
-  items: PublicOpportunityV1[];
+  items: CatalogPublicOpportunity[];
   next_cursor: string | null;
 }
 
 export const getPublicOpportunityById = async (
   database: Database,
   id: string
-): Promise<PublicOpportunityV1 | null> => {
+): Promise<CatalogPublicOpportunity | null> => {
   let cursor: string | undefined;
-  for (let pageNumber = 0; pageNumber < 5; pageNumber += 1) {
+  while (true) {
     const page = await listPublicOpportunities(database, {
       cursor,
       limit: 100,
@@ -38,7 +43,6 @@ export const getPublicOpportunityById = async (
     }
     cursor = page.next_cursor;
   }
-  return null;
 };
 
 const latestBy = <T, K extends string>(
@@ -266,8 +270,7 @@ export const listPublicOpportunities = async (
     .select()
     .from(publicationVersions)
     .where(eq(publicationVersions.editorialState, "published"))
-    .orderBy(desc(publicationVersions.createdAt))
-    .limit(500);
+    .orderBy(desc(publicationVersions.version), desc(publicationVersions.id));
   const versions = [...latestBy(versionRows, (row) => row.editionId).values()];
   if (versions.length === 0) {
     return { items: [], next_cursor: null };
@@ -300,15 +303,20 @@ export const listPublicOpportunities = async (
     if (!storedProjection.success) {
       return [];
     }
+    const { modality: _curatedModality, ...metadata } =
+      getCuratedCatalogMetadata(version.payload.curated_master);
     return [
-      applyOperationalAvailability(
-        storedProjection.data,
-        findOperationalAssessment(
-          operationalAssessmentsByApprovedUrl,
-          version.editionId,
-          storedProjection.data.application_url
-        )
-      ),
+      {
+        ...applyOperationalAvailability(
+          storedProjection.data,
+          findOperationalAssessment(
+            operationalAssessmentsByApprovedUrl,
+            version.editionId,
+            storedProjection.data.application_url
+          )
+        ),
+        ...metadata,
+      },
     ];
   });
   const filtered = records.filter((record) => matchesFilter(record, filter));

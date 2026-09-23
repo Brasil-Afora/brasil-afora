@@ -12,7 +12,6 @@ import { FILTER_OPTIONS } from "@/components/opportunities/filter-options";
 import { BRAZIL_MAP } from "@/components/opportunities/map-windows";
 import {
   isVerifiedNationalOpportunityId,
-  isVerifiedNationalOpportunityName,
   verifiedNationalOpportunities,
 } from "@/data/verified-opportunities";
 import { useOportunidadesNacionais } from "@/hooks/use-oportunidades-nacionais";
@@ -21,6 +20,7 @@ import useOpportunityFilters, {
   OPPORTUNITY_FILTER_STORAGE_KEYS,
 } from "@/hooks/use-opportunity-filters";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
+import { mergeCatalogOpportunities } from "@/lib/merge-catalog-opportunities";
 import type { LocationsById } from "@/server/geo/opportunity-locations";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 
@@ -80,22 +80,17 @@ const header: CatalogHeaderConfig = {
 const NacionalMain = ({ verifiedLocations }: NacionalMainProps) => {
   const { data, loading, error, retry } = useOportunidadesNacionais();
 
-  // The verified selection and the catalog form one list; a catalog record
-  // that duplicates a verified one by name is dropped.
-  const merged = useMemo<Opportunity[]>(
-    () => [
-      ...verifiedNationalOpportunities
-        .filter((opportunity) =>
-          isOpportunityDeadlineOpen(opportunity.prazoInscricao)
-        )
-        .map((opportunity) => ({
-          ...opportunity,
-          localizacoes: verifiedLocations[opportunity.id] ?? [],
-        })),
-      ...data.filter((item) => !isVerifiedNationalOpportunityName(item.nome)),
-    ],
-    [data, verifiedLocations]
-  );
+  const merged = useMemo<Opportunity[]>(() => {
+    const selection = verifiedNationalOpportunities
+      .filter((opportunity) =>
+        isOpportunityDeadlineOpen(opportunity.prazoInscricao)
+      )
+      .map((opportunity) => ({
+        ...opportunity,
+        localizacoes: verifiedLocations[opportunity.id] ?? [],
+      }));
+    return mergeCatalogOpportunities<Opportunity>(data, selection);
+  }, [data, verifiedLocations]);
 
   const {
     clearFilters,

@@ -170,7 +170,7 @@ export const toInternationalItem = (
       ...(funding ? [{ label: funding, tone: "fund" as const }] : []),
       ...(level ? [{ label: level, tone: "plain" as const }] : []),
     ],
-    verified,
+    verified: opportunity.verified ?? verified,
   };
 };
 
@@ -210,7 +210,7 @@ export const toNationalItem = (
         ? [{ label: "Gratuita", tone: "plain" as const }]
         : []),
     ],
-    verified,
+    verified: opportunity.verified ?? verified,
   };
 };
 

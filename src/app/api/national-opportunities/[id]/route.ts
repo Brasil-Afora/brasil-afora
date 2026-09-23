@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { nationalOpportunities } from "@/db/schema/national-opportunities";
 import { resolveNationalLocations } from "@/server/geo/resolve-location";
+import { enrichCuratedRecords } from "@/server/publication/curated-catalog";
 import { requireAdminInRoute } from "@/server/route-auth";
 
 export const dynamic = "force-dynamic";
@@ -38,11 +39,13 @@ export async function GET(
       .limit(1);
 
     const record = data[0];
+    const enriched = record ? (await enrichCuratedRecords([record]))[0] : null;
     return NextResponse.json({
       nationalOpportunity: record
         ? {
             ...record,
             locations: resolveNationalLocations(record.cityState),
+            ...enriched,
           }
         : null,
     });

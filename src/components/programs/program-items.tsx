@@ -1,5 +1,6 @@
 import {
   ArrowRightIcon,
+  BadgeCheckIcon,
   CalendarClockIcon,
   CompassIcon,
   LandmarkIcon,
@@ -80,6 +81,14 @@ export const ProgramStatusLine = ({
   );
 };
 
+export const ProgramVerifiedBadge = ({ verified }: { verified?: boolean }) =>
+  verified ? (
+    <span className="inline-flex items-center gap-1 rounded-full bg-verified px-2.5 py-1 font-semibold text-[12px] text-navy-950">
+      <BadgeCheckIcon aria-hidden="true" className="h-3.5 w-3.5" />
+      Verificada
+    </span>
+  ) : null;
+
 const ProgramBadge = ({ item }: { item: ProgramItem }) =>
   item.status.urgent ? (
     <span className="inline-flex items-center gap-1 rounded-full bg-signal px-2.5 py-1 font-semibold text-[12px] text-navy-950 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.7)]">
@@ -137,7 +146,8 @@ export const ProgramCard = ({
         eager={eager}
         sizes="(min-width: 1024px) 22rem, (min-width: 640px) 50vw, 100vw"
       />
-      <div className="absolute top-3 right-3">
+      <div className="absolute top-3 right-3 flex flex-wrap justify-end gap-2">
+        <ProgramVerifiedBadge verified={item.verified} />
         <ProgramBadge item={item} />
       </div>
     </div>
@@ -204,6 +214,7 @@ export const ProgramRow = ({ item }: { item: ProgramItem }) => (
     />
     <div className="min-w-0 flex-1">
       <p className="truncate text-[12px] text-mist">{item.institution}</p>
+      <ProgramVerifiedBadge verified={item.verified} />
       <h3 className="mt-0.5 line-clamp-2 font-semibold text-[15px] text-white leading-snug sm:text-[16px]">
         <TitleLink item={item} />
       </h3>

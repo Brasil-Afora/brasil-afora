@@ -7,6 +7,7 @@ import type { CatalogHeaderConfig } from "@/components/opportunities/catalog-hea
 import CatalogPage, {
   type CatalogPresentation,
 } from "@/components/opportunities/catalog-page";
+import { useProgramsQuery } from "@/hooks/queries/use-program-queries";
 import useSessionStorage from "@/hooks/use-session-storage";
 import { ProgramCard, ProgramRow } from "./program-items";
 import {
@@ -127,7 +128,8 @@ const presentation: CatalogPresentation<ProgramItem> = {
 // "Encerradas" with the next round's forecast. Opportunities, by contrast,
 // disappear after their deadline.
 const ProgramsMain = () => {
-  const programs = getPrograms();
+  const query = useProgramsQuery();
+  const programs = query.data ?? getPrograms();
   const [filtros, setFiltros] = useSessionStorage<ProgramFilters>(
     PROGRAM_FILTER_STORAGE_KEY,
     INITIAL_PROGRAM_FILTERS
@@ -165,7 +167,13 @@ const ProgramsMain = () => {
       setFiltros={setFiltros}
       setFiltrosTemporarios={setFiltrosTemporarios}
       sortStorageKey="programasOrdenacao"
-      status={{ failed: false, loading: false, retry: () => undefined }}
+      status={{
+        failed: query.isError,
+        loading: query.isPending,
+        retry: () => {
+          query.refetch();
+        },
+      }}
     />
   );
 };

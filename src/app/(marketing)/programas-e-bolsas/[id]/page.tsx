@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import ProgramDetail from "@/components/programs/program-detail";
+import ProgramDetailLoader from "@/components/programs/program-detail-loader";
 import {
   getProgramById,
   getPrograms,
@@ -16,7 +15,7 @@ export async function generateMetadata(
   const { id } = await props.params;
   const program = getProgramById(id);
   if (!program) {
-    return { title: "Programa não encontrado" };
+    return { title: "Programa · Programas e Bolsas" };
   }
   const url = `${PROGRAMS_PATH}/${id}`;
   const title = `${program.nome} · ${program.instituicaoResponsavel}`;
@@ -32,9 +31,5 @@ export default async function ProgramDetailPage(
   props: PageProps<"/programas-e-bolsas/[id]">
 ) {
   const { id } = await props.params;
-  const program = getProgramById(id);
-  if (!program) {
-    notFound();
-  }
-  return <ProgramDetail program={program} />;
+  return <ProgramDetailLoader id={id} />;
 }

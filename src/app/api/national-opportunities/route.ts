@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { nationalOpportunities } from "@/db/schema/national-opportunities";
 import { resolveNationalLocations } from "@/server/geo/resolve-location";
+import { enrichCuratedRecords } from "@/server/publication/curated-catalog";
 import { requireAdminInRoute } from "@/server/route-auth";
 
 export const dynamic = "force-dynamic";
@@ -10,10 +11,12 @@ export async function GET() {
   try {
     const data = await db.select().from(nationalOpportunities);
     return NextResponse.json({
-      nationalOpportunities: data.map((item) => ({
-        ...item,
-        locations: resolveNationalLocations(item.cityState),
-      })),
+      nationalOpportunities: await enrichCuratedRecords(
+        data.map((item) => ({
+          ...item,
+          locations: resolveNationalLocations(item.cityState),
+        }))
+      ),
     });
   } catch {
     return NextResponse.json(

@@ -141,7 +141,10 @@ const matchesBaseFilters = (
       return false;
     }
   }
-  if (filtros.apenasVerificadas && !isVerified(type, opportunity.id)) {
+  if (
+    filtros.apenasVerificadas &&
+    !(opportunity.verified ?? isVerified(type, opportunity.id))
+  ) {
     return false;
   }
   return true;

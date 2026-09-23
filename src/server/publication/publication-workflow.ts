@@ -18,6 +18,7 @@ import {
 } from "@/db/schema/ingestion";
 import { nationalOpportunities } from "@/db/schema/national-opportunities";
 import { opportunities } from "@/db/schema/opportunities";
+import { publishCuratedProjection } from "./curated-projection";
 
 const DECISION_SCOPE = "publication-decision.v1";
 const IDEMPOTENCY_TTL_DAYS = 30;
@@ -371,6 +372,15 @@ async function publishCompatibilityProjection(
       "PUBLICATION_NOT_FOUND",
       "Outbox event references a missing publication version."
     );
+  }
+  if (version.payload.curated_master) {
+    await publishCuratedProjection(
+      transaction,
+      version.editionId,
+      version.id,
+      version.payload.curated_master
+    );
+    return;
   }
   const draftResult = compatibilityDraftSchema.safeParse(
     version.compatibilityPayload

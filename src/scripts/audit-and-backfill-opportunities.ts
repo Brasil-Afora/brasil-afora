@@ -85,7 +85,7 @@ const audit = async (): Promise<Finding[]> => {
     const editionId = editionIds.has(record.id) ? record.id : null;
     const identity = normalizedIdentity(
       record.name,
-      record.applicationDeadline
+      record.applicationDeadline ?? "unknown"
     );
     duplicateGroups.set(identity, [
       ...(duplicateGroups.get(identity) ?? []),
@@ -105,6 +105,7 @@ const audit = async (): Promise<Finding[]> => {
       );
     }
     if (
+      record.applicationDeadline !== null &&
       record.applicationDeadline < today &&
       (!record.lifecycleStatus ||
         ["open", "closing_soon", "extended"].includes(record.lifecycleStatus))
@@ -195,7 +196,7 @@ const audit = async (): Promise<Finding[]> => {
     const editionId = editionIds.has(record.id) ? record.id : null;
     const identity = normalizedIdentity(
       record.name,
-      record.applicationDeadline
+      record.applicationDeadline ?? "unknown"
     );
     duplicateGroups.set(identity, [
       ...(duplicateGroups.get(identity) ?? []),
@@ -215,6 +216,7 @@ const audit = async (): Promise<Finding[]> => {
       );
     }
     if (
+      record.applicationDeadline !== null &&
       record.applicationDeadline < today &&
       (!record.lifecycleStatus ||
         ["open", "closing_soon", "extended"].includes(record.lifecycleStatus))

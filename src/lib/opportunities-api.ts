@@ -2,11 +2,12 @@ import {
   getVerifiedInternationalOpportunityById,
   getVerifiedNationalOpportunityById,
 } from "@/data/verified-opportunities";
+import type { MasterStatus } from "@/lib/curated-import/master";
 import type { OpportunityLocation } from "@/lib/geo";
 
 interface OpportunityRecord {
   ageRange: string;
-  applicationDeadline: string | Date;
+  applicationDeadline: string | Date | null;
   applicationFee: string;
   applicationLinkStatus?: string | null;
   applicationProcess: string;
@@ -16,6 +17,8 @@ interface OpportunityRecord {
   contact: string;
   country: string;
   createdAt?: string | Date;
+  curatedStatus?: MasterStatus;
+  curatedStatusLabel?: string;
   description: string;
   duration: string;
   educationLevel: string;
@@ -29,6 +32,7 @@ interface OpportunityRecord {
   locations?: OpportunityLocation[];
   name: string;
   officialLink: string;
+  program?: boolean;
   responsibleInstitution: string;
   scholarshipCoverage: string;
   scholarshipType: string;
@@ -36,12 +40,13 @@ interface OpportunityRecord {
   specificRequirements: string;
   type: string;
   updatedAt?: string | Date;
+  verified?: boolean;
 }
 
 interface NationalOpportunityRecord {
   about: string;
   ageRange: string;
-  applicationDeadline: string | Date;
+  applicationDeadline: string | Date | null;
   applicationFee: string;
   applicationLinkStatus?: string | null;
   applicationUrl?: string | null;
@@ -52,6 +57,8 @@ interface NationalOpportunityRecord {
   costs: string;
   country: string;
   createdAt?: string | Date;
+  curatedStatus?: MasterStatus;
+  curatedStatusLabel?: string;
   duration: string;
   educationLevel: string;
   extraCosts: string;
@@ -64,6 +71,7 @@ interface NationalOpportunityRecord {
   modality: string;
   name: string;
   officialLink: string;
+  program?: boolean;
   requirements: string;
   responsibleInstitution: string;
   selectionSteps: string;
@@ -71,6 +79,7 @@ interface NationalOpportunityRecord {
   specificRequirements: string;
   type: string;
   updatedAt?: string | Date;
+  verified?: boolean;
 }
 
 export interface StructuredAgeRule {
@@ -103,6 +112,10 @@ interface StructuredOpportunityRecord {
   brazil_eligibility: string;
   can_apply?: boolean;
   collection: "international" | "national" | "unknown";
+  curatedInternational?: Omit<OpportunityRecord, "id">;
+  curatedNational?: Omit<NationalOpportunityRecord, "id">;
+  curatedStatus?: MasterStatus;
+  curatedStatusLabel?: string;
   description: string;
   education_levels: string[];
   id: string;
@@ -111,12 +124,15 @@ interface StructuredOpportunityRecord {
   last_verified_at: string | null;
   lifecycle: string;
   location: string | null;
+  locations?: OpportunityLocation[];
   modality: "hybrid" | "in_person" | "online" | "unknown";
   official_information_url: string;
   opportunity_types: string[];
   organizer: string | null;
+  program?: boolean;
   semantic_fields: Record<string, StructuredSemanticField>;
   title: string;
+  verified?: boolean;
 }
 
 type StructuredActionability = Pick<
@@ -139,6 +155,8 @@ export interface InternationalOpportunity {
   cidade: string;
   coberturaBolsa: string;
   contato: string;
+  curatedStatus?: MasterStatus;
+  curatedStatusLabel?: string;
   custosExtras: string;
   descricao: string;
   duracao: string;
@@ -157,6 +175,7 @@ export interface InternationalOpportunity {
   pais: string;
   prazoInscricao: string;
   processoInscricao: string;
+  program?: boolean;
   requisitosEspecificos: string;
   requisitosIdioma: string;
   semanticFields?: Record<string, StructuredSemanticField>;
@@ -164,6 +183,7 @@ export interface InternationalOpportunity {
   taxaAplicacao: string;
   tipo: string;
   tipoBolsa: string;
+  verified?: boolean;
 }
 
 export interface NationalOpportunity {
@@ -175,6 +195,8 @@ export interface NationalOpportunity {
   canApply?: boolean | null;
   cidadeEstado: string;
   contato: string;
+  curatedStatus?: MasterStatus;
+  curatedStatusLabel?: string;
   custos: string;
   custosExtras: string;
   duracao: string;
@@ -193,6 +215,7 @@ export interface NationalOpportunity {
   nome: string;
   pais: string;
   prazoInscricao: string;
+  program?: boolean;
   requisitos: string;
   requisitosEspecificos: string[];
   semanticFields?: Record<string, StructuredSemanticField>;
@@ -200,11 +223,16 @@ export interface NationalOpportunity {
   structuredAgeRules?: StructuredAgeRule[];
   taxaAplicacao: string;
   tipo: string;
+  verified?: boolean;
 }
 
 // Locations and timestamps are derived on the server, never entered.
 export type InternationalOpportunityInput = Omit<
   InternationalOpportunity,
+  | "verified"
+  | "curatedStatus"
+  | "curatedStatusLabel"
+  | "program"
   | "applicationLinkStatus"
   | "applicationUrl"
   | "canApply"
@@ -218,6 +246,10 @@ export type InternationalOpportunityInput = Omit<
 >;
 export type NationalOpportunityInput = Omit<
   NationalOpportunity,
+  | "verified"
+  | "curatedStatus"
+  | "curatedStatusLabel"
+  | "program"
   | "applicationLinkStatus"
   | "applicationUrl"
   | "canApply"
@@ -287,7 +319,10 @@ class ApiRequestError extends Error {
   }
 }
 
-const toDateString = (value: string | Date): string => {
+const toDateString = (value: string | Date | null): string => {
+  if (!value) {
+    return "";
+  }
   if (typeof value === "string") {
     const dateOnlyMatch = ISO_DATE_ONLY_PATTERN.exec(value.trim());
     if (dateOnlyMatch) {
@@ -430,13 +465,18 @@ const normalizeModality = (
     .replace(/[\u0300-\u036f]/g, "");
 
   const includesHybridTerm =
-    modalityLower.includes("hibrido") || modalityLower.includes("misto");
+    modalityLower.includes("hybrid") ||
+    modalityLower.includes("hibrido") ||
+    modalityLower.includes("misto");
   const includesOnlineTerm =
     modalityLower.includes("online") ||
     modalityLower.includes("remoto") ||
+    modalityLower.includes("remote") ||
     modalityLower.includes("ead");
   const includesPresentialTerm =
-    modalityLower.includes("presencial") || modalityLower.includes("presenca");
+    modalityLower.includes("in_person") ||
+    modalityLower.includes("presencial") ||
+    modalityLower.includes("presenca");
 
   if (includesHybridTerm || (includesOnlineTerm && includesPresentialTerm)) {
     return "Híbrido";
@@ -453,6 +493,10 @@ const normalizeModality = (
 
 type LegacyActionabilityRecord = Pick<
   OpportunityRecord,
+  | "verified"
+  | "curatedStatus"
+  | "curatedStatusLabel"
+  | "program"
   | "applicationLinkStatus"
   | "applicationUrl"
   | "lastVerifiedAt"
@@ -505,6 +549,10 @@ const mapInternationalOpportunity = (
   item: OpportunityRecord,
   actionability: StructuredActionability | null = null
 ): InternationalOpportunity => ({
+  verified: item.verified,
+  curatedStatus: item.curatedStatus,
+  curatedStatusLabel: item.curatedStatusLabel,
+  program: item.program,
   id: String(item.id),
   nome: item.name,
   imagem: item.image,
@@ -536,6 +584,10 @@ const mapNationalOpportunity = (
   item: NationalOpportunityRecord,
   actionability: StructuredActionability | null = null
 ): NationalOpportunity => ({
+  verified: item.verified,
+  curatedStatus: item.curatedStatus,
+  curatedStatusLabel: item.curatedStatusLabel,
+  program: item.program,
   id: String(item.id ?? ""),
   nome: item.name ?? "",
   imagem: item.image ?? "",
@@ -593,136 +645,178 @@ const structuredFeeText = (isFree: boolean | null): string => {
 
 const mapStructuredInternationalOpportunity = (
   item: StructuredOpportunityRecord
-): InternationalOpportunity => ({
-  id: item.id,
-  nome: item.title,
-  imagem: item.image_url ?? "/home.png",
-  pais: semanticText(item, "country", "País em verificação"),
-  cidade: semanticText(item, "city", "Cidade em verificação"),
-  instituicaoResponsavel: semanticText(
-    item,
-    "organizer",
-    "Organizador em verificação"
-  ),
-  tipo: structuredTypeText(item.opportunity_types),
-  descricao: semanticText(item, "description", item.description),
-  nivelEnsino: semanticText(
-    item,
-    "education_level",
-    structuredEducationText(item.education_levels) ||
-      "Nível de ensino em verificação"
-  ),
-  faixaEtaria: semanticText(
-    item,
-    "age",
-    structuredAgeText(item.age_rules) || "Regra de idade em verificação"
-  ),
-  structuredAgeRules: item.age_rules,
-  semanticFields: item.semantic_fields,
-  requisitosIdioma: semanticText(
-    item,
-    "language",
-    "Requisitos de idioma em verificação"
-  ),
-  requisitosEspecificos: semanticText(
-    item,
-    "required_documents",
-    "Requisitos específicos em verificação"
-  ),
-  taxaAplicacao: semanticText(
-    item,
-    "application_fee",
-    structuredFeeText(item.is_free)
-  ),
-  tipoBolsa: semanticText(item, "scholarship", "Bolsa em verificação"),
-  coberturaBolsa: semanticText(
-    item,
-    "full_funding",
-    "Cobertura da bolsa em verificação"
-  ),
-  custosExtras: semanticText(
-    item,
-    "mandatory_additional_costs",
-    "Custos adicionais em verificação"
-  ),
-  duracao: semanticText(item, "duration", "Duração em verificação"),
-  prazoInscricao: item.application_deadline_date
-    ? toDateString(item.application_deadline_date)
-    : "",
-  etapasSelecao: "Etapas de seleção em verificação",
-  processoInscricao: "Processo de inscrição em verificação",
-  linkOficial: item.official_information_url,
-  applicationLinkStatus: item.application_link_status,
-  applicationUrl: item.application_url,
-  canApply: item.can_apply ?? null,
-  lastVerifiedAt: item.last_verified_at,
-  lifecycleStatus: item.lifecycle,
-  contato: "Contato disponível na página oficial",
-});
+): InternationalOpportunity => {
+  if (item.curatedInternational) {
+    return mapInternationalOpportunity(
+      {
+        ...item.curatedInternational,
+        id: item.id,
+        verified: item.verified,
+        curatedStatus: item.curatedStatus,
+        curatedStatusLabel: item.curatedStatusLabel,
+        program: item.program,
+        locations: item.locations,
+      },
+      item
+    );
+  }
+  return {
+    id: item.id,
+    nome: item.title,
+    verified: item.verified,
+    curatedStatus: item.curatedStatus,
+    curatedStatusLabel: item.curatedStatusLabel,
+    program: item.program,
+    localizacoes: item.locations,
+    imagem: item.image_url ?? "/home.png",
+    pais: semanticText(item, "country", "País em verificação"),
+    cidade: semanticText(item, "city", "Cidade em verificação"),
+    instituicaoResponsavel: semanticText(
+      item,
+      "organizer",
+      "Organizador em verificação"
+    ),
+    tipo: structuredTypeText(item.opportunity_types),
+    descricao: semanticText(item, "description", item.description),
+    nivelEnsino: semanticText(
+      item,
+      "education_level",
+      structuredEducationText(item.education_levels) ||
+        "Nível de ensino em verificação"
+    ),
+    faixaEtaria: semanticText(
+      item,
+      "age",
+      structuredAgeText(item.age_rules) || "Regra de idade em verificação"
+    ),
+    structuredAgeRules: item.age_rules,
+    semanticFields: item.semantic_fields,
+    requisitosIdioma: semanticText(
+      item,
+      "language",
+      "Requisitos de idioma em verificação"
+    ),
+    requisitosEspecificos: semanticText(
+      item,
+      "required_documents",
+      "Requisitos específicos em verificação"
+    ),
+    taxaAplicacao: semanticText(
+      item,
+      "application_fee",
+      structuredFeeText(item.is_free)
+    ),
+    tipoBolsa: semanticText(item, "scholarship", "Bolsa em verificação"),
+    coberturaBolsa: semanticText(
+      item,
+      "full_funding",
+      "Cobertura da bolsa em verificação"
+    ),
+    custosExtras: semanticText(
+      item,
+      "mandatory_additional_costs",
+      "Custos adicionais em verificação"
+    ),
+    duracao: semanticText(item, "duration", "Duração em verificação"),
+    prazoInscricao: item.application_deadline_date
+      ? toDateString(item.application_deadline_date)
+      : "",
+    etapasSelecao: "Etapas de seleção em verificação",
+    processoInscricao: "Processo de inscrição em verificação",
+    linkOficial: item.official_information_url,
+    applicationLinkStatus: item.application_link_status,
+    applicationUrl: item.application_url,
+    canApply: item.can_apply ?? null,
+    lastVerifiedAt: item.last_verified_at,
+    lifecycleStatus: item.lifecycle,
+    contato: "Contato disponível na página oficial",
+  };
+};
 
 const mapStructuredNationalOpportunity = (
   item: StructuredOpportunityRecord
-): NationalOpportunity => ({
-  id: item.id,
-  nome: item.title,
-  imagem: item.image_url ?? "/home.png",
-  pais: "Brasil",
-  tipo: structuredTypeText(item.opportunity_types),
-  nivelEnsino: structuredEducationText(item.education_levels),
-  modalidade: normalizeModality(item.modality),
-  prazoInscricao: item.application_deadline_date
-    ? toDateString(item.application_deadline_date)
-    : "",
-  sobre: item.description,
-  duracao: semanticText(item, "duration", "Duração em verificação"),
-  cidadeEstado: semanticText(
-    item,
-    "city",
-    item.location ?? "Local em verificação"
-  ),
-  faixaEtaria: semanticText(
-    item,
-    "age",
-    structuredAgeText(item.age_rules) || "Regra de idade em verificação"
-  ),
-  structuredAgeRules: item.age_rules,
-  semanticFields: item.semantic_fields,
-  requisitos: semanticText(
-    item,
-    "required_documents",
-    "Requisitos em verificação"
-  ),
-  requisitosEspecificos: [],
-  instituicaoResponsavel: semanticText(
-    item,
-    "organizer",
-    "Organizador em verificação"
-  ),
-  taxaAplicacao: semanticText(
-    item,
-    "application_fee",
-    structuredFeeText(item.is_free)
-  ),
-  beneficios: semanticText(item, "benefits", "Benefícios em verificação"),
-  custos: semanticText(
-    item,
-    "program_cost",
-    "Informações de custo em verificação"
-  ),
-  custosExtras: semanticText(
-    item,
-    "mandatory_additional_costs",
-    "Custos adicionais em verificação"
-  ),
-  etapasSelecao: "Etapas de seleção em verificação",
-  linkOficial: item.official_information_url,
-  applicationLinkStatus: item.application_link_status,
-  applicationUrl: item.application_url,
-  canApply: item.can_apply ?? null,
-  lastVerifiedAt: item.last_verified_at,
-  lifecycleStatus: item.lifecycle,
-  contato: "Contato disponível na página oficial",
-});
+): NationalOpportunity => {
+  if (item.curatedNational) {
+    return mapNationalOpportunity(
+      {
+        ...item.curatedNational,
+        id: item.id,
+        verified: item.verified,
+        curatedStatus: item.curatedStatus,
+        curatedStatusLabel: item.curatedStatusLabel,
+        program: item.program,
+        locations: item.locations,
+      },
+      item
+    );
+  }
+  return {
+    id: item.id,
+    nome: item.title,
+    verified: item.verified,
+    curatedStatus: item.curatedStatus,
+    curatedStatusLabel: item.curatedStatusLabel,
+    program: item.program,
+    localizacoes: item.locations,
+    imagem: item.image_url ?? "/home.png",
+    pais: "Brasil",
+    tipo: structuredTypeText(item.opportunity_types),
+    nivelEnsino: structuredEducationText(item.education_levels),
+    modalidade: normalizeModality(item.modality),
+    prazoInscricao: item.application_deadline_date
+      ? toDateString(item.application_deadline_date)
+      : "",
+    sobre: item.description,
+    duracao: semanticText(item, "duration", "Duração em verificação"),
+    cidadeEstado: semanticText(
+      item,
+      "city",
+      item.location ?? "Local em verificação"
+    ),
+    faixaEtaria: semanticText(
+      item,
+      "age",
+      structuredAgeText(item.age_rules) || "Regra de idade em verificação"
+    ),
+    structuredAgeRules: item.age_rules,
+    semanticFields: item.semantic_fields,
+    requisitos: semanticText(
+      item,
+      "required_documents",
+      "Requisitos em verificação"
+    ),
+    requisitosEspecificos: [],
+    instituicaoResponsavel: semanticText(
+      item,
+      "organizer",
+      "Organizador em verificação"
+    ),
+    taxaAplicacao: semanticText(
+      item,
+      "application_fee",
+      structuredFeeText(item.is_free)
+    ),
+    beneficios: semanticText(item, "benefits", "Benefícios em verificação"),
+    custos: semanticText(
+      item,
+      "program_cost",
+      "Informações de custo em verificação"
+    ),
+    custosExtras: semanticText(
+      item,
+      "mandatory_additional_costs",
+      "Custos adicionais em verificação"
+    ),
+    etapasSelecao: "Etapas de seleção em verificação",
+    linkOficial: item.official_information_url,
+    applicationLinkStatus: item.application_link_status,
+    applicationUrl: item.application_url,
+    canApply: item.can_apply ?? null,
+    lastVerifiedAt: item.last_verified_at,
+    lifecycleStatus: item.lifecycle,
+    contato: "Contato disponível na página oficial",
+  };
+};
 
 const fetchFromApi = async <T>(path: string): Promise<T> => {
   const response = await fetch(path, {
@@ -765,38 +859,62 @@ const fetchStructuredActionabilityById = async (
   }
 };
 
+const fetchStructuredPages = async <T extends { id: string }>(
+  collection: "international" | "national",
+  onPage: (items: T[]) => void
+): Promise<void> => {
+  const seenCursors = new Set<string>();
+  let cursor: string | undefined;
+  while (true) {
+    const params = new URLSearchParams({ collection, limit: "100" });
+    if (cursor) {
+      params.set("cursor", cursor);
+    }
+    const result = await fetchFromApi<{
+      data: { items: T[]; next_cursor: string | null };
+    }>(`/api/v1/opportunities?${params.toString()}`);
+    onPage(result.data.items);
+    const nextCursor = result.data.next_cursor;
+    if (!nextCursor) {
+      return;
+    }
+    if (seenCursors.has(nextCursor)) {
+      throw new Error("A paginação do catálogo retornou um cursor repetido.");
+    }
+    seenCursors.add(nextCursor);
+    cursor = nextCursor;
+  }
+};
+
+const fetchStructuredOpportunities = async (
+  collection: "international" | "national"
+): Promise<StructuredOpportunityRecord[]> => {
+  const index = new Map<string, StructuredOpportunityRecord>();
+  await fetchStructuredPages<StructuredOpportunityRecord>(
+    collection,
+    (items) => {
+      for (const item of items) {
+        index.set(item.id, item);
+      }
+    }
+  );
+  return [...index.values()];
+};
+
 const fetchStructuredActionabilityIndex = async (
   collection: "international" | "national"
 ): Promise<Map<string, StructuredActionability>> => {
   const index = new Map<string, StructuredActionability>();
-  const seenCursors = new Set<string>();
-  let cursor: string | undefined;
-
   try {
-    while (true) {
-      const params = new URLSearchParams({ collection, limit: "100" });
-      if (cursor) {
-        params.set("cursor", cursor);
-      }
-      const result = await fetchFromApi<{
-        data: {
-          items: StructuredActionability[];
-          next_cursor: string | null;
-        };
-      }>(`/api/v1/opportunities?${params.toString()}`);
-      for (const item of result.data.items) {
+    await fetchStructuredPages<StructuredActionability>(collection, (items) => {
+      for (const item of items) {
         index.set(item.id, item);
       }
-      const nextCursor = result.data.next_cursor;
-      if (!nextCursor || seenCursors.has(nextCursor)) {
-        return index;
-      }
-      seenCursors.add(nextCursor);
-      cursor = nextCursor;
-    }
+    });
   } catch {
-    return index;
+    // Legacy records remain available when the optional v1 service is unavailable.
   }
+  return index;
 };
 
 const sendToApi = async (
@@ -900,10 +1018,8 @@ export const getInternationalOpportunities = async (): Promise<
   InternationalOpportunity[]
 > => {
   if (STRUCTURED_OPPORTUNITIES_ENABLED) {
-    const structured = await fetchFromApi<{
-      data: { items: StructuredOpportunityRecord[] };
-    }>("/api/v1/opportunities?collection=international&limit=100");
-    return structured.data.items.map(mapStructuredInternationalOpportunity);
+    const structured = await fetchStructuredOpportunities("international");
+    return structured.map(mapStructuredInternationalOpportunity);
   }
   const [data, actionability] = await Promise.all([
     fetchFromApi<{ opportunities: OpportunityRecord[] }>("/api/opportunities"),
@@ -960,10 +1076,8 @@ export const getNationalOpportunities = async (): Promise<
   NationalOpportunity[]
 > => {
   if (STRUCTURED_OPPORTUNITIES_ENABLED) {
-    const structured = await fetchFromApi<{
-      data: { items: StructuredOpportunityRecord[] };
-    }>("/api/v1/opportunities?collection=national&limit=100");
-    return structured.data.items.map(mapStructuredNationalOpportunity);
+    const structured = await fetchStructuredOpportunities("national");
+    return structured.map(mapStructuredNationalOpportunity);
   }
   const [data, actionability] = await Promise.all([
     fetchFromApi<{

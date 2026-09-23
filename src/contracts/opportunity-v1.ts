@@ -835,6 +835,16 @@ export const ingestionRequestV1Schema = z
   .strict()
   .superRefine((request, context) => {
     const { ingestion, snapshot } = request;
+    if (
+      Object.hasOwn(ingestion.publication_version.payload, "curated_master")
+    ) {
+      context.addIssue({
+        code: "custom",
+        message:
+          "curated_master is reserved for the authorized offline editorial importer",
+        path: ["ingestion", "publication_version", "payload"],
+      });
+    }
 
     if (snapshot.id !== ingestion.snapshot_id) {
       context.addIssue({
@@ -921,6 +931,16 @@ export const ingestionRequestV1Schema = z
   })
   .superRefine((request, context) => {
     const { ingestion, snapshot } = request;
+    if (
+      Object.hasOwn(ingestion.publication_version.payload, "curated_master")
+    ) {
+      context.addIssue({
+        code: "custom",
+        message:
+          "curated_master is reserved for the authorized offline editorial importer",
+        path: ["ingestion", "publication_version", "payload"],
+      });
+    }
     const assertionIds = new Set<string>();
     for (const [index, assertion] of ingestion.assertions.entries()) {
       if (assertionIds.has(assertion.id)) {

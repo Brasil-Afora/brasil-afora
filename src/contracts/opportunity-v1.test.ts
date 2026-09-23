@@ -673,6 +673,13 @@ const makeIdentityObservationRequest = ({
 };
 
 describe("opportunity ingestion contract v1", () => {
+  it("rejects the offline editorial import marker in untrusted ingestion payloads", () => {
+    const request = makeValidRequest();
+    Object.assign(request.ingestion.publication_version.payload, {
+      curated_master: {},
+    });
+    expect(ingestionRequestV1Schema.safeParse(request).success).toBe(false);
+  });
   it("accepts a consistent scraper result", () => {
     expect(ingestionRequestV1Schema.safeParse(makeValidRequest()).success).toBe(
       true

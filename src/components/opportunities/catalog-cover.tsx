@@ -79,7 +79,11 @@ const CatalogCover = ({
     {cover.kind === "photo" ? (
       <Image
         alt=""
-        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+        className={
+          cover.src.includes("/curated/artwork-")
+            ? "bg-white object-contain p-3"
+            : "object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+        }
         fill
         loading={eager ? "eager" : "lazy"}
         sizes={sizes}

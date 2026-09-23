@@ -196,17 +196,19 @@ const nameKey = (name: string): string =>
   name.trim().toLocaleLowerCase("pt-BR");
 
 const isOpen = (item: CatalogItem): boolean =>
-  item.daysLeft !== null && item.daysLeft >= 0;
+  (item.daysLeft !== null && item.daysLeft >= 0) ||
+  item.lifecycleLabel === "Inscrições contínuas" ||
+  item.lifecycleLabel === "Inscrições abertas";
 
-/** Verified records first; a catalog record repeating one by name is dropped. */
+/** Published catalog records supersede starter records with matching names. */
 const mergeByName = <T extends { nome: string }>(
   verified: T[],
   catalog: T[]
 ): T[] => {
-  const names = new Set(verified.map((item) => nameKey(item.nome)));
+  const names = new Set(catalog.map((item) => nameKey(item.nome)));
   return [
-    ...verified,
-    ...catalog.filter((item) => !names.has(nameKey(item.nome))),
+    ...catalog,
+    ...verified.filter((item) => !names.has(nameKey(item.nome))),
   ];
 };
 
@@ -242,7 +244,8 @@ export const buildMapItems = ({
   ).map((opportunity) => ({
     ...toInternationalItem(
       opportunity,
-      isVerifiedInternationalOpportunityId(opportunity.id),
+      opportunity.verified ??
+        isVerifiedInternationalOpportunityId(opportunity.id),
       now
     ),
     countries: countriesOf(opportunity.pais),
@@ -268,7 +271,7 @@ export const buildMapItems = ({
   ).map((opportunity) => ({
     ...toNationalItem(
       opportunity,
-      isVerifiedNationalOpportunityId(opportunity.id),
+      opportunity.verified ?? isVerifiedNationalOpportunityId(opportunity.id),
       now
     ),
     countries: countriesOf("Brasil"),

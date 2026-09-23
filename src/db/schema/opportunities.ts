@@ -19,7 +19,7 @@ export const opportunities = pgTable("opportunities", {
   scholarshipCoverage: text("scholarship_coverage").notNull(),
   extraCosts: text("extra_costs").notNull(),
   duration: text("duration").notNull(),
-  applicationDeadline: date("application_deadline").notNull(),
+  applicationDeadline: date("application_deadline"),
   selectionSteps: text("selection_steps").notNull(),
   applicationProcess: text("application_process").notNull(),
   officialLink: text("official_link").notNull(),

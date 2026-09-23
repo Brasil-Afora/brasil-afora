@@ -1,5 +1,6 @@
 import { footerCopy } from "@/lib/copy/pt-br";
 import { getVerifiedDestinations } from "@/server/geo/opportunity-locations";
+import { getCuratedHomepage } from "@/server/publication/curated-home";
 import FeaturedOpportunities from "./featured-opportunities";
 import HomeContribute from "./home-contribute";
 import {
@@ -18,10 +19,13 @@ const GEONAMES_CREDIT = {
 const creditLinkClassName =
   "underline decoration-navy-600 underline-offset-2 transition-colors hover:text-slate-200";
 
-const Homepage = () => {
-  const featured = getFeaturedOpportunities();
-  const verifiedEntries = getVerifiedSearchEntries(featured);
-  const verifiedDestinations = getVerifiedDestinations();
+const Homepage = async () => {
+  const curated = await getCuratedHomepage();
+  const featured = curated?.featured ?? getFeaturedOpportunities();
+  const verifiedEntries =
+    curated?.entries ?? getVerifiedSearchEntries(featured);
+  const verifiedDestinations =
+    curated?.destinations ?? getVerifiedDestinations();
 
   return (
     <div className="overflow-x-clip bg-navy-950 font-reading text-slate-100">
@@ -37,7 +41,12 @@ const Homepage = () => {
 
       <footer className="border-navy-700/60 border-t">
         <div className="mx-auto flex w-full max-w-[84rem] flex-col gap-2 px-5 py-6 text-[13px] text-mist-dim sm:px-8 md:flex-row md:justify-between">
-          <p>{footerCopy.tagline}</p>
+          <p>
+            {footerCopy.tagline}{" "}
+            <a className={creditLinkClassName} href="/creditos-imagens">
+              Créditos das imagens
+            </a>
+          </p>
           <p>
             {footerCopy.topPhotos} {footerCopy.mapLocations}{" "}
             <a

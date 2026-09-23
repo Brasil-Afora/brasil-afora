@@ -20,6 +20,7 @@ import useOpportunityFilters, {
   OPPORTUNITY_FILTER_STORAGE_KEYS,
 } from "@/hooks/use-opportunity-filters";
 import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
+import { mergeCatalogOpportunities } from "@/lib/merge-catalog-opportunities";
 import type { LocationsById } from "@/server/geo/opportunity-locations";
 import type { OpportunitiesFiltros, Opportunity } from "./types";
 
@@ -91,16 +92,11 @@ const header: CatalogHeaderConfig = {
   titleLead: "Oportunidades",
 };
 
-const nameKey = (name: string): string =>
-  name.trim().toLocaleLowerCase("pt-BR");
-
 const InternacionalMain = ({ verifiedLocations }: InternacionalMainProps) => {
   const { data, loading, error, retry } = useOportunidadesInternacionais();
 
-  // The verified selection and the catalog form one list; a catalog record
-  // that duplicates a verified one by name is dropped.
   const merged = useMemo<Opportunity[]>(() => {
-    const verified = verifiedInternationalOpportunities
+    const selection = verifiedInternationalOpportunities
       .filter((opportunity) =>
         isOpportunityDeadlineOpen(opportunity.prazoInscricao)
       )
@@ -108,11 +104,7 @@ const InternacionalMain = ({ verifiedLocations }: InternacionalMainProps) => {
         ...opportunity,
         localizacoes: verifiedLocations[opportunity.id] ?? [],
       }));
-    const verifiedNames = new Set(verified.map((item) => nameKey(item.nome)));
-    return [
-      ...verified,
-      ...data.filter((item) => !verifiedNames.has(nameKey(item.nome))),
-    ];
+    return mergeCatalogOpportunities<Opportunity>(data, selection);
   }, [data, verifiedLocations]);
 
   const {

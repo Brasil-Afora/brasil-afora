@@ -10,11 +10,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { formatDaysLeft } from "@/lib/date-utils";
-import {
-  CATALOG_PATHS,
-  type FeaturedOpportunity,
-  VERIFIED_CHECK_DATE,
-} from "./home-data";
+import { CATALOG_PATHS, type FeaturedOpportunity } from "./home-data";
 
 const URGENT_DAYS = 21;
 
@@ -30,7 +26,11 @@ const FeaturedOpportunityCard = ({
       <div className="relative h-40 overflow-hidden bg-navy-800">
         <Image
           alt=""
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          className={
+            opportunity.image.includes("/curated/artwork-")
+              ? "bg-white object-contain p-3"
+              : "object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          }
           fill
           sizes="(min-width: 1280px) 20rem, (min-width: 640px) 50vw, 100vw"
           src={opportunity.image}
@@ -146,8 +146,7 @@ const FeaturedOpportunities = ({
         </h2>
         <p className="mt-2 max-w-2xl text-[15px] text-mist leading-relaxed">
           Elegibilidade para estudantes do Brasil, prazos e links oficiais
-          conferidos em {VERIFIED_CHECK_DATE}. Ordenadas pelo prazo mais
-          próximo.
+          conferidos nas fontes oficiais. Ordenadas pelo prazo mais próximo.
         </p>
       </div>
       <div className="flex shrink-0 gap-5 text-[14px]">

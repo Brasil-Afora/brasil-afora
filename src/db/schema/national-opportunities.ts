@@ -9,7 +9,7 @@ export const nationalOpportunities = pgTable("national_opportunities", {
   type: text("type").notNull(),
   educationLevel: text("education_level").notNull(),
   modality: text("modality").notNull(),
-  applicationDeadline: date("application_deadline").notNull(),
+  applicationDeadline: date("application_deadline"),
   about: text("about").notNull(),
   shortDescription: text("short_description").notNull(),
   duration: text("duration").notNull(),

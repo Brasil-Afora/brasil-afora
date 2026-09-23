@@ -73,6 +73,14 @@ export interface ProgramEnrollment {
   prazoInscricao?: string;
   /** When the next round is expected, e.g. "fevereiro de 2027". */
   previsao?: string;
+  /** Enrollment statement from the published source; dates still age on the client. */
+  situacaoNaFonte?:
+    | "open"
+    | "rolling"
+    | "closed"
+    | "upcoming"
+    | "next_cycle_not_announced"
+    | "unknown";
 }
 
 export interface ProgramDate {
@@ -82,6 +90,8 @@ export interface ProgramDate {
 }
 
 export interface Program {
+  /** Starter URLs retained when the same identity is published from the database. */
+  aliases?: string[];
   /** When the team last checked the record against the source (dd/mm/aaaa). */
   atualizadoEm: string;
   /** Benefits as filter values; the first one is the card's headline tag. */
@@ -98,6 +108,7 @@ export interface Program {
   duracao?: string;
   /** Selection steps, in order; the student ticks them on the page. */
   etapasSelecao: string[];
+  fontes?: string[];
   /** Readable id, used in the URL: /programas-e-bolsas/<id>. */
   id: string;
   /** Photo for the card cover; without one the cover is a night map. */
@@ -121,4 +132,6 @@ export interface Program {
   tipo: ProgramType;
   /** "Fundação", "Governo federal", "Associação de estudantes"… */
   tipoOrganizacao?: string;
+  /** QA recommendation stored in the published version. */
+  verified?: boolean;
 }

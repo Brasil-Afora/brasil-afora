@@ -1,3 +1,4 @@
+import type { MasterStatus } from "@/lib/curated-import/master";
 import type { StructuredSemanticField } from "@/lib/opportunities-api";
 
 export interface Opportunity {
@@ -7,6 +8,8 @@ export interface Opportunity {
   canApply?: boolean | null;
   cidadeEstado: string;
   contato: string;
+  curatedStatus?: MasterStatus;
+  curatedStatusLabel?: string;
   custos: string;
   custosExtras: string;
   duracao: string;
@@ -23,12 +26,14 @@ export interface Opportunity {
   nome: string;
   pais: string;
   prazoInscricao: string;
+  program?: boolean;
   requisitos: string;
   requisitosEspecificos: string[];
   semanticFields?: Record<string, StructuredSemanticField>;
   sobre: string;
   taxaAplicacao: string;
   tipo: string;
+  verified?: boolean;
 }
 
 export interface OpportunitiesFiltros {

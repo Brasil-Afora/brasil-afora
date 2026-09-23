@@ -2,7 +2,7 @@ import { ShieldCheckIcon } from "lucide-react";
 import { heroCopy } from "@/lib/copy/pt-br";
 import { HERO_PHOTOS, heroPhotoStartIndex } from "./hero-photos";
 import HomeCategoryShortcuts from "./home-category-shortcuts";
-import { type SearchEntry, VERIFIED_CHECK_DATE } from "./home-data";
+import type { SearchEntry } from "./home-data";
 import HomeHeroPhotos from "./home-hero-photos";
 import HomeSearch from "./home-search";
 
@@ -65,7 +65,7 @@ const HomeHero = ({ verifiedEntries }: { verifiedEntries: SearchEntry[] }) => (
           •
         </span>
         <span className="text-mist">
-          {heroCopy.verifiedCheckedOn(VERIFIED_CHECK_DATE)}
+          Consulte as condições de cada oportunidade
         </span>
       </p>
     </div>

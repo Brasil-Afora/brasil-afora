@@ -21,7 +21,6 @@ interface City {
 
 const MAX_WORDS_PER_NAME = 4;
 const MIN_NAME_LENGTH = 4;
-const MAX_LOCATIONS = 3;
 const BRAZIL = "BR";
 const SEGMENT_SEPARATOR = /[,;()/|–—]+|\s+-\s+|\s+e\s+/;
 const WORD = /[a-z]+(?:'[a-z]+)?/g;
@@ -196,7 +195,7 @@ const findCities = (text: string, countries: string[]): FoundCity[] => {
 };
 
 const cityLocations = (cities: FoundCity[]): OpportunityLocation[] =>
-  cities.slice(0, MAX_LOCATIONS).map(({ city, label }) => ({
+  cities.map(({ city, label }) => ({
     label,
     lat: city.lat,
     lon: city.lon,
@@ -219,7 +218,7 @@ export const resolveInternationalLocations = (
   if (cities.length > 0) {
     return cityLocations(cities);
   }
-  return countries.slice(0, MAX_LOCATIONS).map((item) => ({
+  return countries.map((item) => ({
     label: country,
     lat: item.lat,
     lon: item.lon,

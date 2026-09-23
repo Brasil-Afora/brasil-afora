@@ -54,6 +54,7 @@ const LOCALHOST_FALLBACK_REGEX =
 const INTERNAL_CATALOG_REGEX = /<CatalogPage/;
 const MERGED_VERIFIED_DATA_REGEX =
   /verified(?:International|National)Opportunities\s*\.filter/;
+const CATALOG_VISIBILITY_REGEX = /isCatalogOpportunityVisible/;
 const OPEN_DEADLINE_FILTER_REGEX = /isOpportunityDeadlineOpen/;
 const VERIFIED_DETAIL_REGEX =
   /isVerified(?:International|National)OpportunityId/;
@@ -130,8 +131,8 @@ test("does not show legacy catalog opportunities after their deadlines", async (
     BunFileCompat.readText(nationalHookPath),
   ]);
 
-  assert.match(internationalHook, OPEN_DEADLINE_FILTER_REGEX);
-  assert.match(nationalHook, OPEN_DEADLINE_FILTER_REGEX);
+  assert.match(internationalHook, CATALOG_VISIBILITY_REGEX);
+  assert.match(nationalHook, CATALOG_VISIBILITY_REGEX);
 });
 
 test("falls back to the public production domain for metadata", async () => {

@@ -64,6 +64,41 @@ const STATUS_RANK: Record<ProgramStatusKind, number> = {
   encerrado: 4,
 };
 
+const SOURCE_ENROLLMENT: Record<
+  string,
+  Pick<ProgramStatus, "kind" | "label" | "shortLabel">
+> = {
+  closed: {
+    kind: "encerrado",
+    label: "Inscrições encerradas",
+    shortLabel: "Encerradas",
+  },
+  next_cycle_not_announced: {
+    kind: "a-confirmar",
+    label: "Próximo ciclo ainda não anunciado",
+    shortLabel: "Datas a confirmar",
+  },
+  unknown: {
+    kind: "a-confirmar",
+    label: "Situação das inscrições não informada",
+    shortLabel: "Datas a confirmar",
+  },
+  open: { kind: "aberto", label: "Inscrições abertas", shortLabel: "Abertas" },
+  upcoming: { kind: "em-breve", label: "Em breve", shortLabel: "Em breve" },
+};
+const sourceEnrollmentStatus = (program: Program): ProgramStatus | null => {
+  const source = program.inscricoes.situacaoNaFonte;
+  if (!(source && SOURCE_ENROLLMENT[source])) {
+    return null;
+  }
+  return {
+    ...SOURCE_ENROLLMENT[source],
+    daysLeft: null,
+    urgent: false,
+    detail: program.inscricoes.nota ?? null,
+  };
+};
+
 export const programStatus = (program: Program, now: Date): ProgramStatus => {
   const { abertura, continuo, nota, prazoInscricao, previsao } =
     program.inscricoes;
@@ -77,6 +112,11 @@ export const programStatus = (program: Program, now: Date): ProgramStatus => {
       label: "Inscrições o ano todo",
       shortLabel: "Inscrições o ano todo",
     };
+  }
+  const reported = program.inscricoes.situacaoNaFonte;
+  const sourceStatus = sourceEnrollmentStatus(program);
+  if (sourceStatus && reported !== "open" && reported !== "upcoming") {
+    return sourceStatus;
   }
   const opensIn = abertura ? getBrasiliaDaysUntil(abertura, now) : null;
   if (opensIn !== null && opensIn > 0) {
@@ -111,6 +151,9 @@ export const programStatus = (program: Program, now: Date): ProgramStatus => {
       label: "Inscrições encerradas",
       shortLabel: "Encerradas",
     };
+  }
+  if (sourceStatus) {
+    return sourceStatus;
   }
   if (previsao) {
     return {
@@ -149,6 +192,7 @@ export interface ProgramItem {
   summary: string;
   tags: CatalogTag[];
   type: ProgramType;
+  verified: boolean;
 }
 
 const FAVICON_SIZE = 128;
@@ -223,6 +267,7 @@ export const formatLabel = (program: Program): string =>
 
 export const toProgramItem = (program: Program, now: Date): ProgramItem => ({
   audience: program.publico,
+  verified: program.verified ?? false,
   cover: programCover(program),
   destination: destinationLabel(program),
   format: formatLabel(program),
@@ -321,8 +366,13 @@ export const sortProgramItems = (
 
 const RELATED_COUNT = 3;
 
-export const relatedPrograms = (program: Program, now: Date): ProgramItem[] =>
-  PROGRAMS.filter((other) => other.id !== program.id)
+export const relatedPrograms = (
+  program: Program,
+  now: Date,
+  programs: Program[] = PROGRAMS
+): ProgramItem[] =>
+  programs
+    .filter((other) => other.id !== program.id)
     .map((other) => {
       const sameType = other.tipo === program.tipo ? 2 : 0;
       const sharedLevel = other.niveis.some((level) =>

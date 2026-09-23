@@ -2,6 +2,8 @@ export interface OpportunityLifecycleFields {
   applicationLinkStatus?: string | null;
   applicationUrl?: string | null;
   canApply?: boolean | null;
+  curatedStatus?: string;
+  curatedStatusLabel?: string;
   lastVerifiedAt?: string | null;
   lifecycleStatus?: string | null;
   linkOficial: string;
@@ -32,13 +34,18 @@ const effectiveApplyPermission = (
 export const shouldShowDeadlineCountdown = (
   opportunity: OpportunityLifecycleFields
 ): boolean =>
-  !opportunity.lifecycleStatus ||
-  ACTIVE_STATES.has(opportunity.lifecycleStatus) ||
-  UPCOMING_STATES.has(opportunity.lifecycleStatus);
+  opportunity.curatedStatus
+    ? ["open", "upcoming"].includes(opportunity.curatedStatus)
+    : !opportunity.lifecycleStatus ||
+      ACTIVE_STATES.has(opportunity.lifecycleStatus) ||
+      UPCOMING_STATES.has(opportunity.lifecycleStatus);
 
 export const getOpportunityLifecycleLabel = (
   opportunity: OpportunityLifecycleFields
 ): string | null => {
+  if (opportunity.curatedStatusLabel) {
+    return opportunity.curatedStatusLabel;
+  }
   if (!opportunity.lifecycleStatus) {
     return null;
   }
@@ -117,6 +124,8 @@ export const getApplicationTarget = (
     };
   }
   const available =
+    (!opportunity.curatedStatus ||
+      ["open", "rolling"].includes(opportunity.curatedStatus)) &&
     Boolean(opportunity.applicationUrl) &&
     Boolean(
       opportunity.lifecycleStatus &&

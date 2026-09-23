@@ -19,9 +19,10 @@ import {
   StepsChecklist,
 } from "@/components/opportunities/detail-parts";
 import { shareDetail } from "@/components/opportunities/opportunity-detail";
+import { useProgramsQuery } from "@/hooks/queries/use-program-queries";
 import useIsClient from "@/hooks/use-is-client";
 import { formatDaysLeft } from "@/lib/date-utils";
-import { ProgramStatusLine } from "./program-items";
+import { ProgramStatusLine, ProgramVerifiedBadge } from "./program-items";
 import {
   PROGRAMS_PATH,
   type ProgramStatus,
@@ -213,6 +214,22 @@ const OrganizationCard = ({ program }: { program: Program }) => {
         </span>
         . Confirme datas e regras no site oficial antes de se inscrever.
       </p>
+      {program.fontes && program.fontes.length > 0 && (
+        <ul className="space-y-2 text-muted text-sm">
+          {program.fontes.map((source) => (
+            <li key={source}>
+              <a
+                className="underline"
+                href={source}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {source}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
       {domain && (
         <a
           className="mt-4 inline-flex max-w-full items-center gap-1.5 text-[14px] text-atlantic underline-offset-4 hover:underline"
@@ -233,11 +250,12 @@ const OrganizationCard = ({ program }: { program: Program }) => {
 };
 
 const RelatedCard = ({ program }: { program: Program }) => {
+  const query = useProgramsQuery();
   const isClient = useIsClient();
   if (!isClient) {
     return null;
   }
-  const items = relatedPrograms(program, new Date());
+  const items = relatedPrograms(program, new Date(), query.data);
   if (items.length === 0) {
     return null;
   }
@@ -410,7 +428,12 @@ const ProgramDetail = ({ program }: { program: Program }) => {
         }
         backHref={PROGRAMS_PATH}
         backLabel="Programas e Bolsas"
-        badges={<HeroBadge status={status} />}
+        badges={
+          <>
+            <ProgramVerifiedBadge verified={program.verified} />
+            <HeroBadge status={status} />
+          </>
+        }
         detail={{
           cover: programCover(program),
           institution: program.instituicaoResponsavel,
