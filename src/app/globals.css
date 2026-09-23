@@ -288,12 +288,27 @@
    photo can't fade into paper: every step of the fade mixes shadow with
    cream, which reads as a grey smear. So in light the masks and fades go,
    and the photo keeps hard edges: an inset print above the headline on
-   phones, and on desktop a plate beside the text block, top and bottom
-   aligned to it, rounded where it meets the paper and bleeding off the right
-   edge. The copy column narrows so nothing runs under it, and the credit
-   sits under the plate like a print caption. */
+   phones, and on desktop a print beside the text block, top and bottom
+   aligned to it and ending on the container's right edge, where the cards
+   below it end. The copy column narrows so nothing runs under it, and the
+   credit sits under the print like a caption.
+
+   The print used to bleed off the viewport's right edge. On the navy ground
+   the bleed is invisible (the photo dissolves and the whole band reads
+   full-width), but on paper it is a hard edge: the copy kept a 2rem+ gutter
+   on the left while the right had none, and the page read as leaning right.
+   Inside the container both gutters match and the hero shares the page's
+   axis. */
 [data-theme="light"] .ba-hero-dissolve {
   display: none;
+}
+
+/* On the navy ground the hero needs no ground of its own: the photo and the
+   dissolve are the band. On paper it would be the page's own cream with a
+   hairline under it, so the first screen reads as loose text rather than a
+   hero. One step of paper darker gives it an edge. */
+[data-theme="light"] .ba-hero {
+  background-color: var(--color-navy-850);
 }
 
 [data-theme="light"] .ba-hero-mask {
@@ -320,11 +335,14 @@
 @media (min-width: 64rem) {
   [data-theme="light"] .ba-hero-frame {
     top: 3.5rem;
+    /* The container's right edge — the same expression the credit uses, so
+       the caption lines up under the print. */
+    right: max(2rem, calc(50% - 40rem));
     bottom: 3rem;
     left: 60%;
     width: auto;
     margin: 0;
-    border-radius: 18px 0 0 18px;
+    border-radius: 18px;
   }
 
   [data-theme="light"] .ba-hero-caption {
@@ -375,17 +393,19 @@
   }
 }
 
-/* On desktop the plate starts where the copy column ends (container gutter,
+/* On desktop the print starts where the copy column ends (container gutter,
    the 64px icon ring and its 20px gap, the 36rem subtitle, 2.5rem of paper)
-   and bleeds off the right edge. */
+   and ends on the container's right edge, like the light hero's — the same
+   right edge the cards below it use, and the one the credit already uses. */
 @media (min-width: 64rem) {
   [data-theme="light"] .ba-catalog-photo-frame {
     top: 2.5rem;
+    right: max(2rem, calc(50% - 40rem));
     bottom: 2.5rem;
     left: calc(max(0px, 50% - 42rem) + 2rem + 84px + 36rem + 2.5rem);
     width: auto;
     margin: 0;
-    border-radius: 18px 0 0 18px;
+    border-radius: 18px;
   }
 }
 
@@ -411,9 +431,13 @@ html[data-theme="light"] {
   background-color: var(--color-signal);
 }
 
+/* The canvas behind the page: what a rubber-band overscroll uncovers. Left
+   to the browser it is white, which in the light theme is a brighter sheet
+   than the paper it sits behind. */
 html {
   color-scheme: dark;
   scrollbar-color: var(--color-navy-600) var(--color-navy-950);
+  background-color: var(--color-navy-950);
 }
 
 /* Amber lines that draw themselves: the home page's one motion grammar.

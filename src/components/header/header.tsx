@@ -83,7 +83,7 @@ const Header = ({ transparent = false }: HeaderProps) => {
       className={`ba-header sticky top-0 z-50 border-b font-reading text-[15px] text-white transition-colors duration-500 ${headerBgClass}`}
     >
       <div className="mx-auto flex w-full max-w-[84rem] items-center justify-between px-5 py-3 sm:px-8">
-        <div className="flex flex-1 items-center justify-between md:hidden">
+        <div className="flex flex-1 items-center justify-between min-[1000px]:hidden">
           <Button
             className="z-10 text-white focus:outline-none"
             onClick={toggleMobileMenu}
@@ -116,26 +116,36 @@ const Header = ({ transparent = false }: HeaderProps) => {
           </div>
         </div>
 
-        <div className="hidden flex-1 items-center justify-between md:flex">
-          <Link className="flex items-center space-x-2" href="/">
-            <Image
-              alt="Logo do Brasil Afora"
-              className="ba-logo h-11 w-auto object-contain"
-              height={44}
-              src="/brasil-afora-logo.svg"
-              unoptimized
-              width={54}
-            />
-            <span className="whitespace-nowrap font-semibold font-wordmark text-2xl text-white sm:text-3xl">
-              Brasil
-            </span>
-            <span className="whitespace-nowrap font-semibold font-wordmark text-2xl text-signal sm:text-3xl">
-              Afora
-            </span>
-          </Link>
+        {/* The two flanks share the leftover space equally (flex-1 basis-0) so
+            the nav sits on the page's own axis. Letting the nav take the
+            leftover space instead would centre it between the logo and the
+            profile menu, which are ~100px apart in width, and the whole page
+            would read as shifted right. */}
+        <div className="hidden flex-1 items-center justify-between min-[1000px]:flex">
+          <div className="flex flex-1 basis-0 justify-start">
+            <Link className="flex items-center space-x-2" href="/">
+              <Image
+                alt="Logo do Brasil Afora"
+                className="ba-logo h-11 w-auto object-contain"
+                height={44}
+                src="/brasil-afora-logo.svg"
+                unoptimized
+                width={54}
+              />
+              <span className="whitespace-nowrap font-semibold font-wordmark text-2xl text-white sm:text-3xl">
+                Brasil
+              </span>
+              <span className="whitespace-nowrap font-semibold font-wordmark text-2xl text-signal sm:text-3xl">
+                Afora
+              </span>
+            </Link>
+          </div>
 
-          <nav aria-label="Principal" className="flex flex-1 justify-center">
-            <ul className="flex items-center gap-5 lg:gap-8 xl:gap-10">
+          <nav aria-label="Principal" className="flex justify-center">
+            {/* The nav is centred on the page, so it has half the leftover
+                space on each side: the full labels and the wider gaps only
+                fit from 1280px without crowding the wordmark. */}
+            <ul className="flex items-center gap-5 xl:gap-8 2xl:gap-10">
               {navLinks.map(({ href, label, end, shortLabel }) => {
                 const isActive = isPathActive(pathname, href, end);
 
@@ -144,8 +154,8 @@ const Header = ({ transparent = false }: HeaderProps) => {
                     <Link className={getNavLinkClasses(isActive)} href={href}>
                       {shortLabel ? (
                         <>
-                          <span className="lg:hidden">{shortLabel}</span>
-                          <span className="hidden lg:inline">{label}</span>
+                          <span className="xl:hidden">{shortLabel}</span>
+                          <span className="hidden xl:inline">{label}</span>
                         </>
                       ) : (
                         label
@@ -160,7 +170,7 @@ const Header = ({ transparent = false }: HeaderProps) => {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex min-w-0 flex-1 basis-0 items-center justify-end gap-1.5">
             <ThemeToggle />
             <div className="relative" ref={profileRef}>
               <Button
@@ -288,13 +298,13 @@ const Header = ({ transparent = false }: HeaderProps) => {
 
       <Button
         aria-label="Fechar menu"
-        className={`fixed inset-0 z-40 h-auto w-full bg-black bg-opacity-75 transition-opacity duration-300 md:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-40 h-auto w-full bg-black bg-opacity-75 transition-opacity duration-300 min-[1000px]:hidden ${isMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={closeMobileMenu}
         type="button"
         variant="ghost"
       />
       <div
-        className={`fixed top-0 left-0 z-50 h-full w-64 transform bg-slate-900 shadow-xl transition-transform duration-500 ease-in-out md:hidden ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 z-50 h-full w-64 transform bg-slate-900 shadow-xl transition-transform duration-500 ease-in-out min-[1000px]:hidden ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="flex h-full flex-col p-4">
           <div className="mb-6 flex items-center justify-between border-slate-800 border-b pb-4">
