@@ -46,8 +46,8 @@ export default function MapPage() {
               Oportunidades no <span className="text-signal">mapa</span>
             </h1>
             <p className="mt-3 max-w-[40rem] text-[16px] text-mist leading-relaxed">
-              Escolha um país destacado para ver o que está com inscrições
-              abertas lá: bolsas, intercâmbios, olimpíadas e programas para
+              Escolha um país destacado para ver inscrições abertas, contínuas e
+              próximos ciclos: bolsas, intercâmbios, olimpíadas e programas para
               estudantes brasileiros.
             </p>
           </div>

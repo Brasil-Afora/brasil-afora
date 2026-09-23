@@ -86,7 +86,10 @@ const OpportunityItem = ({
             className="h-3.5 w-3.5 shrink-0 text-verified"
           />
         )}
-        <span>Prazo {item.deadline}</span>
+        <span>
+          {item.curatedStatus === "upcoming" ? "Em breve · " : ""}
+          {item.deadline ? `Prazo ${item.deadline}` : "Inscrições contínuas"}
+        </span>
         {item.daysLeft !== null && (
           <span
             className={`font-semibold ${isUrgent(item) ? "text-signal" : "text-slate-200"}`}
@@ -189,7 +192,7 @@ const Overview = ({
     <p aria-live="polite" className="mt-1 text-[14px] text-mist">
       {loading && countries.length === 0
         ? "Carregando oportunidades…"
-        : `${plural(total, "oportunidade aberta", "oportunidades disponíveis")} em ${plural(countries.length, "país", "países")}`}
+        : `${plural(total, "oportunidade disponível", "oportunidades disponíveis")} em ${plural(countries.length, "país", "países")}`}
     </p>
 
     {failed && (
@@ -230,7 +233,7 @@ const Overview = ({
 
     {!loading && countries.length === 0 && (
       <div className="mt-4 rounded-lg border border-navy-700 border-dashed px-4 py-4 text-[14px] text-mist">
-        Nenhuma oportunidade aberta com esses filtros.
+        Nenhuma oportunidade disponível com esses filtros.
         {filtersActive && (
           <button
             className="mt-2 block font-semibold text-signal hover:text-signal-strong"
@@ -333,7 +336,7 @@ const CountryView = ({
           <p aria-live="polite" className="mt-0.5 text-[14px] text-mist">
             {plural(
               items.length,
-              "oportunidade aberta",
+              "oportunidade disponível",
               "oportunidades disponíveis"
             )}
             {isBrazil && items.length > 0 && !place && " no Brasil"}
@@ -400,7 +403,7 @@ const CountryView = ({
         <div className="mt-5 rounded-lg border border-navy-700 border-dashed px-4 py-4 text-[14px] text-mist">
           {filtersActive
             ? `Nenhuma oportunidade em ${country.name} com esses filtros.`
-            : `Nenhuma inscrição aberta em ${country.name} no momento.`}
+            : `Nenhuma oportunidade disponível em ${country.name} no momento.`}
           {filtersActive && (
             <button
               className="mt-2 block font-semibold text-signal hover:text-signal-strong"
