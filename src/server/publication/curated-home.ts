@@ -4,6 +4,8 @@ import {
   normalizeSearchText,
   type SearchEntry,
 } from "@/components/homepage/home-data";
+import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
+import { selectHomepageOpportunities } from "@/lib/curated-import/homepage-selection";
 import {
   currentDeadline,
   effectiveStatus,
@@ -14,6 +16,12 @@ import { getBrasiliaDaysUntil } from "@/lib/date-utils";
 import type { MapDestination } from "@/lib/geo";
 import { getCuratedPublications } from "./curated-catalog";
 import { getCuratedCatalogMetadata } from "./curated-catalog-metadata";
+
+const placeLabel = (country: string, format: string) =>
+  country || (format === "online" ? "Online" : "Local não informado");
+
+const levelLabel = (levels: string[]) =>
+  levels.map((level) => LEVEL_LABELS[level] ?? level).join(" · ");
 
 export const getCuratedHomepage = async () => {
   const publications = await getCuratedPublications();
@@ -33,6 +41,14 @@ export const getCuratedHomepage = async () => {
     const deadline = currentDeadline(source);
     const formattedDeadline = deadline?.split("-").reverse().join("/") ?? "";
     const status = effectiveStatus(source, today);
+    if (
+      !isCatalogOpportunityVisible({
+        curatedStatus: status,
+        prazoInscricao: formattedDeadline,
+      })
+    ) {
+      continue;
+    }
     const href = `${CATALOG_PATHS[scope]}/${id}`;
     const text = normalizeSearchText(
       [
@@ -52,10 +68,11 @@ export const getCuratedHomepage = async () => {
       kind: TYPE_LABELS[source.type] ?? "Programa",
       place: source.city || source.country,
       deadline: formattedDeadline,
+      curatedStatus: status,
       primaryText: text,
       text: `${text} ${normalizeSearchText(source.description)}`,
     });
-    if (!(verified && ["open", "rolling"].includes(status))) {
+    if (!verified) {
       continue;
     }
     const metadata = getCuratedCatalogMetadata(publication);
@@ -68,7 +85,7 @@ export const getCuratedHomepage = async () => {
       });
     }
     const daysLeft = getBrasiliaDaysUntil(formattedDeadline);
-    if (daysLeft === null || daysLeft < 0) {
+    if (daysLeft === null || status === "upcoming") {
       continue;
     }
     featured.push({
@@ -78,20 +95,16 @@ export const getCuratedHomepage = async () => {
       deadline: formattedDeadline,
       image,
       institution: source.organization,
-      level: source.levels
-        .map((level) => LEVEL_LABELS[level] ?? level)
-        .join(" · "),
+      level: levelLabel(source.levels),
       name: source.name,
       officialLink: source.official_url,
-      place:
-        source.country ||
-        (source.format === "online" ? "Online" : "Local não informado"),
+      place: placeLabel(source.country, source.format),
       scope,
       tags: [TYPE_LABELS[source.type] ?? "Programa"],
     });
   }
   return {
-    featured: featured.sort((a, b) => a.daysLeft - b.daysLeft).slice(0, 6),
+    featured: selectHomepageOpportunities(featured, today),
     entries,
     destinations,
   };

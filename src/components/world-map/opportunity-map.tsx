@@ -798,7 +798,7 @@ const OpportunityMap = ({
         aria-hidden="true"
         className="pointer-events-none absolute bottom-4 left-4 z-[500] rounded-xl border border-navy-700/80 bg-navy-950/85 px-3.5 py-3 text-[12px] text-mist"
       >
-        <p className="font-semibold text-slate-100">Inscrições abertas</p>
+        <p className="font-semibold text-slate-100">Abertas ou em breve</p>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <span className="flex items-center gap-1.5 whitespace-nowrap">
             <span className="map-swatch tier-1" />

@@ -8,7 +8,9 @@ import CatalogPage, {
   type CatalogPresentation,
 } from "@/components/opportunities/catalog-page";
 import { useProgramsQuery } from "@/hooks/queries/use-program-queries";
+import { useCatalogClock } from "@/hooks/use-catalog-clock";
 import useSessionStorage from "@/hooks/use-session-storage";
+import { isProgramVisible } from "@/lib/catalog-visibility";
 import { ProgramCard, ProgramRow } from "./program-items";
 import {
   applyProgramFilters,
@@ -105,7 +107,7 @@ const presentation: CatalogPresentation<ProgramItem> = {
   empty: {
     filtered: {
       title: "Nenhum programa com esses filtros",
-      body: "Tente remover um filtro. Programas com inscrições encerradas continuam aqui, com a previsão da próxima turma.",
+      body: "Tente remover um filtro. Mostramos inscrições abertas, contínuas ou com novo ciclo anunciado.",
     },
     none: {
       title: "Os primeiros programas estão a caminho",
@@ -124,12 +126,16 @@ const presentation: CatalogPresentation<ProgramItem> = {
   ],
 };
 
-// A program never expires off the list: when a round closes it stays, marked
-// "Encerradas" with the next round's forecast. Opportunities, by contrast,
-// disappear after their deadline.
 const ProgramsMain = () => {
   const query = useProgramsQuery();
-  const programs = query.data ?? getPrograms();
+  const now = useCatalogClock();
+  const programs = useMemo(
+    () =>
+      (query.data ?? getPrograms()).filter((program) =>
+        isProgramVisible(program, now)
+      ),
+    [query.data, now]
+  );
   const [filtros, setFiltros] = useSessionStorage<ProgramFilters>(
     PROGRAM_FILTER_STORAGE_KEY,
     INITIAL_PROGRAM_FILTERS
@@ -138,11 +144,10 @@ const ProgramsMain = () => {
     useState<ProgramFilters>(filtros);
 
   const items = useMemo(() => {
-    const now = new Date();
     return applyProgramFilters(programs, filtros, now).map((program) =>
       toProgramItem(program, now)
     );
-  }, [programs, filtros]);
+  }, [programs, filtros, now]);
 
   const clearFilters = () => {
     setFiltros(INITIAL_PROGRAM_FILTERS);

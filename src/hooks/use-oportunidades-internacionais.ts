@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { Opportunity } from "@/components/international-opportunities/types";
 import { useInternationalOpportunitiesQuery } from "@/hooks/queries/use-opportunity-queries";
+import { useCatalogClock } from "@/hooks/use-catalog-clock";
 import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
 
 interface UseOportunidadesInternacionaisResult {
@@ -16,11 +17,12 @@ export const useOportunidadesInternacionais =
   (): UseOportunidadesInternacionaisResult => {
     const query = useInternationalOpportunitiesQuery();
 
+    const now = useCatalogClock();
     const data = useMemo<Opportunity[]>(() => {
       return (query.data ?? []).filter((opportunity) =>
-        isCatalogOpportunityVisible(opportunity)
+        isCatalogOpportunityVisible(opportunity, now)
       );
-    }, [query.data]);
+    }, [query.data, now]);
 
     return {
       data,

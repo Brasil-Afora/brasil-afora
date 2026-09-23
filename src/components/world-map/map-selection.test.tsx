@@ -132,10 +132,13 @@ test("resolver preserves accents and university towns for multi-city records", (
   assert.equal(placesLabel(["Boston", "Cambridge"]), "Boston e Cambridge");
 });
 
-test("map excludes upcoming curated rounds with a future deadline", () => {
+test("map includes upcoming curated rounds and rolling intake", () => {
   assert.equal(
-    isMapOpportunityOpen({ ...item("future", []), curatedStatus: "upcoming" }),
-    false
+    isMapOpportunityOpen(
+      { ...item("future", []), curatedStatus: "upcoming" },
+      new Date("2026-09-23T12:00:00Z")
+    ),
+    true
   );
   assert.equal(
     isMapOpportunityOpen({

@@ -129,7 +129,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <Script id="ba-theme-init" strategy="beforeInteractive">
-          {`(function(){try{var m=document.cookie.match(/(?:^|; )ba-theme=(dark|light)/);var t=m?m[1]:localStorage.getItem("ba-theme");if(t!=="light"&&t!=="dark"){t="dark";}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="dark";}})();`}
+          {`(function(){try{var m=document.cookie.match(/(?:^|; )ba-theme=(dark|light)/);var t=null;try{t=localStorage.getItem("ba-theme");}catch(e){}if(t!=="light"&&t!=="dark"){t=m?m[1]:"dark";}if(t!=="light"&&t!=="dark"){t="dark";}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme="dark";}})();`}
         </Script>
         <QueryProvider>{children}</QueryProvider>
         <Toaster />

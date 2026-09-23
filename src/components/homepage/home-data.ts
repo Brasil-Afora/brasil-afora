@@ -30,6 +30,7 @@ export interface FeaturedOpportunity {
   officialLink: string;
   place: string;
   scope: OpportunityScope;
+  selectionReason?: string;
   tags: string[];
 }
 
@@ -127,6 +128,7 @@ export const getFeaturedOpportunities = (
 // Search
 
 export interface SearchEntry {
+  curatedStatus?: string;
   deadline: string;
   href: string;
   id: string;
@@ -157,6 +159,7 @@ export const toInternationalSearchEntry = (
 
   return {
     deadline: opportunity.prazoInscricao,
+    curatedStatus: opportunity.curatedStatus,
     href: `${CATALOG_PATHS.international}/${opportunity.id}`,
     id: `international:${opportunity.id}`,
     kind: opportunity.tipo,
@@ -185,6 +188,7 @@ export const toNationalSearchEntry = (
 
   return {
     deadline: opportunity.prazoInscricao,
+    curatedStatus: opportunity.curatedStatus,
     href: `${CATALOG_PATHS.national}/${opportunity.id}`,
     id: `national:${opportunity.id}`,
     kind: opportunity.tipo,

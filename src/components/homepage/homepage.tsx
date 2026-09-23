@@ -1,6 +1,7 @@
 import { footerCopy } from "@/lib/copy/pt-br";
 import { getVerifiedDestinations } from "@/server/geo/opportunity-locations";
 import { getCuratedHomepage } from "@/server/publication/curated-home";
+import CatalogExpiryRefresh from "./catalog-expiry-refresh";
 import FeaturedOpportunities from "./featured-opportunities";
 import HomeContribute from "./home-contribute";
 import {
@@ -29,6 +30,7 @@ const Homepage = async () => {
 
   return (
     <div className="overflow-x-clip bg-navy-950 font-reading text-slate-100">
+      <CatalogExpiryRefresh />
       <HomeHero verifiedEntries={verifiedEntries} />
       <FeaturedOpportunities opportunities={featured} />
 

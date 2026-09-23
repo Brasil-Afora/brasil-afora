@@ -70,6 +70,14 @@ export function getBrasiliaDaysUntil(
 
   const [, day, month, year] = match;
   const deadlineUtc = Date.UTC(Number(year), Number(month) - 1, Number(day));
+  const parsed = new Date(deadlineUtc);
+  if (
+    parsed.getUTCFullYear() !== Number(year) ||
+    parsed.getUTCMonth() !== Number(month) - 1 ||
+    parsed.getUTCDate() !== Number(day)
+  ) {
+    return null;
+  }
   const [todayYear, todayMonth, todayDay] = brasiliaDateFormatter
     .format(now)
     .split("-")
@@ -100,7 +108,7 @@ export function formatIsoDateBr(isoDate: string): string {
 }
 
 export function isOpportunityDeadlineOpen(deadlineString: string): boolean {
-  const daysRemaining = getDaysRemaining(deadlineString);
+  const daysRemaining = getBrasiliaDaysUntil(deadlineString);
   return daysRemaining !== null && daysRemaining >= 0;
 }
 

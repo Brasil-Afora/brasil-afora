@@ -9,6 +9,7 @@ import {
   verifiedInternationalOpportunities,
   verifiedNationalOpportunities,
 } from "@/data/verified-opportunities";
+import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
 import {
   type CountryGeo,
   findCountries,
@@ -195,13 +196,14 @@ const levelsOf = (nivelEnsino: string): string[] =>
 const nameKey = (name: string): string =>
   name.trim().toLocaleLowerCase("pt-BR");
 
-export const isMapOpportunityOpen = (item: CatalogItem): boolean =>
-  item.curatedStatus
-    ? ["open", "rolling"].includes(item.curatedStatus) &&
-      (item.daysLeft === null || item.daysLeft >= 0)
-    : (item.daysLeft !== null && item.daysLeft >= 0) ||
-      item.lifecycleLabel === "Inscrições contínuas" ||
-      item.lifecycleLabel === "Inscrições abertas";
+export const isMapOpportunityOpen = (
+  item: CatalogItem,
+  now = new Date()
+): boolean =>
+  isCatalogOpportunityVisible(
+    { curatedStatus: item.curatedStatus, prazoInscricao: item.deadline },
+    now
+  );
 
 /** Published catalog records supersede starter records with matching names. */
 const mergeByName = <T extends { nome: string }>(
@@ -291,7 +293,7 @@ export const buildMapItems = ({
     type: opportunity.tipo.trim(),
   }));
 
-  return [...abroad, ...home].filter(isMapOpportunityOpen);
+  return [...abroad, ...home].filter((item) => isMapOpportunityOpen(item, now));
 };
 
 // ---------------------------------------------------------------------------

@@ -189,7 +189,7 @@ const Overview = ({
     <p aria-live="polite" className="mt-1 text-[14px] text-mist">
       {loading && countries.length === 0
         ? "Carregando oportunidades…"
-        : `${plural(total, "oportunidade aberta", "oportunidades abertas")} em ${plural(countries.length, "país", "países")}`}
+        : `${plural(total, "oportunidade aberta", "oportunidades disponíveis")} em ${plural(countries.length, "país", "países")}`}
     </p>
 
     {failed && (
@@ -334,7 +334,7 @@ const CountryView = ({
             {plural(
               items.length,
               "oportunidade aberta",
-              "oportunidades abertas"
+              "oportunidades disponíveis"
             )}
             {isBrazil && items.length > 0 && !place && " no Brasil"}
           </p>
@@ -399,7 +399,7 @@ const CountryView = ({
       ) : (
         <div className="mt-5 rounded-lg border border-navy-700 border-dashed px-4 py-4 text-[14px] text-mist">
           {filtersActive
-            ? `Nada aberto em ${country.name} com esses filtros.`
+            ? `Nenhuma oportunidade em ${country.name} com esses filtros.`
             : `Nenhuma inscrição aberta em ${country.name} no momento.`}
           {filtersActive && (
             <button

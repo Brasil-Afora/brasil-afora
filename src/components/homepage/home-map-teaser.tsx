@@ -9,9 +9,10 @@ import {
   useInternationalOpportunitiesQuery,
   useNationalOpportunitiesQuery,
 } from "@/hooks/queries/use-opportunity-queries";
+import { useCatalogClock } from "@/hooks/use-catalog-clock";
 import useScrollReveal from "@/hooks/use-scroll-reveal";
+import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
 import { clusterByDistance } from "@/lib/cluster";
-import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
 import type { GeoPoint, MapDestination } from "@/lib/geo";
 
 // The world crop and its window live in map-windows.ts (see the cache note
@@ -131,16 +132,22 @@ const useCatalogDestinations = (
   const international = useInternationalOpportunitiesQuery({ enabled });
   const national = useNationalOpportunitiesQuery({ enabled });
 
+  const now = useCatalogClock();
   return useMemo(() => {
     const verifiedNames = new Set(
       verifiedDestinations.map((item) => nameKey(item.name))
     );
-    const isNewAndOpen = (name: string, deadline: string) =>
-      !verifiedNames.has(nameKey(name)) && isOpportunityDeadlineOpen(deadline);
+    const isNewAndOpen = (item: {
+      nome: string;
+      prazoInscricao: string;
+      curatedStatus?: string;
+    }) =>
+      !verifiedNames.has(nameKey(item.nome)) &&
+      isCatalogOpportunityVisible(item, now);
 
     return [
       ...(international.data ?? [])
-        .filter((item) => isNewAndOpen(item.nome, item.prazoInscricao))
+        .filter((item) => isNewAndOpen(item))
         .flatMap((item) =>
           (item.localizacoes ?? []).map((location) => ({
             ...location,
@@ -150,7 +157,7 @@ const useCatalogDestinations = (
           }))
         ),
       ...(national.data ?? [])
-        .filter((item) => isNewAndOpen(item.nome, item.prazoInscricao))
+        .filter((item) => isNewAndOpen(item))
         .flatMap((item) =>
           (item.localizacoes ?? []).map((location) => ({
             ...location,
@@ -160,7 +167,7 @@ const useCatalogDestinations = (
           }))
         ),
     ];
-  }, [international.data, national.data, verifiedDestinations]);
+  }, [international.data, national.data, verifiedDestinations, now]);
 };
 
 const HomeMapTeaser = ({
@@ -280,7 +287,7 @@ const HomeMapTeaser = ({
         {destinations.length > 0 && (
           <figcaption className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-mist">
             <span className="text-slate-200">
-              Onde estão as oportunidades abertas:
+              Onde estão as oportunidades disponíveis:
             </span>
             {countByCountry(destinations).map(([country, count]) => (
               <span className="inline-flex items-center gap-1.5" key={country}>

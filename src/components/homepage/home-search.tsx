@@ -9,7 +9,8 @@ import {
   useInternationalOpportunitiesQuery,
   useNationalOpportunitiesQuery,
 } from "@/hooks/queries/use-opportunity-queries";
-import { isOpportunityDeadlineOpen } from "@/lib/date-utils";
+import { useCatalogClock } from "@/hooks/use-catalog-clock";
+import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
 import {
   CATALOG_PATHS,
   normalizeSearchText,
@@ -40,24 +41,37 @@ const useCatalogEntries = (
   const international = useInternationalOpportunitiesQuery({ enabled });
   const national = useNationalOpportunitiesQuery({ enabled });
 
+  const now = useCatalogClock();
   const entries = useMemo(() => {
     const verifiedNames = new Set(
       verifiedEntries.map((entry) => normalizeSearchText(entry.name.trim()))
     );
-    const isNew = (name: string, deadline: string) =>
-      !verifiedNames.has(normalizeSearchText(name.trim())) &&
-      isOpportunityDeadlineOpen(deadline);
+    const isNew = (item: {
+      nome: string;
+      prazoInscricao: string;
+      curatedStatus?: string;
+    }) =>
+      !verifiedNames.has(normalizeSearchText(item.nome.trim())) &&
+      isCatalogOpportunityVisible(item, now);
 
     return [
-      ...verifiedEntries,
+      ...verifiedEntries.filter((entry) =>
+        isCatalogOpportunityVisible(
+          {
+            prazoInscricao: entry.deadline,
+            curatedStatus: entry.curatedStatus,
+          },
+          now
+        )
+      ),
       ...(international.data ?? [])
-        .filter((item) => isNew(item.nome, item.prazoInscricao))
+        .filter((item) => isNew(item))
         .map((item) => toInternationalSearchEntry(item, false)),
       ...(national.data ?? [])
-        .filter((item) => isNew(item.nome, item.prazoInscricao))
+        .filter((item) => isNew(item))
         .map((item) => toNationalSearchEntry(item, false)),
     ];
-  }, [international.data, national.data, verifiedEntries]);
+  }, [international.data, national.data, verifiedEntries, now]);
 
   return {
     entries,

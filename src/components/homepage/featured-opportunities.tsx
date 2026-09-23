@@ -55,6 +55,12 @@ const FeaturedOpportunityCard = ({
           </Link>
         </h3>
 
+        {opportunity.selectionReason && (
+          <p className="mt-3 text-[14px] text-mist leading-relaxed">
+            {opportunity.selectionReason}
+          </p>
+        )}
+
         <dl className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[14px] text-slate-200">
           <div className="flex items-center gap-1.5">
             <dt className="sr-only">Local</dt>
@@ -145,8 +151,9 @@ const FeaturedOpportunities = ({
           Oportunidades selecionadas
         </h2>
         <p className="mt-2 max-w-2xl text-[15px] text-mist leading-relaxed">
-          Elegibilidade para estudantes do Brasil, prazos e links oficiais
-          conferidos nas fontes oficiais. Ordenadas pelo prazo mais próximo.
+          Quatro escolhas com inscrições abertas, selecionadas pelo apoio
+          financeiro, pela relevância acadêmica e pelo acesso de estudantes
+          brasileiros.
         </p>
       </div>
       <div className="flex shrink-0 gap-5 text-[14px]">
@@ -168,7 +175,7 @@ const FeaturedOpportunities = ({
     </div>
 
     {opportunities.length > 0 ? (
-      <ul className="mt-7 grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 xl:grid-cols-[repeat(auto-fit,minmax(17rem,1fr))]">
+      <ul className="mt-7 grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {opportunities.map((opportunity) => (
           <li className="flex min-w-0" key={opportunity.id}>
             <FeaturedOpportunityCard opportunity={opportunity} />

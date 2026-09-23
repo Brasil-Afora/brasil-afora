@@ -51,9 +51,9 @@ const useTheme = (): UseThemeResult => {
 
   useEffect(() => {
     const stored = readStoredTheme();
-    const initial =
-      document.documentElement.dataset.theme === "light" ? "light" : "dark";
-    setTheme(stored ?? initial);
+    const initial = stored ?? "dark";
+    document.documentElement.dataset.theme = initial;
+    setTheme(initial);
     setMounted(true);
   }, []);
 

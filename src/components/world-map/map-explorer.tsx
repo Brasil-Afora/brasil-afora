@@ -16,6 +16,7 @@ import {
   useInternationalOpportunitiesQuery,
   useNationalOpportunitiesQuery,
 } from "@/hooks/queries/use-opportunity-queries";
+import { useCatalogClock } from "@/hooks/use-catalog-clock";
 import type { LocationsById } from "@/server/geo/opportunity-locations";
 import {
   applyMapFilters,
@@ -90,6 +91,7 @@ interface MapExplorerProps {
 }
 
 const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
+  const now = useCatalogClock();
   const isClient = useIsClient();
   const internationalQuery = useInternationalOpportunitiesQuery();
   const nationalQuery = useNationalOpportunitiesQuery();
@@ -106,11 +108,17 @@ const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
         ? buildMapItems({
             international: internationalQuery.data ?? [],
             national: nationalQuery.data ?? [],
-            now: new Date(),
+            now,
             verifiedLocations,
           })
         : [],
-    [isClient, internationalQuery.data, nationalQuery.data, verifiedLocations]
+    [
+      isClient,
+      internationalQuery.data,
+      nationalQuery.data,
+      verifiedLocations,
+      now,
+    ]
   );
   const filtered = useMemo(
     () => applyMapFilters(items, filters),
@@ -336,7 +344,8 @@ const MapExplorer = ({ verifiedLocations }: MapExplorerProps) => {
       </div>
 
       <p className="mt-4 text-[12px] text-mist-dim">
-        Só inscrições abertas. Cidades pelo texto de cada oportunidade, via{" "}
+        Inscrições abertas, contínuas ou em breve. Cidades pelo texto de cada
+        oportunidade, via{" "}
         <a
           className="underline decoration-navy-600 underline-offset-2 hover:text-slate-200"
           href="https://www.geonames.org/"
