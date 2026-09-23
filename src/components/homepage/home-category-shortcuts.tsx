@@ -2,6 +2,7 @@
 
 import {
   BookOpenCheckIcon,
+  CompassIcon,
   FlaskConicalIcon,
   GraduationCapIcon,
   type LucideIcon,
@@ -11,18 +12,35 @@ import {
   TrophyIcon,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  PROGRAM_FILTER_STORAGE_KEY,
+  PROGRAMS_PATH,
+} from "@/components/programs/program-model";
 import { OPPORTUNITY_FILTER_STORAGE_KEYS } from "@/hooks/use-opportunity-filters";
 import { CATALOG_PATHS, type OpportunityScope } from "./home-data";
+
+type ShortcutScope = OpportunityScope | "programs";
 
 interface CategoryShortcut {
   filters: Record<string, string[]>;
   icon: LucideIcon;
   label: string;
-  scope: OpportunityScope;
+  scope: ShortcutScope;
 }
 
+const SHORTCUT_PATHS: Record<ShortcutScope, string> = {
+  ...CATALOG_PATHS,
+  programs: PROGRAMS_PATH,
+};
+
+const SHORTCUT_STORAGE_KEYS: Record<ShortcutScope, string> = {
+  ...OPPORTUNITY_FILTER_STORAGE_KEYS,
+  programs: PROGRAM_FILTER_STORAGE_KEY,
+};
+
 // Each shortcut opens a catalog with these filters applied. Values must match
-// the catalog filter options in src/components/opportunities/filter-options.ts.
+// the catalog filter options in src/components/opportunities/filter-options.ts
+// (or, for Programas e Bolsas, src/components/programs/types.ts).
 const CATEGORY_SHORTCUTS: CategoryShortcut[] = [
   {
     label: "Bolsas de estudo",
@@ -55,6 +73,12 @@ const CATEGORY_SHORTCUTS: CategoryShortcut[] = [
     filters: { tipo: ["Feiras de Ciências"] },
   },
   {
+    label: "Mentorias e preparatórios",
+    icon: CompassIcon,
+    scope: "programs",
+    filters: { tipo: ["Mentoria", "Preparatório"] },
+  },
+  {
     label: "Mestrado e doutorado",
     icon: BookOpenCheckIcon,
     scope: "international",
@@ -65,7 +89,7 @@ const CATEGORY_SHORTCUTS: CategoryShortcut[] = [
 const presetCatalogFilters = ({ filters, scope }: CategoryShortcut) => {
   try {
     window.sessionStorage.setItem(
-      OPPORTUNITY_FILTER_STORAGE_KEYS[scope],
+      SHORTCUT_STORAGE_KEYS[scope],
       JSON.stringify(filters)
     );
   } catch {
@@ -88,7 +112,7 @@ const HomeCategoryShortcuts = () => (
           <li key={shortcut.label}>
             <Link
               className={chipClassName}
-              href={CATALOG_PATHS[shortcut.scope]}
+              href={SHORTCUT_PATHS[shortcut.scope]}
               onClick={() => presetCatalogFilters(shortcut)}
             >
               <Icon aria-hidden="true" className="h-4 w-4 text-mist" />

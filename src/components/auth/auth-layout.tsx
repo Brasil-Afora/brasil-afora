@@ -14,7 +14,7 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-black">
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-navy-950 via-navy-900 to-navy-950">
       <Header transparent />
       <div className="flex flex-1">
         {/* Left panel — branding */}
@@ -26,7 +26,7 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
             <Link className="flex items-center space-x-3" href="/">
               <Image
                 alt="Logo do Brasil Afora"
-                className="h-20 w-auto object-contain"
+                className="ba-logo h-20 w-auto object-contain"
                 height={80}
                 src="/brasil-afora-logo.svg"
                 unoptimized
@@ -71,17 +71,17 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
             >
               <Image
                 alt="Logo do Brasil Afora"
-                className="h-12 w-auto object-contain"
+                className="ba-logo h-12 w-auto object-contain"
                 height={48}
                 src="/brasil-afora-logo.svg"
                 unoptimized
                 width={59}
               />
-              <span className="whitespace-nowrap font-bold font-wordmark text-white text-xl">
-                BRASIL
+              <span className="whitespace-nowrap font-semibold font-wordmark text-white text-xl">
+                Brasil
               </span>
-              <span className="whitespace-nowrap font-bold font-wordmark text-signal text-xl">
-                AFORA
+              <span className="whitespace-nowrap font-semibold font-wordmark text-signal text-xl">
+                Afora
               </span>
             </Link>
 

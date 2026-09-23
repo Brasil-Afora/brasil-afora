@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import ThemeToggle from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import useHeaderState from "@/hooks/use-header-state";
@@ -79,7 +80,7 @@ const Header = ({ transparent = false }: HeaderProps) => {
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b font-reading text-[15px] text-white transition-colors duration-500 ${headerBgClass}`}
+      className={`ba-header sticky top-0 z-50 border-b font-reading text-[15px] text-white transition-colors duration-500 ${headerBgClass}`}
     >
       <div className="mx-auto flex w-full max-w-[84rem] items-center justify-between px-5 py-3 sm:px-8">
         <div className="flex flex-1 items-center justify-between md:hidden">
@@ -92,54 +93,63 @@ const Header = ({ transparent = false }: HeaderProps) => {
             <MenuIcon className="h-7 w-7" />
           </Button>
           <Link
-            className="absolute left-1/2 flex -translate-x-1/2 transform items-center space-x-1"
+            className="absolute left-1/2 flex -translate-x-1/2 transform items-center space-x-2"
             href="/"
           >
-            <span className="whitespace-nowrap font-bold font-wordmark text-3xl text-white sm:text-4xl">
-              BRASIL
+            <span className="whitespace-nowrap font-semibold font-wordmark text-3xl text-white sm:text-4xl">
+              Brasil
             </span>
             <Image
               alt="Logo do Brasil Afora"
-              className="h-10 w-auto object-contain"
+              className="ba-logo h-10 w-auto object-contain"
               height={36}
               src="/brasil-afora-logo.svg"
               unoptimized
               width={45}
             />
-            <span className="whitespace-nowrap font-bold font-wordmark text-3xl text-signal sm:text-4xl">
-              AFORA
+            <span className="whitespace-nowrap font-semibold font-wordmark text-3xl text-signal sm:text-4xl">
+              Afora
             </span>
           </Link>
-          <div className="h-7 w-7" />
+          <div className="flex h-8 w-8 items-center justify-center">
+            <ThemeToggle className="h-8 w-8" />
+          </div>
         </div>
 
         <div className="hidden flex-1 items-center justify-between md:flex">
-          <Link className="flex items-center space-x-1" href="/">
+          <Link className="flex items-center space-x-2" href="/">
             <Image
               alt="Logo do Brasil Afora"
-              className="h-11 w-auto object-contain"
+              className="ba-logo h-11 w-auto object-contain"
               height={44}
               src="/brasil-afora-logo.svg"
               unoptimized
               width={54}
             />
-            <span className="whitespace-nowrap font-bold font-wordmark text-2xl text-white sm:text-3xl">
-              BRASIL
+            <span className="whitespace-nowrap font-semibold font-wordmark text-2xl text-white sm:text-3xl">
+              Brasil
             </span>
-            <span className="whitespace-nowrap font-bold font-wordmark text-2xl text-signal sm:text-3xl">
-              AFORA
+            <span className="whitespace-nowrap font-semibold font-wordmark text-2xl text-signal sm:text-3xl">
+              Afora
             </span>
           </Link>
 
           <nav aria-label="Principal" className="flex flex-1 justify-center">
-            <ul className="flex items-center gap-10">
-              {navLinks.map(({ href, label, end }) => {
+            <ul className="flex items-center gap-5 lg:gap-8 xl:gap-10">
+              {navLinks.map(({ href, label, end, shortLabel }) => {
                 const isActive = isPathActive(pathname, href, end);
 
                 return (
                   <li className="group" key={href}>
                     <Link className={getNavLinkClasses(isActive)} href={href}>
-                      {label}
+                      {shortLabel ? (
+                        <>
+                          <span className="lg:hidden">{shortLabel}</span>
+                          <span className="hidden lg:inline">{label}</span>
+                        </>
+                      ) : (
+                        label
+                      )}
                       <span
                         className={`absolute -bottom-0.5 left-0 h-0.5 w-full origin-left transform rounded-full bg-signal transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`}
                       />
@@ -150,125 +160,128 @@ const Header = ({ transparent = false }: HeaderProps) => {
             </ul>
           </nav>
 
-          <div className="relative" ref={profileRef}>
-            <Button
-              aria-expanded={isProfileMenuOpen}
-              aria-haspopup="true"
-              className="group flex items-center gap-2 rounded-full bg-transparent px-3 py-2 text-[15px] text-slate-100 transition-all duration-300 hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
-              onClick={toggleProfileMenu}
-              type="button"
-              variant="ghost"
-            >
-              {isAuthenticated && session?.user?.image ? (
-                <Image
-                  alt={session.user.name ?? "Foto de perfil"}
-                  className="h-7 w-7 rounded-full object-cover"
-                  height={28}
-                  src={session.user.image}
-                  unoptimized
-                  width={28}
-                />
-              ) : (
-                <CircleUserRoundIcon className="h-6 w-6" />
-              )}
-              <span className="max-w-36 overflow-hidden text-ellipsis whitespace-nowrap font-medium">
-                {isAuthenticated ? profileDisplayName : "Perfil"}
-              </span>
-            </Button>
-
-            {isProfileMenuOpen && (
-              <div
-                className={`absolute top-full right-0 mt-3 w-56 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 p-3 shadow-[0_20px_45px_rgba(2,6,23,0.65)] ${isAuthenticated ? "w-80" : "w-56"}`}
+          <div className="flex items-center gap-1.5">
+            <ThemeToggle />
+            <div className="relative" ref={profileRef}>
+              <Button
+                aria-expanded={isProfileMenuOpen}
+                aria-haspopup="true"
+                className="group flex items-center gap-2 rounded-full bg-transparent px-3 py-2 text-[15px] text-slate-100 transition-all duration-300 hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
+                onClick={toggleProfileMenu}
+                type="button"
+                variant="ghost"
               >
-                {isAuthenticated ? (
-                  <>
-                    <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        {session?.user?.image ? (
-                          <Image
-                            alt={session.user.name ?? "Foto de perfil"}
-                            className="h-10 w-10 rounded-full object-cover"
-                            height={40}
-                            src={session.user.image}
-                            unoptimized
-                            width={40}
-                          />
-                        ) : (
-                          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-amber-500">
-                            <CircleUserRoundIcon className="h-6 w-6" />
-                          </span>
-                        )}
+                {isAuthenticated && session?.user?.image ? (
+                  <Image
+                    alt={session.user.name ?? "Foto de perfil"}
+                    className="h-7 w-7 rounded-full object-cover"
+                    height={28}
+                    src={session.user.image}
+                    unoptimized
+                    width={28}
+                  />
+                ) : (
+                  <CircleUserRoundIcon className="h-6 w-6" />
+                )}
+                <span className="max-w-36 overflow-hidden text-ellipsis whitespace-nowrap font-medium">
+                  {isAuthenticated ? profileDisplayName : "Perfil"}
+                </span>
+              </Button>
 
-                        <div className="min-w-0">
-                          <p className="font-semibold text-amber-500 text-xs uppercase tracking-wide">
-                            Minha Conta
-                          </p>
-                          <p className="truncate font-semibold text-slate-100 text-sm">
-                            {session?.user?.name || profileDisplayName}
-                          </p>
-                          <p className="mt-1 flex items-center gap-2 truncate text-slate-400 text-xs">
-                            <MailIcon className="h-[11px] w-[11px] shrink-0" />
-                            {session?.user?.email}
-                          </p>
+              {isProfileMenuOpen && (
+                <div
+                  className={`absolute top-full right-0 mt-3 w-56 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 p-3 shadow-[0_20px_45px_rgba(2,6,23,0.65)] ${isAuthenticated ? "w-80" : "w-56"}`}
+                >
+                  {isAuthenticated ? (
+                    <>
+                      <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {session?.user?.image ? (
+                            <Image
+                              alt={session.user.name ?? "Foto de perfil"}
+                              className="h-10 w-10 rounded-full object-cover"
+                              height={40}
+                              src={session.user.image}
+                              unoptimized
+                              width={40}
+                            />
+                          ) : (
+                            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-amber-500">
+                              <CircleUserRoundIcon className="h-6 w-6" />
+                            </span>
+                          )}
+
+                          <div className="min-w-0">
+                            <p className="font-semibold text-amber-500 text-xs uppercase tracking-wide">
+                              Minha Conta
+                            </p>
+                            <p className="truncate font-semibold text-slate-100 text-sm">
+                              {session?.user?.name || profileDisplayName}
+                            </p>
+                            <p className="mt-1 flex items-center gap-2 truncate text-slate-400 text-xs">
+                              <MailIcon className="h-[11px] w-[11px] shrink-0" />
+                              {session?.user?.email}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="mt-2 space-y-2">
-                      <Link
-                        className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-slate-100 text-sm transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
-                        href="/perfil"
-                        onClick={closeProfileMenu}
-                      >
-                        <UserIcon className="h-3 w-3 text-amber-500" /> Meu
-                        Perfil
-                      </Link>
-
-                      {isAdmin && (
+                      <div className="mt-2 space-y-2">
                         <Link
                           className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-slate-100 text-sm transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
-                          href="/admin"
+                          href="/perfil"
                           onClick={closeProfileMenu}
                         >
-                          <UserIcon className="h-3 w-3 text-amber-500" /> Painel
-                          Admin
+                          <UserIcon className="h-3 w-3 text-amber-500" /> Meu
+                          Perfil
                         </Link>
-                      )}
 
-                      <Separator className="my-1 bg-slate-800" />
+                        {isAdmin && (
+                          <Link
+                            className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-slate-100 text-sm transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
+                            href="/admin"
+                            onClick={closeProfileMenu}
+                          >
+                            <UserIcon className="h-3 w-3 text-amber-500" />{" "}
+                            Painel Admin
+                          </Link>
+                        )}
 
-                      <Button
-                        className="flex w-full items-center justify-start gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-left text-slate-200 text-sm transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
-                        onClick={handleSignOut}
-                        type="button"
-                        variant="ghost"
+                        <Separator className="my-1 bg-slate-800" />
+
+                        <Button
+                          className="flex w-full items-center justify-start gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-left text-slate-200 text-sm transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
+                          onClick={handleSignOut}
+                          type="button"
+                          variant="ghost"
+                        >
+                          <LogOutIcon className="h-3 w-3 text-amber-500" /> Sair
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-2">
+                      <Link
+                        className="flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-center font-semibold text-base text-slate-100 transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
+                        href="/login"
+                        onClick={closeProfileMenu}
                       >
-                        <LogOutIcon className="h-3 w-3 text-amber-500" /> Sair
-                      </Button>
+                        <CircleUserRoundIcon className="h-[14px] w-[14px] text-amber-500" />
+                        Entrar
+                      </Link>
+                      <Link
+                        className="flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-center font-semibold text-base text-slate-100 transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
+                        href="/cadastro"
+                        onClick={closeProfileMenu}
+                      >
+                        <UserIcon className="h-3 w-3 text-amber-500" />
+                        Cadastrar
+                      </Link>
                     </div>
-                  </>
-                ) : (
-                  <div className="space-y-2">
-                    <Link
-                      className="flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-center font-semibold text-base text-slate-100 transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
-                      href="/login"
-                      onClick={closeProfileMenu}
-                    >
-                      <CircleUserRoundIcon className="h-[14px] w-[14px] text-amber-500" />
-                      Entrar
-                    </Link>
-                    <Link
-                      className="flex items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 text-center font-semibold text-base text-slate-100 transition-colors duration-200 hover:border-amber-500/40 hover:text-amber-500"
-                      href="/cadastro"
-                      onClick={closeProfileMenu}
-                    >
-                      <UserIcon className="h-3 w-3 text-amber-500" />
-                      Cadastrar
-                    </Link>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

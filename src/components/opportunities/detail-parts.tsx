@@ -97,7 +97,13 @@ export const StatusBadges = ({ detail }: { detail: OpportunityDetail }) => {
 // ---------------------------------------------------------------------------
 // Hero
 
-const InstitutionMark = ({ detail }: { detail: OpportunityDetail }) => {
+/** What the hero shows; opportunities and programs both provide it. */
+export type HeroDetail = Pick<
+  OpportunityDetail,
+  "cover" | "institution" | "name" | "summary"
+>;
+
+const InstitutionMark = ({ detail }: { detail: HeroDetail }) => {
   const [failed, setFailed] = useState(false);
   const logo =
     detail.cover.kind === "map" && !failed ? detail.cover.logo : null;
@@ -186,12 +192,15 @@ export const DetailHero = ({
   actions,
   backHref,
   backLabel,
+  badges,
   detail,
 }: {
   actions: React.ReactNode;
   backHref: string;
   backLabel: string;
-  detail: OpportunityDetail;
+  /** Status next to the institution (verified, deadline, enrollment…). */
+  badges: React.ReactNode;
+  detail: HeroDetail;
 }) => (
   <section className="relative isolate border-navy-700/50 border-b">
     <div className="relative h-48 overflow-hidden sm:h-60 lg:absolute lg:inset-y-0 lg:right-0 lg:-z-10 lg:h-auto lg:w-[52%]">
@@ -240,7 +249,7 @@ export const DetailHero = ({
           {detail.institution && (
             <p className="text-[15px] text-slate-200">{detail.institution}</p>
           )}
-          <StatusBadges detail={detail} />
+          {badges}
         </div>
         <h1 className="mt-4 text-balance font-bold text-[clamp(2rem,1.2rem+2.2vw,3.1rem)] text-white leading-[1.08] tracking-[-0.02em]">
           {detail.name}

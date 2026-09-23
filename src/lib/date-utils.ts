@@ -1,3 +1,6 @@
+import { countdownCopy } from "@/lib/copy/pt-br";
+import { PT_BR_TIME_ZONE } from "@/lib/locale/pt-br";
+
 export function getDaysRemaining(deadlineString: string): number | null {
   if (typeof deadlineString !== "string" || deadlineString.length < 10) {
     return null;
@@ -31,21 +34,22 @@ export function getTimeRemaining(deadlineString: string): string | null {
   }
 
   if (daysRemaining > 0) {
-    return `Faltam ${daysRemaining} dias`;
+    return countdownCopy.daysToGo(daysRemaining);
   }
   if (daysRemaining === 0) {
-    return "Termina hoje";
+    return countdownCopy.endsToday;
   }
-  return "Prazo encerrado";
+  return countdownCopy.closed;
 }
 
-const BRASILIA_TIME_ZONE = "America/Sao_Paulo";
 const MS_PER_DAY = 86_400_000;
 const BR_DATE_REGEX = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
 const ISO_DATE_REGEX = /^(\d{4})-(\d{2})-(\d{2})$/;
 
+// "en-CA" renders YYYY-MM-DD on purpose (an ISO-shaped day bucket for math),
+// not user-facing copy. Display formatting lives in `@/lib/locale/pt-br`.
 const brasiliaDateFormatter = new Intl.DateTimeFormat("en-CA", {
-  timeZone: BRASILIA_TIME_ZONE,
+  timeZone: PT_BR_TIME_ZONE,
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
@@ -77,12 +81,12 @@ export function getBrasiliaDaysUntil(
 
 export function formatDaysLeft(daysLeft: number): string {
   if (daysLeft <= 0) {
-    return "último dia";
+    return countdownCopy.lastDay;
   }
   if (daysLeft === 1) {
-    return "falta 1 dia";
+    return countdownCopy.oneDayLeft;
   }
-  return `faltam ${daysLeft} dias`;
+  return countdownCopy.manyDaysLeft(daysLeft);
 }
 
 /** "2026-09-01" → "01/09/2026"; anything else is returned unchanged. */

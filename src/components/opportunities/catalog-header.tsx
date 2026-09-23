@@ -6,12 +6,34 @@ import type { MapWindow } from "./map-windows";
 
 export type CatalogMapWindow = MapWindow;
 
+/** A sourced photograph, credited on the page while it is shown. */
+export interface CatalogHeaderPhoto {
+  author: string;
+  license: string;
+  licenseUrl: string;
+  /** object-position focal point (x% y%). */
+  position: string;
+  sourceUrl: string;
+  src: string;
+  /** What the photo shows, for the credit line. */
+  subject: string;
+}
+
+/**
+ * What sits behind the title: the night-lights map of a catalog's territory
+ * (with pins where its items take place), or a photograph for a catalog that
+ * is not about a place.
+ */
+export type CatalogHeaderBackdrop =
+  | { kind: "map"; map: CatalogMapWindow }
+  | { kind: "photo"; photo: CatalogHeaderPhoto };
+
 export interface CatalogHeaderConfig {
   accentClassName: string;
   accentWord: string;
+  backdrop: CatalogHeaderBackdrop;
   breadcrumb: string;
   icon: LucideIcon;
-  map: CatalogMapWindow;
   subtitle: string;
   titleLead: string;
 }
@@ -100,6 +122,53 @@ export const CatalogMap = ({
   );
 };
 
+const creditLinkClassName =
+  "whitespace-nowrap underline decoration-navy-600 underline-offset-2 transition-colors hover:text-slate-100";
+
+/**
+ * The photo dissolves into the navy the same way the maps do; in the light
+ * theme it becomes a hard-edged plate instead (globals.css, .ba-catalog-photo),
+ * because a dark photo can't fade into paper.
+ */
+export const CatalogPhoto = ({ photo }: { photo: CatalogHeaderPhoto }) => (
+  <div className="ba-catalog-photo absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,black_55%,transparent_100%)] lg:[mask-composite:intersect] lg:[mask-image:linear-gradient(to_right,transparent_0%,black_32%),linear-gradient(to_bottom,black_78%,transparent_100%)]">
+    <Image
+      alt=""
+      className="ba-catalog-photo-image object-cover"
+      fill
+      preload
+      sizes="(min-width: 1024px) 62vw, 100vw"
+      src={photo.src}
+      style={{ objectPosition: photo.position }}
+    />
+  </div>
+);
+
+const PhotoCredit = ({ photo }: { photo: CatalogHeaderPhoto }) => (
+  <p className="ba-catalog-photo-credit px-5 pt-2 text-right text-[12px] text-mist leading-snug sm:px-8 lg:absolute lg:right-[max(2rem,calc(50%-40rem))] lg:bottom-2.5 lg:max-w-[40%] lg:px-0 lg:pt-0">
+    <span className="text-slate-200">{photo.subject}</span>
+    <span aria-hidden="true"> · </span>
+    Foto:{" "}
+    <a
+      className={creditLinkClassName}
+      href={photo.sourceUrl}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      {photo.author}
+    </a>
+    ,{" "}
+    <a
+      className={creditLinkClassName}
+      href={photo.licenseUrl}
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      {photo.license}
+    </a>
+  </p>
+);
+
 const CatalogHeader = ({
   config,
   pins,
@@ -108,15 +177,21 @@ const CatalogHeader = ({
   pins: GeoPoint[];
 }) => {
   const Icon = config.icon;
+  const { backdrop } = config;
 
   return (
     <section className="relative isolate overflow-hidden border-navy-700/50 border-b">
       <div
         aria-hidden="true"
-        className="relative h-36 overflow-hidden sm:h-44 lg:absolute lg:inset-y-0 lg:right-0 lg:-z-10 lg:h-auto lg:w-[62%]"
+        className={`relative h-36 overflow-hidden sm:h-44 lg:absolute lg:inset-y-0 lg:right-0 lg:-z-10 lg:h-auto lg:w-[62%] ${backdrop.kind === "photo" ? "ba-catalog-photo-frame" : ""}`}
       >
-        <CatalogMap map={config.map} pins={pins} />
+        {backdrop.kind === "map" ? (
+          <CatalogMap map={backdrop.map} pins={pins} />
+        ) : (
+          <CatalogPhoto photo={backdrop.photo} />
+        )}
       </div>
+      {backdrop.kind === "photo" && <PhotoCredit photo={backdrop.photo} />}
 
       <div className="mx-auto w-full max-w-[84rem] px-5 pt-3 pb-9 sm:px-8 lg:flex lg:min-h-[20rem] lg:flex-col lg:justify-center lg:py-10">
         <nav aria-label="Trilha de navegação">

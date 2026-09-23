@@ -15,9 +15,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
-import { useId, useRef, useState, useSyncExternalStore } from "react";
+import { useId, useRef, useState } from "react";
+import useIsClient from "@/hooks/use-is-client";
 import useLocalStorage from "@/hooks/use-local-storage";
 import useSessionStorage from "@/hooks/use-session-storage";
+import type { GeoPoint } from "@/lib/geo";
 import CatalogFilters, {
   type CatalogFilterField,
   type CatalogFilterValues,
@@ -38,11 +40,73 @@ const LOADING_PLACEHOLDERS = 3;
 const EAGER_CARDS = 3;
 const SUBMISSION_FORM_URL = "https://forms.gle/dJrD1eg4y3VHGFap9";
 
-const SORT_OPTIONS: { label: string; value: CatalogSort }[] = [
-  { value: "relevancia", label: "Verificadas primeiro" },
-  { value: "prazo", label: "Prazo mais próximo" },
-  { value: "nome", label: "Nome (A–Z)" },
-];
+export interface CatalogSortOption {
+  label: string;
+  value: CatalogSort;
+}
+
+interface CatalogCopyBlock {
+  body: string;
+  title: string;
+}
+
+/**
+ * What a catalog lists and how it names it. The shell (header, filter panel,
+ * toolbar, pagination, mobile sheet) is shared; each catalog brings its own
+ * card, row, order and words.
+ */
+export interface CatalogPresentation<T> {
+  contribute: CatalogCopyBlock;
+  /** Result count heading: [singular, plural]. */
+  count: [string, string];
+  empty: {
+    /** Filters exclude everything. */
+    filtered: CatalogCopyBlock;
+    /** Nothing is listed at all. */
+    none: CatalogCopyBlock;
+  };
+  keyOf: (item: T) => string;
+  loading: string;
+  /** Where the listed items take place; omitted for catalogs off the map. */
+  pinsOf?: (items: T[]) => GeoPoint[];
+  renderCard: (item: T, eager: boolean) => ReactNode;
+  renderRow: (item: T) => ReactNode;
+  sortItems: (items: T[], sort: CatalogSort) => T[];
+  sortOptions: CatalogSortOption[];
+}
+
+const OPPORTUNITY_EMPTY_BODY =
+  "Tente remover um filtro ou ampliar o prazo. Novas oportunidades entram no catálogo com frequência.";
+
+/** The international and national catalogs. */
+export const OPPORTUNITY_PRESENTATION: CatalogPresentation<CatalogItem> = {
+  contribute: {
+    title: "Conhece uma oportunidade que não está aqui?",
+    body: "Envie pelo formulário e ajude outros estudantes a encontrá-la.",
+  },
+  count: ["oportunidade encontrada", "oportunidades encontradas"],
+  empty: {
+    filtered: {
+      title: "Nenhuma oportunidade com esses filtros",
+      body: OPPORTUNITY_EMPTY_BODY,
+    },
+    none: {
+      title: "Nenhuma oportunidade com esses filtros",
+      body: OPPORTUNITY_EMPTY_BODY,
+    },
+  },
+  keyOf: (item) => `${item.scope}-${item.id}`,
+  loading: "Carregando oportunidades…",
+  pinsOf: (items) => items.flatMap((item) => item.locations),
+  renderCard: (item, eager) => <CatalogCard eager={eager} item={item} />,
+  renderRow: (item) => <CatalogRow item={item} />,
+  sortItems: sortCatalogItems,
+  sortOptions: [
+    { value: "relevancia", label: "Verificadas primeiro" },
+    { value: "prazo", label: "Prazo mais próximo" },
+    { value: "nome", label: "Nome (A–Z)" },
+  ],
+};
 
 type CatalogView = "grid" | "list";
 
@@ -52,7 +116,7 @@ interface CatalogStatus {
   retry: () => void;
 }
 
-interface CatalogPageProps<F extends CatalogFilterValues> {
+interface CatalogPageProps<F extends CatalogFilterValues, T> {
   clearFilters: () => void;
   countFor: (draft: F) => number;
   crossLink: { href: string; label: string };
@@ -61,7 +125,8 @@ interface CatalogPageProps<F extends CatalogFilterValues> {
   filtrosTemporarios: F;
   header: CatalogHeaderConfig;
   initialFilters: F;
-  items: CatalogItem[];
+  items: T[];
+  presentation: CatalogPresentation<T>;
   setFiltros: Dispatch<SetStateAction<F>>;
   setFiltrosTemporarios: Dispatch<SetStateAction<F>>;
   sortStorageKey: string;
@@ -73,16 +138,6 @@ interface AppliedChip {
   label: string;
   value: string | null;
 }
-
-const subscribeNoop = () => () => undefined;
-
-/** False during prerender and hydration, true once running in the browser. */
-const useIsClient = (): boolean =>
-  useSyncExternalStore(
-    subscribeNoop,
-    () => true,
-    () => false
-  );
 
 const plural = (count: number, singular: string, pluralForm: string) =>
   `${count} ${count === 1 ? singular : pluralForm}`;
@@ -120,9 +175,11 @@ function appliedChips<F extends CatalogFilterValues>(
 
 const SelectSort = ({
   onChange,
+  options,
   value,
 }: {
   onChange: (sort: CatalogSort) => void;
+  options: CatalogSortOption[];
   value: CatalogSort;
 }) => {
   const id = useId();
@@ -142,7 +199,7 @@ const SelectSort = ({
           onChange={(event) => onChange(event.target.value as CatalogSort)}
           value={value}
         >
-          {SORT_OPTIONS.map((option) => (
+          {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -186,16 +243,18 @@ const ViewToggle = ({
   </fieldset>
 );
 
-const ContributeCard = ({ className = "" }: { className?: string }) => (
+const ContributeCard = ({
+  className = "",
+  copy,
+}: {
+  className?: string;
+  copy: CatalogCopyBlock;
+}) => (
   <aside
     className={`rounded-xl border border-navy-700 bg-navy-900/60 p-5 ${className}`}
   >
-    <h2 className="font-semibold text-[16px] text-white">
-      Conhece uma oportunidade que não está aqui?
-    </h2>
-    <p className="mt-1.5 text-[14px] text-mist leading-relaxed">
-      Envie pelo formulário e ajude outros estudantes a encontrá-la.
-    </p>
+    <h2 className="font-semibold text-[16px] text-white">{copy.title}</h2>
+    <p className="mt-1.5 text-[14px] text-mist leading-relaxed">{copy.body}</p>
     <a
       className="mt-4 inline-flex h-10 items-center gap-2 rounded-full border border-signal/70 px-5 font-semibold text-[14px] text-white transition-colors duration-200 hover:bg-signal hover:text-navy-950"
       href={SUBMISSION_FORM_URL}
@@ -270,10 +329,12 @@ const FailedNotice = ({ onRetry }: { onRetry: () => void }) => (
 
 const EmptyResults = ({
   canClear,
+  copy,
   crossLink,
   onClear,
 }: {
   canClear: boolean;
+  copy: CatalogCopyBlock;
   crossLink: { href: string; label: string };
   onClear: () => void;
 }) => (
@@ -281,12 +342,9 @@ const EmptyResults = ({
     <span className="flex h-14 w-14 items-center justify-center rounded-full border border-navy-600 text-mist">
       <SearchXIcon aria-hidden="true" className="h-6 w-6" />
     </span>
-    <h3 className="mt-4 font-bold text-[20px] text-white">
-      Nenhuma oportunidade com esses filtros
-    </h3>
+    <h3 className="mt-4 font-bold text-[20px] text-white">{copy.title}</h3>
     <p className="mt-2 max-w-md text-[15px] text-mist leading-relaxed">
-      Tente remover um filtro ou ampliar o prazo. Novas oportunidades entram no
-      catálogo com frequência.
+      {copy.body}
     </p>
     <div className="mt-6 flex flex-wrap justify-center gap-3">
       {canClear && (
@@ -309,43 +367,45 @@ const EmptyResults = ({
   </div>
 );
 
-const ResultList = ({
+function ResultList<T>({
   items,
   placeholders,
+  presentation,
   view,
 }: {
-  items: CatalogItem[];
+  items: T[];
   placeholders: number;
+  presentation: CatalogPresentation<T>;
   view: CatalogView;
-}) => (
-  <ul
-    className={
-      view === "grid"
-        ? "grid grid-cols-[repeat(auto-fill,minmax(min(100%,16.5rem),1fr))] gap-5"
-        : "flex flex-col gap-3"
-    }
-  >
-    {items.map((item, index) => (
-      <li className="flex min-w-0" key={`${item.scope}-${item.id}`}>
-        {view === "grid" ? (
-          <CatalogCard eager={index < EAGER_CARDS} item={item} />
-        ) : (
+}) {
+  return (
+    <ul
+      className={
+        view === "grid"
+          ? "grid grid-cols-[repeat(auto-fill,minmax(min(100%,16.5rem),1fr))] gap-5"
+          : "flex flex-col gap-3"
+      }
+    >
+      {items.map((item, index) => (
+        <li className="flex min-w-0" key={presentation.keyOf(item)}>
+          {view === "grid" ? (
+            presentation.renderCard(item, index < EAGER_CARDS)
+          ) : (
+            <div className="w-full">{presentation.renderRow(item)}</div>
+          )}
+        </li>
+      ))}
+      {Array.from({ length: placeholders }, (_, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: placeholders have no identity.
+        <li className="flex" key={`placeholder-${index}`}>
           <div className="w-full">
-            <CatalogRow item={item} />
+            <CatalogCardSkeleton />
           </div>
-        )}
-      </li>
-    ))}
-    {Array.from({ length: placeholders }, (_, index) => (
-      // biome-ignore lint/suspicious/noArrayIndexKey: placeholders have no identity.
-      <li className="flex" key={`placeholder-${index}`}>
-        <div className="w-full">
-          <CatalogCardSkeleton />
-        </div>
-      </li>
-    ))}
-  </ul>
-);
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function FilterSheet({
   children,
@@ -401,7 +461,7 @@ function FilterSheet({
   );
 }
 
-function CatalogPage<F extends CatalogFilterValues>({
+function CatalogPage<F extends CatalogFilterValues, T>({
   clearFilters,
   countFor,
   crossLink,
@@ -411,11 +471,12 @@ function CatalogPage<F extends CatalogFilterValues>({
   header,
   initialFilters,
   items,
+  presentation,
   setFiltros,
   setFiltrosTemporarios,
   sortStorageKey,
   status,
-}: CatalogPageProps<F>) {
+}: CatalogPageProps<F, T>) {
   const isClient = useIsClient();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [sort, setSort] = useSessionStorage<CatalogSort>(
@@ -433,7 +494,7 @@ function CatalogPage<F extends CatalogFilterValues>({
   const [pageState, setPageState] = useState({ page: 1, signature });
   const requestedPage = pageState.signature === signature ? pageState.page : 1;
 
-  const sorted = sortCatalogItems(items, sort);
+  const sorted = presentation.sortItems(items, sort);
   const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   const page = Math.min(requestedPage, pageCount);
   const firstIndex = (page - 1) * PAGE_SIZE;
@@ -480,7 +541,7 @@ function CatalogPage<F extends CatalogFilterValues>({
     setSheetOpen(false);
   };
 
-  const pins = ready ? items.flatMap((item) => item.locations) : [];
+  const pins = ready && presentation.pinsOf ? presentation.pinsOf(items) : [];
 
   return (
     <div className="min-h-screen bg-navy-950 font-reading text-slate-100">
@@ -519,7 +580,7 @@ function CatalogPage<F extends CatalogFilterValues>({
                 setFiltros={setFiltros}
               />
             </section>
-            <ContributeCard />
+            <ContributeCard copy={presentation.contribute} />
           </div>
         </div>
 
@@ -530,12 +591,8 @@ function CatalogPage<F extends CatalogFilterValues>({
               className="font-bold text-[20px] text-white tabular-nums"
             >
               {ready
-                ? plural(
-                    items.length,
-                    "oportunidade encontrada",
-                    "oportunidades encontradas"
-                  )
-                : "Carregando oportunidades…"}
+                ? plural(items.length, ...presentation.count)
+                : presentation.loading}
             </h2>
             <div className="flex w-full items-center gap-2.5 sm:w-auto">
               <button
@@ -551,7 +608,11 @@ function CatalogPage<F extends CatalogFilterValues>({
                   </span>
                 )}
               </button>
-              <SelectSort onChange={setSort} value={sort} />
+              <SelectSort
+                onChange={setSort}
+                options={presentation.sortOptions}
+                value={sort}
+              />
               <ViewToggle onChange={setView} value={view} />
             </div>
           </div>
@@ -567,6 +628,11 @@ function CatalogPage<F extends CatalogFilterValues>({
             {ready && items.length === 0 ? (
               <EmptyResults
                 canClear={chips.length > 0}
+                copy={
+                  chips.length > 0
+                    ? presentation.empty.filtered
+                    : presentation.empty.none
+                }
                 crossLink={crossLink}
                 onClear={clearFilters}
               />
@@ -574,6 +640,7 @@ function CatalogPage<F extends CatalogFilterValues>({
               <ResultList
                 items={ready ? sorted.slice(firstIndex, lastIndex) : []}
                 placeholders={placeholders}
+                presentation={presentation}
                 view={view}
               />
             )}
@@ -595,20 +662,25 @@ function CatalogPage<F extends CatalogFilterValues>({
             </div>
           )}
 
-          <ContributeCard className="mt-10 lg:hidden" />
+          <ContributeCard
+            className="mt-10 lg:hidden"
+            copy={presentation.contribute}
+          />
 
-          <p className="mt-10 text-[12px] text-mist-dim">
-            Localizações do mapa:{" "}
-            <a
-              className="underline decoration-navy-600 underline-offset-2 hover:text-slate-200"
-              href="https://www.geonames.org/"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              GeoNames
-            </a>{" "}
-            (CC BY 4.0).
-          </p>
+          {header.backdrop.kind === "map" && (
+            <p className="mt-10 text-[12px] text-mist-dim">
+              Localizações do mapa:{" "}
+              <a
+                className="underline decoration-navy-600 underline-offset-2 hover:text-slate-200"
+                href="https://www.geonames.org/"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                GeoNames
+              </a>{" "}
+              (CC BY 4.0).
+            </p>
+          )}
         </div>
       </div>
 
