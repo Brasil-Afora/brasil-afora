@@ -31,7 +31,7 @@ import {
 import DetailSimilar from "./detail-similar";
 import type { MapWindow } from "./map-windows";
 
-const REPORT_EMAIL = "passaporteglobalbr@gmail.com";
+const REPORT_EMAIL = "equipe@brasilafora.org";
 
 const SECTIONS: DetailSectionLink[] = [
   { id: "visao-geral", label: "Visão geral" },

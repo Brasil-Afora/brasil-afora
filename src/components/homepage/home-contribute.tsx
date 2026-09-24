@@ -1,7 +1,7 @@
 import { ArrowUpRightIcon, MailIcon } from "lucide-react";
 
 const SUBMISSION_FORM_URL = "https://forms.gle/dJrD1eg4y3VHGFap9";
-const CONTACT_EMAIL = "passaporteglobalbr@gmail.com";
+const CONTACT_EMAIL = "equipe@brasilafora.org";
 
 const HomeContribute = () => (
   <section

@@ -37,7 +37,7 @@ import type { Program } from "./types";
 // opportunity has one deadline, a program has a round: the sidebar shows
 // where enrollment stands and the round's dates. Programs are not on the map.
 
-const REPORT_EMAIL = "passaporteglobalbr@gmail.com";
+const REPORT_EMAIL = "equipe@brasilafora.org";
 const PARAGRAPH_SPLIT_REGEX = /\n\s*\n/;
 const LEADING_WWW_REGEX = /^www\./;
 
