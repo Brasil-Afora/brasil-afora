@@ -1,8 +1,8 @@
 "use client";
 
+import { CheckIcon } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Combobox,
   ComboboxCollection,
@@ -108,8 +108,10 @@ const FilterDropdown = ({
     "flex h-10 w-full cursor-pointer items-center justify-between gap-2 rounded-lg border border-navy-700 bg-navy-950/60 px-3 text-left font-normal text-[14px] text-slate-100 transition-colors hover:border-navy-600 hover:bg-navy-900 hover:text-white focus-visible:border-signal/70 focus-visible:outline-none focus-visible:ring-0 aria-expanded:border-navy-600 aria-expanded:bg-navy-900 aria-expanded:text-white [&>svg]:shrink-0 [&>svg]:text-mist [&>svg]:transition-transform [&>svg]:duration-200 aria-expanded:[&>svg]:rotate-180";
   const dropdownMenuClasses =
     "rounded-xl border border-navy-700 bg-navy-900 p-2 text-slate-100 shadow-[0_24px_48px_-20px_rgba(0,0,0,0.85)] ring-0 before:hidden";
+  // The box is drawn, not an interactive Checkbox: a nested control swallows
+  // the click, so only the label would toggle the option.
   const checkboxClasses =
-    "border-navy-600 bg-navy-950 data-checked:border-signal data-checked:bg-signal data-checked:text-navy-950";
+    "flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-navy-600 bg-navy-950 transition-colors data-checked:border-signal data-checked:bg-signal data-checked:text-navy-950";
   const maxVisibleItems = cols === 2 ? 12 : 8;
   const shouldUseScrollArea = visibleOptions.length > maxVisibleItems;
 
@@ -125,10 +127,13 @@ const FilterDropdown = ({
             key={opt}
             value={opt}
           >
-            <Checkbox
-              checked={selectedOptions.has(opt)}
+            <span
+              aria-hidden="true"
               className={checkboxClasses}
-            />
+              data-checked={selectedOptions.has(opt) ? "" : undefined}
+            >
+              {selectedOptions.has(opt) && <CheckIcon className="size-3.5" />}
+            </span>
             <span>{opt}</span>
           </ComboboxItem>
         )}
