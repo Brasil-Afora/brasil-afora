@@ -14,9 +14,9 @@
 export const siteCopy = {
   brand: "Brasil Afora",
   description:
-    "Conecte-se às melhores oportunidades, bolsas e feiras, no Brasil e no mundo. Tudo em um só lugar para impulsionar seu futuro!",
+    "Encontre bolsas de estudo, intercâmbios, olimpíadas e programas acadêmicos no Brasil e no exterior. Explore oportunidades gratuitamente, sem cadastro.",
   locale: "pt-BR",
-  title: "Brasil Afora: encontre oportunidades acadêmicas",
+  title: "Brasil Afora | Bolsas de estudo e intercâmbios",
 } as const;
 
 export const navCopy = {
@@ -42,7 +42,7 @@ export const heroCopy = {
   photosPause: "Pausar as fotos",
   photosPlay: "Continuar as fotos",
   lede: "Bolsas de estudo, summer programs, intercâmbios, olimpíadas e feiras para estudantes brasileiros de todos os níveis, no Brasil e no mundo.",
-  title: "Sua jornada acadêmica não tem fronteiras",
+  title: "Seu próximo passo pode levar você mais longe.",
   verified: "Seleção verificada em fontes oficiais",
   verifiedCheckedOn: (date: string): string => `Conferida em ${date}`,
 } as const;
