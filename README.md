@@ -40,7 +40,7 @@ The app follows a three-layer architecture: UI (components and hooks) → BFF (A
 
 ## Environment variables
 
-Create a `.env` file in the project root:
+Copy `.env.example` to `.env` and fill in the values:
 
 ```bash
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/brasil_afora
@@ -59,6 +59,15 @@ Notes:
 - `DATABASE_URL` is required for Drizzle and runtime DB access.
 - `BETTER_AUTH_SECRET` must be a secure secret outside local development.
 - Google login is enabled only when both Google variables are set.
+- `CORS_ORIGIN` is **required in production** (startup throws when it is
+  missing); in development it defaults to `http://localhost:3000`.
+- API rate limiting is in-memory by default. Production with multiple
+  instances needs `UPSTASH_REDIS_REST_URL` +
+  `UPSTASH_REDIS_REST_TOKEN` (or Vercel KV equivalents).
+- Service tokens (`INGESTION_API_TOKEN`, `MAINTENANCE_WORKER_TOKEN`,
+  `OUTBOX_WORKER_TOKEN`) need at least 32 characters.
+- See `.env.example` and `docs/SECURITY_HEADERS.md` for the full list,
+  rate limit overrides, and the production checklist.
 
 ## Local setup
 

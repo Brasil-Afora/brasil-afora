@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "bun@1.3.14",
+  "//drizzle-beta-tracking": "drizzle-orm/drizzle-kit pinned to 1.0.0-beta.9: no stable 1.x release exists yet (latest stable 0.45.3 predates the casing API in use), so downgrading would break the app. Monitor https://github.com/drizzle-team/drizzle-orm/releases and upgrade to 1.x stable when it lands, then run bun install, bun run db:generate, and the full test suite.",
   "engines": {
     "node": "24.x"
   },

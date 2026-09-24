@@ -8,13 +8,31 @@ const requireEnv = (value: string | undefined, key: string): string => {
   return normalized;
 };
 
-const optionalEnv = (value: string | undefined, fallback: string): string => {
-  const normalized = value?.trim();
-  if (!normalized) {
-    return fallback;
+const DEV_CORS_ORIGIN = "http://localhost:3000";
+
+/**
+ * Resolves the allowed CORS origins.
+ *
+ * In production `CORS_ORIGIN` is required so deployments fail fast with a
+ * clear message instead of silently trusting an insecure default. Local
+ * development keeps `http://localhost:3000` when the variable is unset.
+ */
+const corsOrigin = (): string[] => {
+  const raw = process.env.CORS_ORIGIN?.trim();
+  if (!raw) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "Missing required environment variable: CORS_ORIGIN " +
+          '(set it to the production origin, e.g. "https://brasil-afora.vercel.app").'
+      );
+    }
+    return [DEV_CORS_ORIGIN];
   }
 
-  return normalized;
+  return raw
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
 };
 
 export const env = {
@@ -33,10 +51,7 @@ export const env = {
     process.env.RESEND_FROM_EMAIL,
     "RESEND_FROM_EMAIL"
   ),
-  CORS_ORIGIN: optionalEnv(process.env.CORS_ORIGIN, "http://localhost:3000")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter((origin) => origin.length > 0),
+  CORS_ORIGIN: corsOrigin(),
   GOOGLE_CLIENT_ID: requireEnv(
     process.env.GOOGLE_CLIENT_ID,
     "GOOGLE_CLIENT_ID"

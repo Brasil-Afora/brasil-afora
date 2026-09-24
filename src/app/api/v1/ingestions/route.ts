@@ -2,6 +2,14 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ingestionRequestV1Schema } from "@/contracts/opportunity-v1";
 import { db } from "@/db/client";
+import { logError } from "@/lib/logger";
+import {
+  applyRateLimitHeaders,
+  checkRateLimit,
+  getIngestionRateLimitKey,
+  RATE_LIMIT_PRESETS,
+  rateLimitExceededResponse,
+} from "@/lib/rate-limit";
 import {
   IdempotencyConflictError,
   persistIngestion,
@@ -31,12 +39,26 @@ const validationError = (issues: { message: string; path: PropertyKey[] }[]) =>
   );
 
 export async function POST(request: NextRequest) {
+  const rateLimit = await checkRateLimit(
+    getIngestionRateLimitKey(request),
+    RATE_LIMIT_PRESETS.ingestion
+  );
+  if (!rateLimit.success) {
+    const limited = rateLimitExceededResponse(rateLimit);
+    return NextResponse.json(await limited.json(), {
+      headers: limited.headers,
+      status: limited.status,
+    });
+  }
+
   const configurationError = ingestionAuthConfigurationError();
   if (configurationError) {
+    applyRateLimitHeaders(configurationError.headers, rateLimit);
     return configurationError;
   }
   const authResult = await requireIngestionInRoute(request);
   if (authResult.response) {
+    applyRateLimitHeaders(authResult.response.headers, rateLimit);
     return authResult.response;
   }
 
@@ -68,10 +90,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await persistIngestion(db, parsed.data);
-    return NextResponse.json(
+    const response = NextResponse.json(
       { data: result },
       { status: result.replayed ? 200 : 201 }
     );
+    applyRateLimitHeaders(response.headers, rateLimit);
+    return response;
   } catch (error) {
     if (error instanceof IdempotencyConflictError) {
       return NextResponse.json(
@@ -84,7 +108,7 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
-    console.error("Ingestion transaction failed.", error);
+    logError("Ingestion transaction failed.", error);
     return NextResponse.json(
       {
         error: {
