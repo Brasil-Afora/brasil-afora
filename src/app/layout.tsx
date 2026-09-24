@@ -134,7 +134,7 @@ export default function RootLayout({
         <QueryProvider>{children}</QueryProvider>
         <Toaster />
       </body>
-      <GoogleAnalytics gaId="G-TCGX1Z935P" />
+      <GoogleAnalytics gaId="G-8FFF836E3M" />
     </html>
   );
 }
