@@ -10,6 +10,7 @@ import {
   isVerifiedInternationalOpportunityId,
   isVerifiedNationalOpportunityId,
 } from "@/data/verified-opportunities";
+import { fundingOption, priceBand } from "@/lib/cost-profile";
 import { getBrasiliaDaysUntil } from "@/lib/date-utils";
 import type {
   InternationalOpportunity,
@@ -23,17 +24,18 @@ type Opportunity = InternationalOpportunity | NationalOpportunity;
 
 interface BaseFilters {
   apenasVerificadas: boolean;
+  faixaPreco: string[];
   idade: string;
   nivelEnsino: string[];
   prazo: string;
   taxaAplicacao: string[];
   tipo: string[];
+  tipoBolsa: string[];
 }
 
 interface InternationalFilters extends BaseFilters {
   pais: string[];
   requisitosIdioma: string[];
-  tipoBolsa: string[];
 }
 
 interface NationalFilters extends BaseFilters {
@@ -56,6 +58,8 @@ const AGE_MIN_REGEX =
   /(?:a partir de|acima de|mínimo de|minimo de|maiores de)\s*(\d{1,2})/;
 const AGE_MAX_REGEX = /(?:até|ate|menores de|no máximo)\s*(\d{1,2})\s*anos/;
 const AGE_PLUS_REGEX = /(\d{1,2})\s*\+/;
+/** "US$ 0." or "R$ 0" is a free application, not a paid one. */
+const ZERO_FEE_REGEX = /^(?:us\$|r\$|€|£)\s*0(?:[.,]0+)?(?:[.\s]|$)/;
 
 const normalize = (value: string): string =>
   value.normalize("NFD").replace(DIACRITICS_REGEX, "").toLowerCase();
@@ -69,6 +73,56 @@ const matchesAnyOption = (text: string, selected: string[]): boolean => {
   return selected.some((option) =>
     optionStems(option).some((stem) => haystack.includes(stem))
   );
+};
+
+// Session filters saved before "Completa" became "Integral" and "Variável"
+// was folded into it.
+const LEGACY_FUNDING_OPTIONS: Record<string, string> = {
+  Completa: "Integral",
+  Variável: "Integral",
+};
+
+/** Records without a cost profile fall back to the scholarship type text. */
+const recordFundingOption = (opportunity: Opportunity): string | null => {
+  const structured = fundingOption(opportunity.custo?.funding);
+  if (structured || !("tipoBolsa" in opportunity)) {
+    return structured;
+  }
+  const text = normalize(opportunity.tipoBolsa);
+  if (text.startsWith("complet") || text.includes("integral")) {
+    return "Integral";
+  }
+  if (text.startsWith("parcial")) {
+    return "Parcial";
+  }
+  return text.startsWith("sem bolsa") ? "Sem bolsa" : null;
+};
+
+const matchesFunding = (
+  opportunity: Opportunity,
+  selected: string[]
+): boolean => {
+  const option = recordFundingOption(opportunity);
+  return (
+    option !== null &&
+    selected.some(
+      (value) => (LEGACY_FUNDING_OPTIONS[value] ?? value) === option
+    )
+  );
+};
+
+const matchesApplicationFee = (
+  opportunity: Opportunity,
+  selected: string[]
+): boolean => {
+  const fee = opportunity.custo?.applicationFee;
+  if (fee) {
+    return selected.includes(fee === "paid" ? "Pago" : "Gratuito");
+  }
+  if (ZERO_FEE_REGEX.test(normalize(opportunity.taxaAplicacao))) {
+    return selected.includes("Gratuito");
+  }
+  return matchesAnyOption(opportunity.taxaAplicacao, selected);
 };
 
 /** Use the same matching rule as filtering, including multi-country records. */
@@ -110,6 +164,20 @@ const isVerified = (type: CatalogType, id: string): boolean =>
     ? isVerifiedInternationalOpportunityId(id)
     : isVerifiedNationalOpportunityId(id);
 
+/** Application fee, funding and price. */
+const matchesCostFilters = (
+  opportunity: Opportunity,
+  filtros: BaseFilters,
+  hasSemantics: boolean
+): boolean =>
+  (hasSemantics ||
+    filtros.taxaAplicacao.length === 0 ||
+    matchesApplicationFee(opportunity, filtros.taxaAplicacao)) &&
+  (filtros.tipoBolsa.length === 0 ||
+    matchesFunding(opportunity, filtros.tipoBolsa)) &&
+  (filtros.faixaPreco.length === 0 ||
+    filtros.faixaPreco.includes(priceBand(opportunity.custo?.price)));
+
 const matchesBaseFilters = (
   opportunity: Opportunity,
   filtros: BaseFilters,
@@ -143,11 +211,7 @@ const matchesBaseFilters = (
   ) {
     return false;
   }
-  if (
-    !hasSemantics &&
-    filtros.taxaAplicacao.length > 0 &&
-    !matchesAnyOption(opportunity.taxaAplicacao, filtros.taxaAplicacao)
-  ) {
+  if (!matchesCostFilters(opportunity, filtros, hasSemantics)) {
     return false;
   }
   if (filtros.prazo) {
@@ -172,9 +236,7 @@ const matchesInternationalFilters = (
   (filtros.pais.length === 0 ||
     matchesAnyOption(opportunity.pais, filtros.pais)) &&
   (filtros.requisitosIdioma.length === 0 ||
-    matchesAnyOption(opportunity.requisitosIdioma, filtros.requisitosIdioma)) &&
-  (filtros.tipoBolsa.length === 0 ||
-    matchesAnyOption(opportunity.tipoBolsa, filtros.tipoBolsa));
+    matchesAnyOption(opportunity.requisitosIdioma, filtros.requisitosIdioma));
 
 const matchesNationalFilters = (
   opportunity: NationalOpportunity,

@@ -27,6 +27,7 @@ import type { OpportunitiesFiltros, Opportunity } from "./types";
 
 const initialFiltros: OpportunitiesFiltros = {
   apenasVerificadas: false,
+  faixaPreco: [],
   idade: "",
   nivelEnsino: [],
   pais: [],
@@ -51,6 +52,18 @@ const fields: CatalogFilterField<keyof OpportunitiesFiltros>[] = [
     placeholder: "Todos",
   },
   {
+    key: "faixaPreco",
+    label: "Preço",
+    options: FILTER_OPTIONS.faixaPreco,
+    placeholder: "Qualquer preço",
+  },
+  {
+    key: "tipoBolsa",
+    label: "Financiamento",
+    options: FILTER_OPTIONS.tipoBolsa,
+    placeholder: "Todos",
+  },
+  {
     key: "pais",
     label: "País de destino",
     options: FILTER_OPTIONS.paises,
@@ -61,12 +74,6 @@ const fields: CatalogFilterField<keyof OpportunitiesFiltros>[] = [
     key: "requisitosIdioma",
     label: "Idioma exigido",
     options: FILTER_OPTIONS.requisitosIdioma,
-    placeholder: "Todos",
-  },
-  {
-    key: "tipoBolsa",
-    label: "Financiamento",
-    options: FILTER_OPTIONS.tipoBolsa,
     placeholder: "Todos",
   },
   {

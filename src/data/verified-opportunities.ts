@@ -1,3 +1,4 @@
+import { getCostProfile } from "@/lib/cost-profile";
 import type {
   InternationalOpportunity,
   NationalOpportunity,
@@ -6,11 +7,19 @@ import showcaseData from "./showcase-opportunities.json";
 
 export const VERIFIED_OPPORTUNITIES_DATE = showcaseData.verifiedAt;
 
-export const verifiedInternationalOpportunities =
-  showcaseData.international as InternationalOpportunity[];
+export const verifiedInternationalOpportunities = (
+  showcaseData.international as InternationalOpportunity[]
+).map((opportunity) => ({
+  ...opportunity,
+  custo: getCostProfile(opportunity.id),
+}));
 
-export const verifiedNationalOpportunities =
-  showcaseData.national as NationalOpportunity[];
+export const verifiedNationalOpportunities = (
+  showcaseData.national as NationalOpportunity[]
+).map((opportunity) => ({
+  ...opportunity,
+  custo: getCostProfile(opportunity.id),
+}));
 
 const internationalById = new Map(
   verifiedInternationalOpportunities.map((opportunity) => [

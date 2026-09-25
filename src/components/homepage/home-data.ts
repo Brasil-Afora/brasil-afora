@@ -1,8 +1,10 @@
+import { fundingTag } from "@/components/opportunities/catalog-model";
 import {
   VERIFIED_OPPORTUNITIES_DATE,
   verifiedInternationalOpportunities,
   verifiedNationalOpportunities,
 } from "@/data/verified-opportunities";
+import { priceLabel } from "@/lib/cost-profile";
 import { formatIsoDateBr, getBrasiliaDaysUntil } from "@/lib/date-utils";
 import type {
   InternationalOpportunity,
@@ -41,25 +43,15 @@ const WHITESPACE_REGEX = /\s+/;
 export const normalizeSearchText = (value: string): string =>
   value.normalize("NFD").replace(DIACRITICS_REGEX, "").toLowerCase();
 
-const scholarshipTag = (tipoBolsa: string): string | null => {
-  const normalized = normalizeSearchText(tipoBolsa);
-  if (normalized.startsWith("complet")) {
-    return "Bolsa integral";
-  }
-  if (normalized.startsWith("parcial")) {
-    return "Bolsa parcial";
-  }
-  if (normalized.startsWith("variavel")) {
-    return "Bolsa variável";
-  }
-  return null;
-};
-
 const internationalTags = (opportunity: InternationalOpportunity): string[] => {
   const tags: string[] = [];
-  const scholarship = scholarshipTag(opportunity.tipoBolsa);
+  const scholarship = fundingTag(opportunity.custo, opportunity.tipoBolsa);
   if (scholarship) {
     tags.push(scholarship);
+  }
+  const price = priceLabel(opportunity.custo?.price);
+  if (price) {
+    tags.push(price);
   }
   if (opportunity.duracao.length <= SHORT_DURATION_MAX_LENGTH) {
     tags.push(opportunity.duracao);
@@ -69,7 +61,12 @@ const internationalTags = (opportunity: InternationalOpportunity): string[] => {
 
 const nationalTags = (opportunity: NationalOpportunity): string[] => {
   const tags = [opportunity.tipo];
-  if (normalizeSearchText(opportunity.taxaAplicacao).startsWith("gratuit")) {
+  const price = priceLabel(opportunity.custo?.price);
+  if (price) {
+    tags.push(price);
+  } else if (
+    normalizeSearchText(opportunity.taxaAplicacao).startsWith("gratuit")
+  ) {
     tags.push("Inscrição gratuita");
   }
   return tags;

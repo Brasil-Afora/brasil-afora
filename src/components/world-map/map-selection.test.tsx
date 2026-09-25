@@ -42,6 +42,7 @@ const item = (id: string, locations: MapItem["locations"]): MapItem => ({
   level: "Graduação",
   name: `Program ${id}`,
   place: "Estados Unidos",
+  price: { known: false, label: "Preço não informado" },
   scope: "international",
   tags: [],
   verified: false,

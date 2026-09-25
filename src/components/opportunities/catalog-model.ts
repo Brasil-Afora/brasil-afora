@@ -1,3 +1,9 @@
+import {
+  type CostProfile,
+  fundingLabel,
+  PRICE_UNKNOWN_LABEL,
+  priceLabel,
+} from "@/lib/cost-profile";
 import { getBrasiliaDaysUntil } from "@/lib/date-utils";
 import { findCountry, findState, type OpportunityLocation } from "@/lib/geo";
 import type {
@@ -42,6 +48,8 @@ export interface CatalogItem {
   locations: OpportunityLocation[];
   name: string;
   place: string;
+  /** What taking part costs; muted when the organizer doesn't say. */
+  price: { known: boolean; label: string };
   scope: CatalogScope;
   tags: CatalogTag[];
   verified: boolean;
@@ -126,10 +134,22 @@ export const scholarshipLabel = (tipoBolsa: string): string | null => {
   if (normalized.startsWith("parcial")) {
     return "Bolsa parcial";
   }
-  if (normalized.startsWith("variavel")) {
-    return "Bolsa variável";
-  }
   return null;
+};
+
+/** Funding label from the cost profile, else from the scholarship type text. */
+export const fundingTag = (
+  custo: CostProfile | undefined,
+  tipoBolsa = ""
+): string | null => fundingLabel(custo?.funding) ?? scholarshipLabel(tipoBolsa);
+
+export const catalogPrice = (
+  custo: CostProfile | undefined
+): CatalogItem["price"] => {
+  const label = priceLabel(custo?.price);
+  return label
+    ? { known: true, label }
+    : { known: false, label: PRICE_UNKNOWN_LABEL };
 };
 
 export const shortLevel = (nivelEnsino: string): string =>
@@ -144,7 +164,7 @@ export const toInternationalItem = (
   now: Date
 ): CatalogItem => {
   const country = findCountry(opportunity.pais);
-  const funding = scholarshipLabel(opportunity.tipoBolsa);
+  const funding = fundingTag(opportunity.custo, opportunity.tipoBolsa);
   const level = shortLevel(opportunity.nivelEnsino);
   return {
     audience: opportunity.faixaEtaria,
@@ -167,6 +187,7 @@ export const toInternationalItem = (
     level,
     name: opportunity.nome,
     place: opportunity.pais,
+    price: catalogPrice(opportunity.custo),
     scope: "international",
     tags: [
       ...(funding ? [{ label: funding, tone: "fund" as const }] : []),
@@ -182,6 +203,7 @@ export const toNationalItem = (
   now: Date
 ): CatalogItem => {
   const state = findState(opportunity.cidadeEstado);
+  const funding = fundingTag(opportunity.custo);
   return {
     audience: opportunity.faixaEtaria,
     cover: coverFor(
@@ -203,15 +225,19 @@ export const toNationalItem = (
     level: shortLevel(opportunity.nivelEnsino),
     name: opportunity.nome,
     place: opportunity.cidadeEstado || opportunity.pais,
+    price: catalogPrice(opportunity.custo),
     scope: "national",
     tags: [
+      ...(funding ? [{ label: funding, tone: "fund" as const }] : []),
       ...(opportunity.tipo
-        ? [{ label: opportunity.tipo, tone: "fund" as const }]
+        ? [
+            {
+              label: opportunity.tipo,
+              tone: funding ? ("plain" as const) : ("fund" as const),
+            },
+          ]
         : []),
       { label: opportunity.modalidade, tone: "plain" as const },
-      ...(isFree(opportunity.taxaAplicacao)
-        ? [{ label: "Gratuita", tone: "plain" as const }]
-        : []),
     ],
     verified: opportunity.verified ?? verified,
   };

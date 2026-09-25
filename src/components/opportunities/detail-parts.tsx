@@ -2,6 +2,7 @@
 
 import {
   BadgeCheckIcon,
+  BanknoteIcon,
   BookmarkCheckIcon,
   BookmarkIcon,
   CalendarClockIcon,
@@ -47,6 +48,7 @@ const FACT_ICONS: Record<FactIcon, LucideIcon> = {
   level: GraduationCapIcon,
   modality: MonitorSmartphoneIcon,
   place: MapPinIcon,
+  price: BanknoteIcon,
   type: TagIcon,
 };
 

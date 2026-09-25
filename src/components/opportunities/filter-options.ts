@@ -1,3 +1,5 @@
+import { FUNDING_OPTIONS, PRICE_BANDS } from "@/lib/cost-profile";
+
 export const FILTER_OPTIONS = {
   niveisEnsino: [
     "Ano Sabático",
@@ -150,7 +152,9 @@ export const FILTER_OPTIONS = {
 
   taxaAplicacao: ["Gratuito", "Pago"].sort(),
 
-  tipoBolsa: ["Completa", "Parcial", "Variável", "Sem bolsa"],
+  tipoBolsa: FUNDING_OPTIONS,
+
+  faixaPreco: PRICE_BANDS,
 
   modalidade: ["Presencial", "Online", "Híbrido"],
 } as const;
@@ -185,12 +189,9 @@ export const FILTER_ALIASES: Record<string, readonly string[]> = {
   "Cursos & Imersões": ["curso", "imers", "camp"],
   "Programas de Mentoria": ["mentoria"],
   "Voluntariado/Social": ["voluntari", "social"],
-  // Taxa e financiamento
+  // Taxa de inscrição (records without a cost profile)
   Gratuito: ["gratuit", "isent", "sem taxa"],
   Pago: ["pago", "us$", "r$", "€", "£"],
-  Completa: ["complet", "integral"],
-  Variável: ["variavel"],
-  "Sem bolsa": ["sem bolsa"],
 };
 
 export const DEADLINE_WINDOWS = [

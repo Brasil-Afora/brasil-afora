@@ -1,6 +1,7 @@
 import {
   ArrowRightIcon,
   BadgeCheckIcon,
+  BanknoteIcon,
   CalendarClockIcon,
   LandmarkIcon,
   MapPinIcon,
@@ -70,6 +71,9 @@ const Countdown = ({ item }: { item: CatalogItem }) =>
     </span>
   );
 
+const priceClass = (item: CatalogItem): string =>
+  item.price.known ? "font-semibold text-white" : "text-mist";
+
 const TitleLink = ({ item }: { item: CatalogItem }) => (
   <Link
     className="outline-none after:absolute after:inset-0 after:content-[''] focus-visible:underline focus-visible:decoration-signal focus-visible:underline-offset-4"
@@ -129,6 +133,16 @@ export const CatalogCard = ({
       </div>
 
       <dl className="mt-4 grid gap-1.5 text-[14px] text-slate-200">
+        <div className="flex min-w-0 items-center gap-2">
+          <dt className="sr-only">Preço</dt>
+          <BanknoteIcon
+            aria-hidden="true"
+            className="h-4 w-4 shrink-0 text-mist"
+          />
+          <dd className={`truncate tabular-nums ${priceClass(item)}`}>
+            {item.price.label}
+          </dd>
+        </div>
         <div className="flex min-w-0 items-center gap-2">
           <dt className="sr-only">Local</dt>
           <MapPinIcon
@@ -193,6 +207,13 @@ export const CatalogRow = ({ item }: { item: CatalogItem }) => (
       </h3>
       <p className="mt-1 truncate text-[13px] text-slate-300">
         {[item.place, item.level].filter(Boolean).join(" · ")}
+      </p>
+      <p
+        className={`mt-1 flex items-center gap-1.5 truncate text-[13px] tabular-nums ${priceClass(item)}`}
+      >
+        <BanknoteIcon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+        <span className="sr-only">Preço:</span>
+        {item.price.label}
       </p>
       <p className="mt-1 text-[13px] text-slate-200 md:hidden">
         <Deadline item={item} />

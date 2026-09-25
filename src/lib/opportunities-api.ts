@@ -2,6 +2,7 @@ import {
   getVerifiedInternationalOpportunityById,
   getVerifiedNationalOpportunityById,
 } from "@/data/verified-opportunities";
+import { type CostProfile, getCostProfile } from "@/lib/cost-profile";
 import type { MasterStatus } from "@/lib/curated-import/master";
 import type { OpportunityLocation } from "@/lib/geo";
 
@@ -157,6 +158,8 @@ export interface InternationalOpportunity {
   contato: string;
   curatedStatus?: MasterStatus;
   curatedStatusLabel?: string;
+  /** Price, funding and fee categories; see src/lib/cost-profile.ts. */
+  custo?: CostProfile;
   custosExtras: string;
   descricao: string;
   duracao: string;
@@ -197,6 +200,8 @@ export interface NationalOpportunity {
   contato: string;
   curatedStatus?: MasterStatus;
   curatedStatusLabel?: string;
+  /** Price, funding and fee categories; see src/lib/cost-profile.ts. */
+  custo?: CostProfile;
   custos: string;
   custosExtras: string;
   duracao: string;
@@ -238,6 +243,7 @@ export type InternationalOpportunityInput = Omit<
   | "canApply"
   | "id"
   | "localizacoes"
+  | "custo"
   | "atualizadoEm"
   | "lastVerifiedAt"
   | "lifecycleStatus"
@@ -255,6 +261,7 @@ export type NationalOpportunityInput = Omit<
   | "canApply"
   | "id"
   | "localizacoes"
+  | "custo"
   | "atualizadoEm"
   | "lastVerifiedAt"
   | "lifecycleStatus"
@@ -576,6 +583,7 @@ const mapInternationalOpportunity = (
   linkOficial: item.officialLink,
   ...mapLegacyActionability(item, actionability),
   contato: item.contact,
+  custo: getCostProfile(String(item.id)),
   localizacoes: item.locations ?? [],
   atualizadoEm: updatedAtOf(item.updatedAt),
 });
@@ -611,6 +619,7 @@ const mapNationalOpportunity = (
   linkOficial: item.officialLink ?? "",
   ...mapLegacyActionability(item, actionability),
   contato: item.contact ?? "",
+  custo: getCostProfile(String(item.id)),
   localizacoes: item.locations ?? [],
   atualizadoEm: updatedAtOf(item.updatedAt),
 });
@@ -730,6 +739,7 @@ const mapStructuredInternationalOpportunity = (
     lastVerifiedAt: item.last_verified_at,
     lifecycleStatus: item.lifecycle,
     contato: "Contato disponível na página oficial",
+    custo: getCostProfile(item.id),
   };
 };
 
@@ -815,6 +825,7 @@ const mapStructuredNationalOpportunity = (
     lastVerifiedAt: item.last_verified_at,
     lifecycleStatus: item.lifecycle,
     contato: "Contato disponível na página oficial",
+    custo: getCostProfile(item.id),
   };
 };
 

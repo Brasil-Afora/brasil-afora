@@ -46,7 +46,7 @@ const CATEGORY_SHORTCUTS: CategoryShortcut[] = [
     label: "Bolsas de estudo",
     icon: GraduationCapIcon,
     scope: "international",
-    filters: { tipoBolsa: ["Completa", "Parcial", "Variável"] },
+    filters: { tipoBolsa: ["Integral", "Parcial"] },
   },
   {
     label: "Summer programs",

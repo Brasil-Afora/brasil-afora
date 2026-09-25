@@ -7,6 +7,7 @@ The shared catalog used by the international, national and Programas e Bolsas li
 ## Rules for agents
 
 - Verified and catalog opportunities form one list: filters, sorting and pagination apply to both. Only the curated set gets the "Verificada" badge.
+- Price, funding (Integral / Parcial / Sem bolsa) and the application-fee category come from `src/data/cost-profiles.json`, keyed by record id and read through `src/lib/cost-profile.ts`. The research stores these as free prose, so a record without a profile can't be filtered by them and shows "Preço não informado". When opportunities are added, add their profiles (`bun run cost:missing` lists the gaps). Take a price only from the record's own text; never estimate one the organizer doesn't publish. Need-based or limited full aid is `full_possible`: filed under "Integral", labeled "Bolsa de até 100%".
 - Keep filter matching in `src/hooks/use-opportunity-filters.ts`. When the verified data describes a type in prose, add a stem to `FILTER_ALIASES` in `filter-options.ts` instead of special-casing it in components.
 - Colors come from the brand tokens in `globals.css`; each catalog passes its scope accent through `CatalogHeaderConfig.accentClassName`.
 - Reuse `FilterDropdown` for multi-select filters; single choices use a native `<select>`.

@@ -1,5 +1,6 @@
 import {
   type CatalogItem,
+  catalogPrice,
   coverFor,
   toInternationalItem,
   toNationalItem,
@@ -15,6 +16,7 @@ import {
   verifiedInternationalOpportunities,
   verifiedNationalOpportunities,
 } from "@/data/verified-opportunities";
+import { getCostProfile } from "@/lib/cost-profile";
 import { getBrasiliaDaysUntil } from "@/lib/date-utils";
 import { findCountry, findState, type GeoPoint } from "@/lib/geo";
 import type {
@@ -218,6 +220,7 @@ const itemFromFavorite = (
     locations: [],
     name: favorite.nome,
     place: favorite.pais,
+    price: catalogPrice(getCostProfile(favorite.id)),
     scope,
     steps: [],
     stepsKey: keyOf(scope, favorite.id),

@@ -23,6 +23,7 @@
     "db:migrate": "bunx --bun drizzle-kit migrate",
     "db:studio": "bunx --bun drizzle-kit studio",
     "data:audit": "bun run src/scripts/audit-and-backfill-opportunities.ts",
+    "cost:missing": "bun run src/scripts/cost-profiles-missing.ts",
     "semantic:audit": "tsx src/scripts/audit-semantic-field-states.ts",
     "semantic:backfill": "tsx src/scripts/audit-semantic-field-states.ts --apply",
     "local:bootstrap-reviewer": "bun run src/scripts/bootstrap-local-reviewer.ts"

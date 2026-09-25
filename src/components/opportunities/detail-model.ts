@@ -1,4 +1,5 @@
 import { VERIFIED_OPPORTUNITIES_DATE } from "@/data/verified-opportunities";
+import { priceDetail, priceLabel } from "@/lib/cost-profile";
 import { formatIsoDateBr, getBrasiliaDaysUntil } from "@/lib/date-utils";
 import { findCountry, findState, type OpportunityLocation } from "@/lib/geo";
 import type {
@@ -16,8 +17,8 @@ import {
   type CatalogScope,
   type CatalogTag,
   coverFor,
+  fundingTag,
   isFree,
-  scholarshipLabel,
   shortLevel,
 } from "./catalog-model";
 
@@ -36,6 +37,7 @@ export type FactIcon =
   | "level"
   | "modality"
   | "place"
+  | "price"
   | "type";
 
 export interface DetailFact {
@@ -245,7 +247,7 @@ export const toInternationalDetail = (
   const place = [stated(opportunity.cidade), stated(opportunity.pais)]
     .filter(Boolean)
     .join(", ");
-  const funding = scholarshipLabel(opportunity.tipoBolsa ?? "");
+  const funding = fundingTag(opportunity.custo, opportunity.tipoBolsa ?? "");
   const level = shortLevel(stated(opportunity.nivelEnsino) ?? "") || null;
   const requirements = stated(opportunity.requisitosEspecificos);
   const listedRequirements = listOf(requirements);
@@ -258,6 +260,7 @@ export const toInternationalDetail = (
       stated(opportunity.processoInscricao)
     ),
     costs: [
+      { label: "Preço", value: priceDetail(opportunity.custo?.price) },
       {
         label: "Financiamento",
         value: funding ?? stated(opportunity.tipoBolsa),
@@ -284,6 +287,11 @@ export const toInternationalDetail = (
     facts: [
       { icon: "place", label: "Local", value: place || null },
       { icon: "level", label: "Nível de ensino", value: level },
+      {
+        icon: "price",
+        label: "Preço",
+        value: priceLabel(opportunity.custo?.price),
+      },
       {
         icon: "funding",
         label: "Financiamento",
@@ -340,11 +348,14 @@ export const toNationalDetail = (
     .filter((item): item is string => Boolean(item))
     .map(cleanItem);
   const state = findState(opportunity.cidadeEstado ?? "");
+  const funding = fundingTag(opportunity.custo);
 
   return {
     ...shared(opportunity, verified, now),
     ...applicationOf(stated(opportunity.etapasSelecao), null),
     costs: [
+      { label: "Preço", value: priceDetail(opportunity.custo?.price) },
+      { label: "Financiamento", value: funding },
       { label: "O que você ganha", value: stated(opportunity.beneficios) },
       { label: "Custos", value: stated(opportunity.custos) },
       { label: "Taxa de inscrição", value: stated(opportunity.taxaAplicacao) },
@@ -366,6 +377,14 @@ export const toNationalDetail = (
       { icon: "place", label: "Local", value: place },
       { icon: "level", label: "Nível de ensino", value: level },
       { icon: "type", label: "Tipo", value: stated(opportunity.tipo) },
+      {
+        icon: "price",
+        label: "Preço",
+        value: priceLabel(opportunity.custo?.price),
+      },
+      ...(funding
+        ? [{ icon: "funding" as const, label: "Financiamento", value: funding }]
+        : []),
       { icon: "clock", label: "Duração", value: stated(opportunity.duracao) },
       {
         icon: "age",
@@ -395,8 +414,14 @@ export const toNationalDetail = (
     similarPlace: "",
     summary: firstSentence(about),
     tags: [
+      ...(funding ? [{ label: funding, tone: "fund" as const }] : []),
       ...(stated(opportunity.tipo)
-        ? [{ label: opportunity.tipo, tone: "fund" as const }]
+        ? [
+            {
+              label: opportunity.tipo,
+              tone: funding ? ("plain" as const) : ("fund" as const),
+            },
+          ]
         : []),
       ...(stated(opportunity.modalidade)
         ? [{ label: opportunity.modalidade, tone: "plain" as const }]

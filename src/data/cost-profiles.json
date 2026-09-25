@@ -1,0 +1,2576 @@
+{
+  "exchangeRates": {
+    "date": "2026-09-25",
+    "source": "Banco Central do Brasil, PTAX de fechamento (venda); INR pelo Banco Central Europeu",
+    "brlPerUnit": {
+      "USD": 5.1991,
+      "EUR": 5.928,
+      "GBP": 6.8904,
+      "CHF": 6.2799,
+      "CAD": 3.6771,
+      "AUD": 3.6565,
+      "INR": 0.05408
+    }
+  },
+  "profiles": {
+    "f6846231-d0d3-48bc-a21b-9b522d3d3ca0": {
+      "name": "Non-Trivial — Research Foundations e Fellowship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "f4de74d4-b3fe-4b09-af53-3916fd624914": {
+      "name": "Canada/USA Mathcamp",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 7500,
+        "currency": "USD"
+      },
+      "applicationFee": "free"
+    },
+    "eaa38934-4e22-4922-ab8c-4806170578d1": {
+      "name": "Summer Science Program (SSP)",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 11800,
+        "currency": "USD"
+      },
+      "applicationFee": "free"
+    },
+    "f64d4dbc-4f38-4b6b-abd1-93b2fb29b590": {
+      "name": "Diamond Challenge"
+    },
+    "e36f6a1b-7b9f-4104-a657-4264fb16e823": {
+      "name": "Living Expenses Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "f1749727-941f-4a8f-aeef-40832a1802ae": {
+      "name": "BHW Women in STEM Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "e141726b-7f25-4dc9-a810-8a4eb0ab9c7b": {
+      "name": "Trey Porter Law Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "f24bf06e-f20f-48f9-a33f-a0b7cba59d87": {
+      "name": "Live Your Dream Awards — Viva Seu Sonho",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "f3fdab4e-1e0a-4953-a2a5-e5a8d2a2dd47": {
+      "name": "Zolve Global Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "fe2aa2af-a7f2-4575-ab6f-d66f74535537": {
+      "name": "Zonta Young Women in Leadership Award — brasileiras residentes em distrito Zonta",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "f58823cc-9dbd-4341-a3c2-fac438a7ef14": {
+      "name": "Notre Dame Leadership Seminars",
+      "funding": "full",
+      "price": {
+        "kind": "amount",
+        "amount": 150,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "e0178bf1-d9c4-4550-ada9-8802e9b00670": {
+      "name": "Columbia Model United Nations in New York (CMUNNY)",
+      "price": {
+        "kind": "amount",
+        "amount": 95,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "e338087c-0e71-46b5-af3a-21bf68d16d75": {
+      "name": "Management & Technology Summer Institute (M&TSI)",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 12000,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "ece88d05-7164-43d7-a4de-1de7ef36e295": {
+      "name": "Introduction to Design Thinking — Dartmouth",
+      "price": {
+        "kind": "amount",
+        "amount": 950,
+        "currency": "USD"
+      }
+    },
+    "ec7b182a-460c-404e-a200-726b5e266419": {
+      "name": "Sea|mester — viagens educativas a bordo",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 31970,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "e46869d4-d151-46c9-a810-ce57a375c394": {
+      "name": "Duke Pre-College 2027",
+      "funding": "none",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "e1854fca-7c5b-4419-ac98-88bd15e0a676": {
+      "name": "Yale Model United Nations (YMUN LIII, New Haven)",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 30,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "e048dad5-ccd6-4385-a38b-bb525704d161": {
+      "name": "Bocconi Summer School for High School Students",
+      "price": {
+        "kind": "amount",
+        "amount": 2700,
+        "currency": "EUR",
+        "from": true
+      }
+    },
+    "f5175e94-036f-43f8-a1ef-b0b4756a6462": {
+      "name": "Wolfram High School Summer Research Program",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 5500,
+        "currency": "USD"
+      }
+    },
+    "e911d42d-5844-43b5-a4ae-c463141889ac": {
+      "name": "Leadership in the Business World (LBW)",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 11899,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "fd17ed43-68ba-4d3f-aab0-34a43bff5ca5": {
+      "name": "HCSSiM — Summer Studies in Mathematics",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 7208,
+        "currency": "USD"
+      },
+      "applicationFee": "free"
+    },
+    "f893c039-41a6-4b64-ad33-dd46edb97ecb": {
+      "name": "Winter International Academy — UT Austin",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 6500,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "f64aa800-222f-487d-a915-996d274ec882": {
+      "name": "TeenEagle English Competition – Online Round",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 159.9,
+        "currency": "BRL"
+      },
+      "applicationFee": "paid"
+    },
+    "edc6c70c-2cde-47f8-ae80-0cb3cfe17961": {
+      "name": "ARTEFFECT — concurso anual de artes para estudantes",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "e108e930-d294-410b-adf3-ed0bc2aa6d86": {
+      "name": "LSE Generate Global Innovation Challenge (antiga Pitch for the Future)",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 15,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "eb3fb79e-d078-4095-aaee-341427cab11b": {
+      "name": "Columbia Undergraduate Law Review — High School Essay Contest",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "fe9cc31e-a6f1-4747-aa6b-8a1aaa997a5b": {
+      "name": "Émile Boutmy Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "f768358a-8983-4f17-a312-096a11c721ed": {
+      "name": "Erasmus Mundus Joint Masters — bolsas",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "f35b9819-60e4-45ed-a7ba-25ffccf1fea4": {
+      "name": "UBC International Scholars Program",
+      "funding": "full_possible"
+    },
+    "edca176e-0810-4b02-a6d7-e904a4ca920a": {
+      "name": "Hong Kong PhD Fellowship Scheme — HKPFS",
+      "funding": "partial"
+    },
+    "e7d6723b-9014-4d42-a3c5-b45d99672234": {
+      "name": "Schwarzman Scholars",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "eb2f13d3-b5d2-464c-a641-c23710703628": {
+      "name": "Leiden University Excellence Scholarship — LExS",
+      "funding": "partial",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "c5927c04-ed66-4b7e-a460-46e6cc37bc15": {
+      "name": "Programa de Mentoria HBASS",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "d89f5d2e-4469-4dc5-af7a-c69f310fcfff": {
+      "name": "King's College London Pre-University Summer School",
+      "price": {
+        "kind": "paid"
+      },
+      "applicationFee": "paid"
+    },
+    "cfda5548-618c-4a40-a86f-b059eff984b1": {
+      "name": "VANDA Science Olympiad",
+      "price": {
+        "kind": "amount",
+        "amount": 159.9,
+        "currency": "BRL"
+      },
+      "applicationFee": "paid"
+    },
+    "d1c6abf8-219a-4f1e-a305-5c5c97aa7ac3": {
+      "name": "Yale Young Global Scholars (YYGS)",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 7500,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "c1e829b2-13f1-480a-a04d-84869e8321ea": {
+      "name": "UChicago Summer Session — Pre-College",
+      "funding": "partial",
+      "price": {
+        "kind": "paid"
+      },
+      "applicationFee": "paid"
+    },
+    "d8c4840e-9ab5-4b80-ad86-f52797b020d3": {
+      "name": "MathILy",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 6175,
+        "currency": "USD"
+      }
+    },
+    "c657bdc0-0569-4435-ae6c-fb7f60f47d9e": {
+      "name": "MPOWER Global Citizen Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "d7faf524-1fff-40e7-a528-9d773a9825fb": {
+      "name": "Oportunidades Acadêmicas",
+      "funding": "partial"
+    },
+    "c7a58718-dc66-40ec-a16b-64b632a13e99": {
+      "name": "Model United Nations of the University of Chicago (MUNUC)",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 85,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "cd2aeae6-b8b8-4606-ac64-a2b7e9198b13": {
+      "name": "Washington Area Model United Nations Conference (WAMUNC)",
+      "price": {
+        "kind": "amount",
+        "amount": 70,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "d8eb9981-515d-4fd2-a012-95f845020de6": {
+      "name": "OxfordMUN GlobalVoices",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 330,
+        "currency": "GBP"
+      },
+      "applicationFee": "paid"
+    },
+    "dce92d5e-f34c-4310-ad7a-88ecb480c2bd": {
+      "name": "St. John’s College Summer Academy — Great Books",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 240,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "c458fea8-0196-4137-a773-e2e8b5b5b606": {
+      "name": "Cornell University Precollege Studies",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 5820,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "cab07a48-a621-40c0-ad7c-500e78b9da25": {
+      "name": "The Common Young Writers Program",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 649,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "free"
+    },
+    "c982e9aa-9ced-4274-a3f1-bd85d7ecff16": {
+      "name": "Johns Hopkins Biomedical Engineering Innovation — Spring 2027",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 4200,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "c2af4bdb-774d-4252-a337-decca877fb19": {
+      "name": "Boston University Tanglewood Institute (BUTI)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 4055,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "dae4fc9b-cc1e-4e88-a3d8-77f1fec66821": {
+      "name": "PAIR — Program on AI and Reasoning",
+      "funding": "full",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "cd6c7435-8a7d-42ed-adde-acb04e8b72bd": {
+      "name": "JASNA Essay Contest",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "dbeffe8c-a50b-4625-a31b-55728c47692f": {
+      "name": "Immerse Education Essay Competition 2027",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "dd448689-c16e-4281-a84e-cf6c7b7d8b36": {
+      "name": "BioArtAttack — Nancy Rothwell Prize (categoria mundial)",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "dd69c2da-4996-4ad7-ae7e-deeed9e67004": {
+      "name": "Global Appathon 2026–27 (antigo Global AI Hackathon)",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "c0afd325-f06a-49d2-a97b-cfaed16d16bf": {
+      "name": "Foyle Young Poets of the Year Award",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "d8a029f1-e73a-4cfd-a04d-88ff861fdf72": {
+      "name": "Bolsa Estágio de Pesquisa no Exterior — BEPE",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "da801c46-07e2-429f-a507-95a0a4e87d01": {
+      "name": "Yenching Academy — Master's Fellowship",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "de07c7c3-cfc4-410d-ac30-38dc7a6d0b22": {
+      "name": "UNICEF Internship Programme",
+      "funding": "partial",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "d7697603-27c0-4bf0-a84f-8edcf2e4fd00": {
+      "name": "Chemers Neustein Summer Undergraduate Research Fellowship — SURF",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "c5c27aa5-cc7e-4c14-a389-44cd2ac8289f": {
+      "name": "MEXT — Curso Profissionalizante",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      },
+      "applicationFee": "free"
+    },
+    "a160e5d1-c1a6-4b02-ab15-a38aa8d0fa7b": {
+      "name": "HIR Academic Writing Contest",
+      "funding": "none",
+      "price": {
+        "kind": "paid"
+      },
+      "applicationFee": "paid"
+    },
+    "b5eb4711-28e1-482c-a7f3-a6193f4266cf": {
+      "name": "Wharton Global High School Investment Competition",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "acd58776-3043-4f6a-a920-d7c7ddcb8506": {
+      "name": "Yale Dream",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "9ea944ea-a386-4eaf-a899-ca9cf59a7beb": {
+      "name": "European Summer Program on Rationality (ESPR)",
+      "funding": "full",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "be220067-3c66-4dfb-ab0e-bd1b5322e506": {
+      "name": "ETH Student Summer Research Fellowship"
+    },
+    "bd041abd-354e-48cd-a1a8-ba5b7d67e1f4": {
+      "name": "Baret Scholars",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 94500,
+        "currency": "USD"
+      }
+    },
+    "a26b236d-b7ba-4edc-a1a4-4137f73561bc": {
+      "name": "UWC ISAK Japan Summer School",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 3850,
+        "currency": "USD"
+      }
+    },
+    "b0f28f94-5c8c-4131-aaa3-6a0f292ac287": {
+      "name": "Master Mind Scholarships",
+      "funding": "full",
+      "price": {
+        "kind": "amount",
+        "amount": 136.5,
+        "currency": "EUR"
+      }
+    },
+    "bddf7289-faa6-4d05-ac70-1c92ab06e50a": {
+      "name": "The Heinlein Society Scholarships",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "a717a5e2-2694-46b4-a570-8394c8081e91": {
+      "name": "Anthony Quinn Foundation Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "a041986a-fdfa-4ec5-ae27-7dfad7d9269a": {
+      "name": "Stanford Summer Humanities Institute",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 8850,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "a5aba3cf-f841-42bc-a0b4-115468ee6e78": {
+      "name": "Cornell Model United Nations Conference (CMUNC)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 75,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "a212e348-f189-45d8-ae57-b662c2835540": {
+      "name": "Pioneer Research Institute",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 7465,
+        "currency": "USD"
+      }
+    },
+    "a99ae096-3039-4678-a97f-7d006d0eb438": {
+      "name": "Dartmouth Model United Nations (DartMUN)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 100,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "adadb32a-23d1-41b9-ad6f-3cfbdbb9cc4b": {
+      "name": "Oppia Foundation — contribuições voluntárias",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "b014a2eb-2a66-4de1-aa40-cc0b73ccbba2": {
+      "name": "Wisconsin International Precollege Academy — trilha internacional do ALP",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 5100,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "bd67613a-73d8-4fe6-a7de-04d84dcc8a65": {
+      "name": "Talaria Summer Institute",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "bd94b8a3-6e97-4b07-a2d3-dc73c4b3ee01": {
+      "name": "OIST Research Internship",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "ab70c19a-192a-4221-a9cf-2f3007b0320b": {
+      "name": "Georgetown University Pre-College Online — cursos com crédito",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 3995,
+        "currency": "USD"
+      }
+    },
+    "b1d57dbf-21e5-4ee6-a619-12aa11093871": {
+      "name": "Carpe Diem Education — Latitudes Year",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 25800,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "b7f875ec-8564-4e16-a344-1415ccea27ce": {
+      "name": "The Oxford Tradition — Oxbridge Academic Programs",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 7850,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "a37c19c9-6f1e-4286-a0fa-092a9f9e4e4d": {
+      "name": "High Mountain Institute – Gap Semester (Patagonia Trek)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 15400,
+        "currency": "USD"
+      }
+    },
+    "b594f883-1cbe-42b2-a93e-c2a81b3bce5a": {
+      "name": "Santa Clara University – Summer Engineering Seminar",
+      "funding": "full",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "a6af5056-91ac-481f-a3ba-3776243462f8": {
+      "name": "The Engineering Place — Rising 11th–12th Residential Camps",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 1550,
+        "currency": "USD"
+      }
+    },
+    "bbcf7df5-ff08-4d0f-a458-ef8c442f4f6b": {
+      "name": "Student Science Training Program (UF SSTP)",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 5500,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "bdf9c64a-068c-4bde-a38d-9df649a81bf6": {
+      "name": "Singapore and Asian Schools Math Olympiad (SASMO)",
+      "price": {
+        "kind": "amount",
+        "amount": 139.9,
+        "currency": "BRL"
+      },
+      "applicationFee": "paid"
+    },
+    "ad33d8b8-135b-484a-a72f-b89d0615a08c": {
+      "name": "Lumiere Scholars Essay Award — Fall 2026",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "9df576aa-b953-4e89-a651-ba419eb91cdd": {
+      "name": "Youth Innovation Challenge — proteção dos oceanos",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "a83076c9-39aa-48f8-ac1c-647dce216918": {
+      "name": "H G Wells Short Story Competition — Young Writers",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "a332d9fb-f83e-4ec7-a7e6-cdf04593a5c7": {
+      "name": "Fundación Carolina — Becas de Posgrado",
+      "funding": "full_possible",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "b907a2c1-a14d-4f58-ade6-a29565b89b23": {
+      "name": "CERN Technical Studentship — IT, Mathematics & Robotics",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "858048dd-b524-44de-ad6e-642e7d52987f": {
+      "name": "BRASA Pré — Graduação Europa"
+    },
+    "8fbf6102-3202-4dec-abdd-58db0d192ac9": {
+      "name": "BRASA Pré — Pós-graduação Américas"
+    },
+    "8d2db1f5-5615-4e1e-a80f-02462d782325": {
+      "name": "Virtual Global Leadership Program: International Affairs in a Transforming World",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 95,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "8e1a278f-31a6-41a5-a52c-339b49e10955": {
+      "name": "Vogue Summer School — New York City",
+      "price": {
+        "kind": "amount",
+        "amount": 6195,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "7af33870-03f5-4139-a5d1-a7b652419753": {
+      "name": "Brown Leadership Institute",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 5778,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "9bbabf25-1061-4056-a839-9c03043f99cd": {
+      "name": "Young Entrepreneurs Around the World (YEAW)"
+    },
+    "9a01ff24-1c15-4240-ab73-2052221ac275": {
+      "name": "Take Action Lab — programa semestral",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 21000,
+        "currency": "USD"
+      }
+    },
+    "8f3d8c9b-22e5-42d4-a46d-fb01261a768f": {
+      "name": "UWC ISAK Japan Winter School",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 1380,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "8ea7d6b7-6acb-4a62-ae7e-7f6031b3bf54": {
+      "name": "Stanford Pre-Collegiate Summer Institutes",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 3200,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "92dd87ad-3936-48d2-a096-b3f59048f09e": {
+      "name": "LALA Leadership Camps",
+      "funding": "partial",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "89fdba91-8c74-4bd2-a854-c52ad4c4e711": {
+      "name": "Europe: The STEM Experience (Global Leadership Adventures)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 6399,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "931e190a-6d4f-46c4-a69c-da14578e7bed": {
+      "name": "Beamline for Schools (BL4S)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "8800c40e-4b33-472e-a8ab-4f85a8287f12": {
+      "name": "Programa de Bolsas BRASA",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "88660fe4-d79a-4b08-a83a-521ed37bea28": {
+      "name": "Ronald D. Weiss College Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "80dad5be-1ace-4df2-a8e0-874b987cfbc4": {
+      "name": "Change the World MUN — Nova York 2027",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 220,
+        "currency": "EUR",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "8b3ff9a7-f9bd-4aaf-a6c6-c6d099b4db30": {
+      "name": "Southeast Asia Gap Semester",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 15000,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "81e79368-6bf0-41d4-a29d-fb5a94de1943": {
+      "name": "MPOWER Women in STEM Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "83bd56ba-49ee-4940-a21d-23f9e5b6e63f": {
+      "name": "IYRC Medicine and Research Summer Program",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 750,
+        "currency": "USD"
+      }
+    },
+    "8ca6d6e4-4316-4573-afb8-528c0ca8516a": {
+      "name": "Princeton Model United Nations Conference (PMUNC)",
+      "funding": "full_possible",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "9803c946-c7db-4ca8-aa09-8501e6766013": {
+      "name": "Garcia Summer Research Program",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 4000,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "91bb5d72-56a6-452a-a9ed-9f3e0ad11ce8": {
+      "name": "Changemakers Collective Fellowship",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 45000,
+        "currency": "INR"
+      }
+    },
+    "86a69a00-2455-4294-a4cb-a11995d9829d": {
+      "name": "Program in Algorithmic and Combinatorial Thinking (PACT) — virtual",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 2150,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "8bfa6e54-2d0a-4348-a664-2175161e1d3f": {
+      "name": "Economics for Leaders (EFL)",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 2800,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "8344cf00-3862-486f-a583-557751c956df": {
+      "name": "Vogue Fashion Summer Camp — Madrid",
+      "price": {
+        "kind": "amount",
+        "amount": 2900,
+        "currency": "EUR"
+      }
+    },
+    "9a54d9b0-0fe1-462c-aca5-6f72df18d473": {
+      "name": "National High School Model United Nations (NHSMUN NYC 2027)",
+      "price": {
+        "kind": "amount",
+        "amount": 155,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "81d13c84-5c43-4f1c-ad6d-ae68c238a511": {
+      "name": "AwesomeMath Summer Program (online)",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 1275,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "83f6d195-c1f4-49e2-aa3a-0f2a26129f8e": {
+      "name": "Medicine4Youth Summer Research Program — High School Stream"
+    },
+    "94c52b8a-ecfb-4b48-a4a3-8e1979e63347": {
+      "name": "Harvard Crimson Global Case Competition (HCGCC) 2026",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 20,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "995115aa-0be1-4542-afd2-99542e1b6448": {
+      "name": "PhotoVogue Global Open Call 2026 — Brave New Visions",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "9d804901-b247-4419-a9b1-eec8f6359502": {
+      "name": "John Locke Institute Global Essay Prize",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "86c95fbc-c5cc-4d36-a735-e6913190ccfb": {
+      "name": "Visiting Student Research Program — VSRP",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      },
+      "applicationFee": "free"
+    },
+    "9859bd90-9128-4b07-a9b3-4909e61b8e90": {
+      "name": "Aalto Science Institute International Summer Research Programme",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "85b49af1-08cc-4cb7-a933-c6b7275f22ec": {
+      "name": "Lester B. Pearson International Scholarship",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "99910a14-a545-4611-a890-857f0fadd535": {
+      "name": "Research Training Program — University of Sydney, internacional",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "96203ab4-c4a8-4c7a-ac20-b1654605ea5e": {
+      "name": "University of Otago Doctoral Scholarship",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "99a9c8a4-e790-4c69-a8f5-4d27ada175f2": {
+      "name": "MEXT — Graduação",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      },
+      "applicationFee": "free"
+    },
+    "7a134727-a4cc-41e8-a61f-1095b25de2d5": {
+      "name": "BRASA Pré — Graduação Américas"
+    },
+    "5c9d762b-e17f-41dc-a2f0-e3fe6bd00b25": {
+      "name": "Singapore International Art Tournament (SIAT)",
+      "price": {
+        "kind": "amount",
+        "amount": 139.9,
+        "currency": "BRL"
+      },
+      "applicationFee": "paid"
+    },
+    "5e8e4755-efd6-4a66-a1cf-da85189e110f": {
+      "name": "European Forum Alpbach — Scholarship Programme",
+      "funding": "partial",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "6bd69da1-7342-48a4-a2a8-5c1761ec2d0a": {
+      "name": "Prep Program 2027",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "605cbedd-e8aa-452a-ab8d-37f29fb5ab26": {
+      "name": "Breakthrough Junior Challenge",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "60fc964a-531d-4a98-a33f-5d2e880ed714": {
+      "name": "Harriet Fitzgerald Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "6b552c98-ed2e-44e3-a2fd-db846bf4f687": {
+      "name": "Ritchie-Jennings Memorial Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "71f1b8e1-a3e6-451f-a330-7cfe44916101": {
+      "name": "Alpha Scholars — Social Science Research Program",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 3300,
+        "currency": "USD"
+      }
+    },
+    "72d8dec5-2a45-4951-a266-b082e50e4894": {
+      "name": "Yale International Relations Leadership Institute (YIRLI)",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 2200,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "662ed257-f4dd-44ab-ae2b-5bb661cd2aed": {
+      "name": "Stamps Pre-College Summer Portfolio Prep",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 750,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "7f7a3dbe-d188-41a7-a730-3107a63cb995": {
+      "name": "VANDA International Junior Science Olympiad",
+      "price": {
+        "kind": "paid"
+      },
+      "applicationFee": "paid"
+    },
+    "80d1cc80-a743-4d3a-a6be-ec5c3b10ab09": {
+      "name": "Australian Mathematics Competition (AMC)",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 9.3,
+        "currency": "AUD"
+      },
+      "applicationFee": "paid"
+    },
+    "6af72fab-b5bb-4f3c-ae44-d32a169dce07": {
+      "name": "New York School of Interior Design — Summer Pre-College",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 2125,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "74c72372-781e-4b5e-a9b1-8d86dca8688e": {
+      "name": "William & Mary NIAHD — Pre-College Program in American History",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 7250,
+        "currency": "USD"
+      },
+      "applicationFee": "free"
+    },
+    "662135a8-4578-474d-ace5-107f1fcc4202": {
+      "name": "SCAD Rising Star",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 6620,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "615bb239-bdfd-41ca-a3cc-b0c377209d83": {
+      "name": "Secondary Student Training Program (SSTP)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 7500,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "64903281-0266-421b-a385-2b73846d7aae": {
+      "name": "Northeastern Accelerate Pre-College (residencial)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 7095,
+        "currency": "USD"
+      }
+    },
+    "735cb8d9-0314-4af4-a7bd-e5328376f03d": {
+      "name": "UWC Costa Rica – Sustainability & Spanish Immersive Experience",
+      "price": {
+        "kind": "amount",
+        "amount": 3400,
+        "currency": "USD"
+      }
+    },
+    "5e56d46f-847c-4618-ae7d-20bb40394241": {
+      "name": "LaunchX Online Flagship Entrepreneurship Summer Program",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 6495,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "6fde5cde-2ce1-441f-a68a-6ac6c8227aec": {
+      "name": "The Junior Academy",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "6dadfd20-c087-4c98-a368-1faef68abdd2": {
+      "name": "Universidade de Verão — Universidade de Coimbra",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 160,
+        "currency": "EUR",
+        "from": true
+      }
+    },
+    "690a5337-1207-4083-ae3d-89f7bd133880": {
+      "name": "International Astronomy and Astrophysics Competition (IAAC)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "808a161e-4e62-44bb-a222-4112180a45cd": {
+      "name": "Copernicus Mathematics Olympiad",
+      "price": {
+        "kind": "amount",
+        "amount": 20,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "5e656f85-edb6-4f8f-a80f-9db1d35a5736": {
+      "name": "Copernicus Physics and Astronomy Olympiad",
+      "price": {
+        "kind": "amount",
+        "amount": 20,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "781f7597-4569-45a8-a05b-663acb3b630e": {
+      "name": "International Youth Math Challenge (IYMC)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "621d5a3b-0561-46b5-a479-3dcf07a12928": {
+      "name": "Concurso de cartazes do Festival Internacional de Curtas Ciudad de Soria",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "7621a526-d587-4c4d-acfe-0ffdb7f04b83": {
+      "name": "RMetS Weather Photographer of the Year",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "63bb6121-fd1d-4970-a6cf-f773187edfbd": {
+      "name": "PLURAL+ Youth Video Festival"
+    },
+    "7b2d6229-e362-4b25-a18d-20036bb8ec44": {
+      "name": "Aspire Leaders Program — Cohort 4 de 2026 (Brasil)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "62044a27-83ad-4474-ad76-95a86bada32c": {
+      "name": "Max Planck Computer Science Research Internships",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "5df9e5db-7e89-412f-aa01-834c850bac53": {
+      "name": "Clarendon Scholarships",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "5f89b92a-f4f8-436c-a657-4fa2e96e07af": {
+      "name": "Graduate Research Scholarships — University of Melbourne",
+      "funding": "full_possible"
+    },
+    "69a1d997-21da-4e92-a622-ecd0c6fc1b2b": {
+      "name": "UM NL-High Potential Scholarship",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "5f3d1745-4580-40a4-acba-04dc99901a46": {
+      "name": "Cold Spring Harbor Laboratory — Undergraduate Research Program",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "3f1cbd1b-7cf0-47e4-a708-60db475919dc": {
+      "name": "Blue Planet Awareness Contest",
+      "funding": "none"
+    },
+    "580d55d8-0f5d-48cf-a14d-e9ecbd1242a4": {
+      "name": "Programa Líderes Estudar",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "4f38a441-98ef-4b78-ac0e-7649dd148c80": {
+      "name": "Zonta Women in STEM Award",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "5414fc46-4b6b-45f5-a215-896ba1ca0e60": {
+      "name": "Nsouli Scholars Programme",
+      "funding": "full_possible",
+      "applicationFee": "free"
+    },
+    "50a85226-3792-4016-abbf-6188ac631e3b": {
+      "name": "The Vic & Oby Scholarship Fund",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "4b0597ed-6c45-4cf6-a69c-58951f1ab3c8": {
+      "name": "Notre Dame Summer Scholars",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 4900,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "5336dfa7-3a10-4a45-a384-f2c88b665aec": {
+      "name": "AMP Global Scholar – Virtual",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 400,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "free"
+    },
+    "40e2bb18-7c10-48c7-a44c-7fa67263f13d": {
+      "name": "IJBMUN — Instituto Jovem Brasileiro",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "499e502e-b529-46e4-a73c-b65f83f671e0": {
+      "name": "Jakarta International Model United Nations (JMUN)",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "46bc8047-7bd1-4094-ae3f-3853983a210f": {
+      "name": "Summer Engineering Exploration Camp (SEE Camp)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 750,
+        "currency": "USD"
+      }
+    },
+    "473b2f96-222a-4845-a949-ae7f900b9ad2": {
+      "name": "Immerse Education — Blog Competition 2027",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "5bc88547-fc3f-400e-aeb1-cd69840b4b3b": {
+      "name": "UWC Atlantic — Global Leadership Experience (GLE)",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 3115,
+        "currency": "GBP"
+      }
+    },
+    "43713025-c444-426b-ad90-a520f48a9683": {
+      "name": "Warwick Pre-University Summer School",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 5250,
+        "currency": "GBP"
+      },
+      "applicationFee": "paid"
+    },
+    "4aa8e636-d6bd-4b09-a163-0ab7a9f040a7": {
+      "name": "Sotheby’s Summer Institute — Pre-College",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 6195,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "413cded6-3210-42d8-af8a-956ecf0f219c": {
+      "name": "UMass Amherst Summer Pre-College",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 1985,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "3f02a05a-e8d3-4b8a-a712-2dac66d8f59a": {
+      "name": "Lumiere Research Scholar — Individual Research Program",
+      "funding": "full_possible",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "50fdea3d-2fd1-4b0d-a470-f5d84dcb7dda": {
+      "name": "Imperial Global Summer School",
+      "price": {
+        "kind": "amount",
+        "amount": 7695,
+        "currency": "GBP"
+      }
+    },
+    "5c74413a-7fa2-4fc7-ae0a-a44310dca7c6": {
+      "name": "Honors Summer Math Camp 2027",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 6600,
+        "currency": "USD"
+      }
+    },
+    "58b2bea7-26d6-40ff-adda-2dea2ec05ede": {
+      "name": "UCSB Research Mentorship Program (RMP) 2027",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 5675,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "5a8205e2-7415-4035-adf8-552707b8a5a7": {
+      "name": "Harvard Model United Nations (HMUN Boston 2027)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 130,
+        "currency": "USD",
+        "from": true
+      }
+    },
+    "464cb265-16b3-452e-a546-217c4970acd3": {
+      "name": "Wharton Sports Business Academy",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 4799,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "2a154c68-d566-4283-aef6-bf80519083f9": {
+      "name": "MEXT — Pesquisa / Pós-graduação, via representação japonesa no Brasil",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      },
+      "applicationFee": "free"
+    },
+    "4aac2cbe-9136-4640-a5c1-72a385adb35f": {
+      "name": "Summer Institute in Global Leadership — UNAGB",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 660,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "free"
+    },
+    "5352a7db-aaaf-4ecc-a520-22915977817e": {
+      "name": "Babson Summer Study for High School Students",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 6295,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "4027f195-c58f-49a1-a483-9802f1851880": {
+      "name": "Inspirit AI — AI Scholars Live Online",
+      "price": {
+        "kind": "amount",
+        "amount": 1400,
+        "currency": "USD"
+      }
+    },
+    "559a9bc8-9b67-4c0e-ad62-6ab58641d76e": {
+      "name": "John Locke Institute — Summer Schools",
+      "funding": "partial",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "4e0273df-503d-4a1b-adf5-e821f436f7ab": {
+      "name": "Leaders of Tomorrow Digital Exchange Program — 26 Winter",
+      "funding": "partial",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "3df5cafb-884c-4849-ab2f-74c05ec1b180": {
+      "name": "World Mathematics Team Championship (WMTC)",
+      "price": {
+        "kind": "amount",
+        "amount": 298,
+        "currency": "BRL",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "5974f424-ece3-4ac4-a128-29262eab501e": {
+      "name": "MIT Solve — 2027 Global Climate Challenge"
+    },
+    "421711ba-cf61-4e20-a03c-b4a352d8f536": {
+      "name": "CaseCatalyst Innovation Case Competition",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 120,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "403bc60a-66cd-472d-a156-7168b9c95fda": {
+      "name": "Vienna BioCenter Summer School",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      },
+      "applicationFee": "free"
+    },
+    "2bb84051-0498-4784-a00d-e303a646ea4c": {
+      "name": "Project Access — Undergraduate Programme",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "373a4f03-8277-40a9-a3a1-1a4d2a120263": {
+      "name": "BRASA Pré — Pós-graduação Europa"
+    },
+    "284a9e6f-c8e7-40bb-a9db-0e39318a4c34": {
+      "name": "Chevening Scholarships — Brasil",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "353c1cbb-ce49-4004-a363-5696958747da": {
+      "name": "Immerse Education — Bursary Programme",
+      "funding": "full_possible",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "32b202be-f9a8-420b-a185-c6c8a41af9a9": {
+      "name": "Yale Summer Program in Astrophysics (YSPA)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 7800,
+        "currency": "USD"
+      }
+    },
+    "2db96ff3-f292-47c6-afab-f41d67d080c7": {
+      "name": "Ross Mathematics Program",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 7500,
+        "currency": "USD"
+      }
+    },
+    "38dbd628-6223-47b0-a131-bfb069cc478d": {
+      "name": "Camp Rising Sun",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "2e27619e-ce36-4f87-a00c-ef036f7b40f5": {
+      "name": "Future We Want MUN — Rio de Janeiro",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 50,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "208c021f-d92d-42bc-af2f-ef29e0472f3b": {
+      "name": "The Earth Prize"
+    },
+    "350e8c98-eecf-4826-aaa8-9ea523a521e7": {
+      "name": "Behring Scholars",
+      "funding": "full_possible"
+    },
+    "316288ea-8837-48fb-a189-d13c8e436827": {
+      "name": "Tobin Injury Law — CHAI x 66 Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "3d890035-1280-481a-aa16-23d648bbc63f": {
+      "name": "Global Model UN New York (antigo WIMUN)",
+      "price": {
+        "kind": "amount",
+        "amount": 311,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "2780889a-7e2b-413a-a478-cf646295fc0a": {
+      "name": "Global Model WHO 2026",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 289,
+        "currency": "CHF"
+      },
+      "applicationFee": "paid"
+    },
+    "2da0518e-0a33-4969-ad83-ab95ddc824c6": {
+      "name": "University of Amsterdam — Pre-University Honours Programmes",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 2500,
+        "currency": "EUR"
+      },
+      "applicationFee": "paid"
+    },
+    "28126c04-75b4-4060-a7b0-f67091e7690e": {
+      "name": "Georgetown University — cursos online pré-universitários de enriquecimento",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 1895,
+        "currency": "USD"
+      }
+    },
+    "30bf0839-4351-4591-a7b5-4f856f064d8f": {
+      "name": "WashU High School Summer Scholars Program",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 12135,
+        "currency": "USD"
+      }
+    },
+    "2a7752c5-4ea8-4dae-a56a-55d1ec3d298e": {
+      "name": "International Model United Nations (IMUN) — conferências online",
+      "price": {
+        "kind": "amount",
+        "amount": 11,
+        "currency": "USD"
+      }
+    },
+    "24022851-bbdb-4cdf-acd0-4870759bef11": {
+      "name": "SPINWIP — Stanford Program for Inspiring the Next Generation of Women in Physics",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "231a53a6-63ad-4a29-a540-fde3726c271c": {
+      "name": "(RE)Defining Equality — UWC Austria Short Course",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 400,
+        "currency": "EUR"
+      }
+    },
+    "223761cc-677f-4112-a3e3-bd49dc667a64": {
+      "name": "Smith College Precollege Programs",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 2795,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "22cfd195-4560-444c-a9b3-b8e5af072e46": {
+      "name": "RockEDU Summer Science Research Program (SSRP)",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "357bb94a-5539-4be8-a81c-7461f60eb0a8": {
+      "name": "Knight-Hennessy Scholars",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "3db4e7ac-62bd-44bb-a42f-1ff4f7080a12": {
+      "name": "National Youth Science Camp (NYSCamp)",
+      "funding": "full",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "3c496bfd-81ef-49c7-ab22-7c19cbe18096": {
+      "name": "International Logic Olympiad",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 50,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "2b5208c5-dff4-405c-ad05-798d6357165e": {
+      "name": "Certamen Internacional Videominuto — Universidade de Zaragoza",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "2d00d9e4-80e2-4224-aa0a-94cf06c698e8": {
+      "name": "Stockholm Junior Water Prize — etapa Brasil",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "277ccb94-e39f-48dc-af54-44f1b17f6668": {
+      "name": "ENS International Selection — Arts and Humanities",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "307d241e-7171-46e0-ad99-2ae1a4eedd33": {
+      "name": "Government of Ireland International Education Scholarships — GOI-IES",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "2dbeb4a8-bcc6-4098-a614-bb869e51f684": {
+      "name": "MEXT — Escola Técnica Superior (KOSEN)",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      },
+      "applicationFee": "free"
+    },
+    "35d1465d-89a3-4a72-ae7d-4b66890948cf": {
+      "name": "CERN Summer Studentship",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "01062700-3c20-4c95-a454-5410a053056a": {
+      "name": "National Model United Nations — New York (NMUN•NY)",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "1d5e82eb-c804-41c8-ae46-c136a3d3ed51": {
+      "name": "Case Western Reserve University — Pre-College Online",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 1595,
+        "currency": "USD"
+      },
+      "applicationFee": "free"
+    },
+    "19a55eba-750b-49e0-ac28-cc47d134939a": {
+      "name": "International Junior Informatics Olympiad (IJIO; antiga DrCT)",
+      "price": {
+        "kind": "amount",
+        "amount": 139.9,
+        "currency": "BRL"
+      },
+      "applicationFee": "paid"
+    },
+    "194b9970-2756-4841-ad19-55af8b2ef53f": {
+      "name": "UWC — seleção pelo comitê brasileiro",
+      "funding": "full_possible",
+      "applicationFee": "paid"
+    },
+    "157c724e-bcb4-45e0-ae29-c1c94c5a407b": {
+      "name": "MMEG — US–Canada Program",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "1c4e93b8-c04b-49c9-a8cb-2dea7800c716": {
+      "name": "Science Ambassador Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "059e35dc-7cf5-4ae7-abc5-f42dac9397ac": {
+      "name": "LALA University Placement",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "112a5155-ddf3-4c96-a1db-318b816b5f21": {
+      "name": "Stanford University Mathematics Camp (SUMaC)",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 3750,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "03dc5d27-8731-4145-ab97-8ce1fd6a188e": {
+      "name": "Summer@Brown",
+      "funding": "none",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "0b60df7e-068a-4a6c-a069-e52779a16b73": {
+      "name": "SupplementRelief.com Health & Wellness Scholarship — Spring 2027",
+      "funding": "partial",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "14448309-6bc5-4da0-aa38-59b7a2243263": {
+      "name": "Georgetown Summer High School Academies",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 3725,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "05c57ea4-bfa1-4a50-a4cf-7979d5661309": {
+      "name": "HACIA Democracy — Harvard Summit of the Americas",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "006b9de0-80be-4b0d-af26-e3940c5d3528": {
+      "name": "TKS — programa virtual de inovação e mentoria",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 4890,
+        "currency": "USD"
+      }
+    },
+    "129daa22-a23f-45b4-aaff-5d637f967655": {
+      "name": "Wharton Global Youth — programas online de verão sem crédito",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 329,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "0ab54e73-c9c6-4cf6-a1de-c259e5326c62": {
+      "name": "Universidade de Verão @ UBI",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 200,
+        "currency": "EUR"
+      },
+      "applicationFee": "paid"
+    },
+    "067f01de-df53-4bc4-a3b4-0f950d344283": {
+      "name": "SPARC — Summer Program for Applied Rationality and Cognition",
+      "funding": "full",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "162fac91-b905-4deb-a09a-3854a4d51a4b": {
+      "name": "IYRC STEM Winter Program",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 299,
+        "currency": "USD"
+      }
+    },
+    "1c1e3df4-8d1e-4e5f-a153-5d274dc3fbcc": {
+      "name": "University of Toronto Youth Summer Program — Law",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 1175,
+        "currency": "CAD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "02e6164d-d56e-4732-a73f-65093bac40ac": {
+      "name": "University of Washington — Language & Culture STEP",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 1955,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "00c31a1c-6a53-402e-ab70-037447b9ca7d": {
+      "name": "The Stanford Daily — High School Summer Workshops",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 2180,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "0dff5591-6f0c-4c98-a5c5-326bbb298784": {
+      "name": "Copernicus Natural Science Olympiad",
+      "price": {
+        "kind": "amount",
+        "amount": 20,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "13763430-2db8-4363-a5db-d649fbc8ed5c": {
+      "name": "High School Academic Research Competition (SARC)",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 10,
+        "currency": "USD",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "18a5f50e-41b7-4c4e-a3fd-6e32da003131": {
+      "name": "Physics Cup — TalTech",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "18106846-1bb5-4683-ac75-6e0e9764133e": {
+      "name": "Embracing Our Differences — concurso de arte para exposição 2028",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "1f66093c-1f2b-4a82-afcd-95f41fb78dce": {
+      "name": "Regeneron International Science and Engineering Fair (ISEF) — via FEBRACE",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "1c79a0bf-436c-48fb-a7f7-8161ddeb5aac": {
+      "name": "Princeton University Ten-Minute Play Contest",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "14547331-bc97-4f3b-afde-7f5e6f1a5c56": {
+      "name": "Royal Society of Biology Photography Competition — Young Photographer",
+      "funding": "none"
+    },
+    "053374d2-551f-4722-a065-a65df990f729": {
+      "name": "Global Teen Education — submissão de artigos acadêmicos",
+      "funding": "none"
+    },
+    "1638c12d-d403-4f55-aa91-b37d5768d910": {
+      "name": "Excellence Scholarship & Opportunity Programme — ESOP",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "05c177e9-3a9e-4787-a45f-39167a7e7391": {
+      "name": "McCall MacBain Scholarships",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "1b962902-390d-4398-aade-8b31ed95a802": {
+      "name": "Scientific Internships — ISTA, fluxo contínuo",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "15dc93b6-62b5-411b-a46c-f888a9fea3c2": {
+      "name": "Lund University Global Scholarship",
+      "funding": "partial",
+      "price": {
+        "kind": "paid"
+      },
+      "applicationFee": "paid"
+    },
+    "1bcaeaba-8e6b-4375-a3a2-bf4af55346bd": {
+      "name": "OIST PhD Program — doutorado financiado",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      },
+      "applicationFee": "paid"
+    },
+    "1f6f7859-bf36-46f1-a03c-f4e27e5608ca": {
+      "name": "MEXT — Língua e Cultura Japonesa (Letras Japonês)",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      },
+      "applicationFee": "free"
+    },
+    "f4c7f62b-692e-4d6d-adba-b49d05343022": {
+      "name": "Concurso Canguru de Matemática Brasil",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "eca023b3-5f69-4ae2-a16e-004a2e388ce2": {
+      "name": "Olimpíada Brasileira de Foguetes (OBAFOG; antiga MOBFOG)"
+    },
+    "f9e00e47-d8e8-47cd-ab2d-35ed85c4ce01": {
+      "name": "Olimpíada Brasileira de Matemática Financeira (OBMF)",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "e0629517-9801-4bb2-a4c9-e8f350bde197": {
+      "name": "FACAMP Model United Nations (FAMUN)",
+      "price": {
+        "kind": "amount",
+        "amount": 200,
+        "currency": "BRL"
+      },
+      "applicationFee": "paid"
+    },
+    "eeb28ab3-9342-4d0f-a6de-7e214a365b3c": {
+      "name": "UWC Short Course: Amazônia 360",
+      "funding": "partial",
+      "price": {
+        "kind": "amount",
+        "amount": 18000,
+        "currency": "BRL"
+      }
+    },
+    "ff4be585-7260-41a0-af71-08be28d298a3": {
+      "name": "Olimpíada de Matemática da Unicamp (OMU)",
+      "price": {
+        "kind": "amount",
+        "amount": 48,
+        "currency": "BRL",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "e0c0678c-3666-4a6a-a1d6-255804552519": {
+      "name": "Prêmio Jovens Visionários 2026 (continuação do Espírito Comunitário)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "f5bd0dda-4eb3-4401-a25b-358e94010f37": {
+      "name": "Campeonato Nacional de Debates Escolares (CNDE)"
+    },
+    "ee4933a8-a0b6-4044-ad70-04cbe51b5713": {
+      "name": "Programa de Iniciação Científica e Mestrado — PICME",
+      "funding": "partial",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "c7434643-2e18-4f0b-a564-23c2151b23c1": {
+      "name": "Olimpíada Nacional de Ciências (ONC)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "c79e3416-e80a-40b8-a438-c6834622a647": {
+      "name": "Olimpíada Brasileira de Geopolítica (OBGP)",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "bff7df0d-489c-494b-a4ec-a4f896e2215d": {
+      "name": "Tocando em Frente — voluntariado jovem",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "cdc2c1b9-8411-4c01-aa0b-b5b499a3689b": {
+      "name": "Cidadão Pró-Mundo — voluntariado",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "daf9c0a0-1dbc-48f1-a561-163cb0048b8f": {
+      "name": "GROW Ambassadors — Voluntariado",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "d26d9093-b577-44c4-a0f0-88af01eb22e9": {
+      "name": "São Paulo Model United Nations (SPMUN)",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "be92ba7c-4736-40d2-a525-225ada9211af": {
+      "name": "GVMUN — GV Model United Nations",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "dfa54e76-231a-48cb-a91d-dc76a5e27b41": {
+      "name": "Olimpíada Brasileira de Física das Escolas Públicas (OBFEP)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "d6642f25-ed48-4699-a968-83ba8c9ba2db": {
+      "name": "Olimpíada de Química do Estado de São Paulo (OQSP)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "d35ac7f8-4137-42ba-a32b-592c874a7402": {
+      "name": "Olimpíada Brasileira de Economia (OBECON)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "cc335e59-b8a8-4821-a6d3-78eb5aefa959": {
+      "name": "Olimpíada Itabirana de Matemática (OIM)",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "cc7ddfb3-b74e-4730-ac90-ddc5816e276c": {
+      "name": "Desafio Bebras Brasil 2026",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "c8515b1e-a628-4f40-a5e1-cd9bfc9bbc8e": {
+      "name": "STEM a Mais — voluntariado em oportunidades acadêmicas",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "d3894b72-555c-4fb5-a7a5-2795aae77d71": {
+      "name": "Bolsa de Iniciação Científica FAPESP",
+      "funding": "partial",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "a5190e79-f5e1-4e1d-ac6b-d0f8b2397bd7": {
+      "name": "Olimpíada Brasileira de Africanidades e Povos Originários (OBAPO)",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "b07a7f47-0f37-4b7b-a011-b7eb20e718bb": {
+      "name": "Olimpíada Mandacaru de Matemática",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "a4252b69-09a7-47c9-acad-7b106d116470": {
+      "name": "Simulação de Organizações Internacionais da UFRN (SOI)",
+      "price": {
+        "kind": "amount",
+        "amount": 110,
+        "currency": "BRL"
+      },
+      "applicationFee": "paid"
+    },
+    "b0d8d7bb-8b48-4427-a07a-9cbe4cb133d9": {
+      "name": "Olimpíada Brasileira de Linguística (OBL)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "b2287376-c129-4c8d-a9a3-52d6242b7fa3": {
+      "name": "Mostra Nacional de Robótica (MNR)"
+    },
+    "9e42869e-c602-4394-a864-55aa936626b3": {
+      "name": "Olimpíada Brasileira de Satélites",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "b138c7c1-ba9c-4610-a660-0b4e216f185f": {
+      "name": "Olimpíada Paranaense de Matemática"
+    },
+    "b684e296-b650-4d67-a340-0c34e58204ef": {
+      "name": "Olimpíada Brasileira de Tecnologia (OBT)",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "b1853a24-425a-4f88-aa77-e43d0517f1ac": {
+      "name": "BioFórum — colaboração voluntária em comunicação e pesquisa de conteúdo",
+      "funding": "none"
+    },
+    "9df1a22d-0100-4760-a9d1-d5b890cf2eed": {
+      "name": "Torneio Diplomun de Debates 2026",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "8fe11839-77ef-48f9-a23f-f755381c95a3": {
+      "name": "Olimpíada Brasileira de Astronomia e Astronáutica (OBA)"
+    },
+    "9ad5f57e-7838-40d8-a42d-8fb7385b2df8": {
+      "name": "Torneio Meninas na Matemática (TM²)"
+    },
+    "95c6ef63-29c9-4bea-ae7c-83d7ac07215a": {
+      "name": "Olimpíada de Matemática do Estado do Rio de Janeiro (OMERJ)"
+    },
+    "9db8766b-bc95-4b8b-a9f1-5b834d35f2b1": {
+      "name": "Polite — Banco de Talentos para voluntariado",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "9208ffdd-c81e-4e5e-a8d7-a7c8135f05f7": {
+      "name": "Instituto Synapso — voluntariado People & Culture",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "9bc444fc-0d82-4ac6-a371-2eb9a49a9f7b": {
+      "name": "Feira Brasileira de Ciências e Engenharia — FEBRACE",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "6724ebdf-1aaf-41d1-afa1-baa33a815271": {
+      "name": "Bolsa Talento Ismart",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      },
+      "applicationFee": "free"
+    },
+    "73137833-9cc2-4dac-aa65-19e0fabcaa78": {
+      "name": "Pernambuco Model United Nations (PEMUN)",
+      "price": {
+        "kind": "paid"
+      }
+    },
+    "79cb2ada-8b70-440d-ae68-45375cf77d1b": {
+      "name": "Simulações Anglo (SiAn)"
+    },
+    "7298b451-834e-42a4-aa10-97879390203e": {
+      "name": "Inteli Camp 2027",
+      "funding": "none",
+      "price": {
+        "kind": "amount",
+        "amount": 3720,
+        "currency": "BRL"
+      }
+    },
+    "69b18d0e-aa13-4060-a6ef-c6689cfb1bce": {
+      "name": "Olimpíada Brasileira de Biologia (OBB)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "6924029f-33d8-4260-a88f-b765c3286d3f": {
+      "name": "Desafio Nacional Acadêmico",
+      "price": {
+        "kind": "amount",
+        "amount": 250,
+        "currency": "BRL"
+      },
+      "applicationFee": "paid"
+    },
+    "5884e8bf-5bd4-42fd-a87e-bd1084835b1c": {
+      "name": "Escola de Verão ICTP-SAIFR para Jovens Físicos"
+    },
+    "4c52d4b1-65c4-4fc1-aad4-40ffedb1d362": {
+      "name": "Olimpíada Brasileira de Agropecuária (OBAP)"
+    },
+    "4becd6e0-9bba-462a-a79d-de0e2e0bca01": {
+      "name": "Brazilian High School Investment Competition (BRHSIC)"
+    },
+    "4d8876e0-c2d2-4662-a5a7-512fefbd148d": {
+      "name": "Olimpíada Nacional em História do Brasil (ONHB)",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "406f930c-7e5c-4596-a54f-fa6f1e0220a0": {
+      "name": "Torneio Brasileiro de Ciências (TBC)",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "55ac91be-22d4-4380-a673-62e9a9d57751": {
+      "name": "Olimpíada Paraibana de Matemática (OPM)"
+    },
+    "49b36072-9733-47de-a12f-a5e5f27a7433": {
+      "name": "Olimpíada Brasileira Online de Ciências Humanas (OBOCH)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "51472e3a-d7c2-4c58-a449-c0e1f4a7128b": {
+      "name": "Olimpíada Brasileira Online de Robótica (OBOR)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "44c8882f-bb16-49db-a353-e25a1213628f": {
+      "name": "EcoAção Brasil — voluntariado em tecnologia climática",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "3e4b389a-d7a7-4923-a052-f248a5c85bf8": {
+      "name": "FAPESP — Bolsa de Doutorado",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "5682d1d2-8c08-4b2f-a6a0-86adeeaa82fa": {
+      "name": "Fiocruz/CIEE — Estágio não obrigatório, seleção 2026"
+    },
+    "3300b6bf-28f0-4ed5-a852-c54e8b66da1d": {
+      "name": "Olimpíada Brasileira de Física (OBF)",
+      "price": {
+        "kind": "amount",
+        "amount": 13,
+        "currency": "BRL",
+        "from": true
+      },
+      "applicationFee": "paid"
+    },
+    "31e8b578-5561-48a1-a956-3348edbc1228": {
+      "name": "Olimpíada Brasileira de Informática (OBI)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "245efd52-192d-4d63-a5ae-6913e48f3edf": {
+      "name": "Vitalis — Olimpíada de Medicina",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "3d10de2e-f008-4cf8-a356-0ef74c8bda11": {
+      "name": "Olimpíada Brasileira de Diplomacia e Relações Internacionais (OBDIP)",
+      "funding": "none",
+      "price": {
+        "kind": "paid"
+      },
+      "applicationFee": "paid"
+    },
+    "3439913b-8aba-4a18-aa8b-e40da89c17cf": {
+      "name": "Olimpíada Brasileira de Geografia (OBG)",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "39bbe97c-3c35-4368-a246-73b289cadb26": {
+      "name": "Olimpíada de Português (OP)",
+      "price": {
+        "kind": "paid"
+      },
+      "applicationFee": "paid"
+    },
+    "1ff65e37-397f-46f8-a746-4820978a4728": {
+      "name": "Olimpíada Brasileira de Saúde e Meio Ambiente (OBSMA)",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "1fcd3976-c904-4c22-a38c-506b20ad77c6": {
+      "name": "Competição Jacob Palis Júnior de Matemática",
+      "funding": "none",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "204d9a78-0ba2-4ca3-ae2c-b97072873bfe": {
+      "name": "Programa Bolsas de Verão — CNPEM"
+    },
+    "2d7ab6f1-f58a-4506-a750-c37df1cc559b": {
+      "name": "FAPESP — Bolsas de Treinamento Técnico (TT)",
+      "funding": "partial",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "16237011-35e4-4337-a21b-43eda689fb3f": {
+      "name": "Torneio Nacional de Biologia (TNBio)",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "1a65b611-78a0-4ec9-a7a4-ff161b77c2d6": {
+      "name": "FAPESP — Bolsa de Mestrado",
+      "funding": "full",
+      "price": {
+        "kind": "stipend"
+      }
+    },
+    "11c2a665-b13c-4a1d-a6d9-5c825b5d865d": {
+      "name": "Olimpíada Brasileira de Matemática das Escolas Públicas (OBMEP)",
+      "price": {
+        "kind": "free_public_school"
+      },
+      "applicationFee": "free_public_school"
+    },
+    "0286b027-0da1-43a9-a8d2-31cfcefba16f": {
+      "name": "Olimpíada Brasileira de Raciocínio Lógico (OBRL)",
+      "price": {
+        "kind": "paid"
+      },
+      "applicationFee": "paid"
+    },
+    "0c2403db-bd8b-4396-a54c-cccf300a2aa2": {
+      "name": "Olimpíada Nacional Feminina de Química (QUIMENINAS)"
+    },
+    "0d919b42-2813-4da0-ad6a-82e6c272e28c": {
+      "name": "Olimpíada Brasileira de Robótica (OBR)",
+      "price": {
+        "kind": "free"
+      }
+    },
+    "19ff88b7-16bf-44b7-af61-29447f0d752b": {
+      "name": "Brazil Model United Nations (BRAMUN)"
+    },
+    "lester-b-pearson-2027": {
+      "name": "Lester B. Pearson International Scholarship 2027",
+      "funding": "full",
+      "price": {
+        "kind": "covered"
+      }
+    },
+    "ubc-international-scholars-2027": {
+      "name": "UBC International Scholars Program 2027",
+      "funding": "full_possible"
+    },
+    "yale-young-global-scholars-2027": {
+      "name": "Yale Young Global Scholars 2027",
+      "funding": "full_possible",
+      "price": {
+        "kind": "amount",
+        "amount": 7500,
+        "currency": "USD"
+      },
+      "applicationFee": "paid"
+    },
+    "febrace-2027": {
+      "name": "FEBRACE – Feira Brasileira de Ciências e Engenharia",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "one-2026": {
+      "name": "ONE 2026 — Olimpíada Nacional de Empreendedorismo",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    },
+    "onee-2026": {
+      "name": "ONEE 2026 — Olimpíada Nacional de Eficiência Energética",
+      "price": {
+        "kind": "free"
+      },
+      "applicationFee": "free"
+    }
+  }
+}
