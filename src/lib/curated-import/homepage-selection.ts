@@ -1,31 +1,31 @@
 import type { FeaturedOpportunity } from "@/components/homepage/home-data";
 
-// Editorial review: 2026-09-23. Order reflects funding, Brazilian access and
-// complementary education stages, rather than whichever deadline comes first.
+// Editorial review: 2026-09-25. Order follows the education stage, from high
+// school to a master's, and each pick weighs funding and Brazilian access.
 export const HOMEPAGE_SELECTION = [
   {
-    name: "Lester B. Pearson International Scholarship",
+    name: "Yale Young Global Scholars (YYGS)",
     reason:
-      "Quatro anos de graduação com tuition, livros e apoio integral de residência. Indicação da escola até 09/10; candidatura à universidade até 16/10.",
-    actionableUntil: "2026-10-09",
+      "Duas semanas em Yale para o ensino médio, com auxílio de até 100% da tuition também para brasileiros. Early Action até 15/10; Regular até 06/01.",
+    actionableUntil: "2027-01-06",
   },
   {
-    name: "OIST Research Internship",
+    name: "Feira Brasileira de Ciências e Engenharia — FEBRACE",
     reason:
-      "Pesquisa de 4–6 meses no Japão com auxílio, moradia e passagem. Para estudantes de graduação, mestrado e recém-formados elegíveis.",
-    actionableUntil: "2026-10-15",
+      "Feira nacional de ciências para alunos do 8º ano ao ensino médio e técnico. Submissão gratuita até 20/10, às 18h; finalistas se apresentam em março.",
+    actionableUntil: "2026-10-20",
   },
   {
-    name: "Chevening Scholarships — Brasil",
+    name: "Aspire Leaders Program — Cohort 4 de 2026 (Brasil)",
     reason:
-      "Bolsa integral para mestrado de um ano no Reino Unido. Exige graduação, experiência profissional elegível e retorno ao Brasil.",
-    actionableUntil: "2026-10-06",
+      "Seis semanas de liderança online e gratuita para universitários e recém-formados de 18 a 29 anos, de primeira geração ou baixa renda. Até 16/10.",
+    actionableUntil: "2026-10-16",
   },
   {
-    name: "Prep Program 2027",
+    name: "Yenching Academy — Master's Fellowship",
     reason:
-      "Mentoria gratuita para brasileiros do ensino médio se candidatarem à graduação no exterior. Não garante bolsa na universidade de destino.",
-    actionableUntil: "2026-10-01",
+      "Mestrado em estudos da China na Universidade de Pequim; todo admitido recebe tuition, moradia, estipêndio e passagem. Até 30/11, 9h de Pequim (22h de 29/11 em Brasília).",
+    actionableUntil: "2026-11-29",
   },
 ] as const;
 
