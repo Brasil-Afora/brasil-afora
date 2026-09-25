@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { curatedImagePosition } from "@/data/curated-image-focus";
 import { formatDaysLeft } from "@/lib/date-utils";
 import { CATALOG_PATHS, type FeaturedOpportunity } from "./home-data";
 
@@ -34,6 +35,7 @@ const FeaturedOpportunityCard = ({
           fill
           sizes="(min-width: 1280px) 20rem, (min-width: 640px) 50vw, 100vw"
           src={opportunity.image}
+          style={{ objectPosition: curatedImagePosition(opportunity.image) }}
         />
         <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-verified px-2.5 py-1 font-semibold text-[12px] text-navy-950 shadow-[0_6px_16px_-6px_rgba(0,0,0,0.7)]">
           <BadgeCheckIcon aria-hidden="true" className="h-3.5 w-3.5" />

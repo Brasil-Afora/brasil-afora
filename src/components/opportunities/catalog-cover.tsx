@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { curatedImagePosition } from "@/data/curated-image-focus";
 import type { CatalogCover as CatalogCoverData } from "./catalog-model";
 import MapImage from "./map-image";
 
@@ -88,6 +89,7 @@ const CatalogCover = ({
         loading={eager ? "eager" : "lazy"}
         sizes={sizes}
         src={cover.src}
+        style={{ objectPosition: curatedImagePosition(cover.src) }}
         unoptimized={isRemote(cover.src)}
       />
     ) : (
