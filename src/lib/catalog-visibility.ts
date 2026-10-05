@@ -24,6 +24,7 @@ export const isCatalogOpportunityVisible = (
 
 export const isProgramVisible = (
   program: {
+    verified?: boolean;
     inscricoes: {
       prazoInscricao?: string;
       situacaoNaFonte?: string;
@@ -32,6 +33,9 @@ export const isProgramVisible = (
   },
   now = new Date()
 ): boolean =>
+  (program.verified === true &&
+    program.inscricoes.situacaoNaFonte === "open" &&
+    !program.inscricoes.prazoInscricao?.trim()) ||
   isCatalogOpportunityVisible(
     {
       prazoInscricao: program.inscricoes.prazoInscricao ?? "",

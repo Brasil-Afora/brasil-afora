@@ -60,3 +60,12 @@ it("expires at midnight in Brasilia even when UTC has already advanced", () => {
     isCatalogOpportunityVisible(opportunity, new Date("2026-09-24T03:00:00Z"))
   ).toBe(false);
 });
+
+it("keeps a verified open program with no published deadline visible", () => {
+  expect(
+    isProgramVisible({
+      verified: true,
+      inscricoes: { situacaoNaFonte: "open" },
+    })
+  ).toBe(true);
+});
