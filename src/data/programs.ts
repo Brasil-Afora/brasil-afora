@@ -1,4 +1,5 @@
 import type { Program } from "@/components/programs/types";
+import { RADAR_PROGRAMS } from "./radar-programs-2026-10-03";
 
 // Programas e Bolsas: the starter set, entered by hand until the scraper and
 // the admin take over. TODO(data): move to a table (or a `categoria` on the
@@ -17,6 +18,7 @@ import type { Program } from "@/components/programs/types";
 export const PROGRAMS_CHECKED_AT = "22/09/2026";
 
 export const PROGRAMS: Program[] = [
+  ...RADAR_PROGRAMS,
   {
     id: "prep-program-fundacao-estudar",
     nome: "Prep Program",

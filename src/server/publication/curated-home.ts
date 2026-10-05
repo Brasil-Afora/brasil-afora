@@ -4,6 +4,7 @@ import {
   normalizeSearchText,
   type SearchEntry,
 } from "@/components/homepage/home-data";
+import { radarPresentation } from "@/data/radar-presentation";
 import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
 import { selectHomepageOpportunities } from "@/lib/curated-import/homepage-selection";
 import {
@@ -61,7 +62,7 @@ export const getCuratedHomepage = async () => {
     );
     entries.push({
       id: `${scope}:${id}`,
-      name: source.name,
+      name: radarPresentation(source.name)?.name ?? source.name,
       href,
       scope,
       verified,
@@ -80,7 +81,7 @@ export const getCuratedHomepage = async () => {
       destinations.push({
         ...location,
         country: source.country,
-        name: source.name,
+        name: radarPresentation(source.name)?.name ?? source.name,
         scope,
       });
     }
@@ -104,7 +105,10 @@ export const getCuratedHomepage = async () => {
     });
   }
   return {
-    featured: selectHomepageOpportunities(featured, today),
+    featured: selectHomepageOpportunities(featured, today).map((item) => ({
+      ...item,
+      name: radarPresentation(item.name)?.name ?? item.name,
+    })),
     entries,
     destinations,
   };

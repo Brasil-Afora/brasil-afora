@@ -137,3 +137,15 @@ describe("published programs", () => {
     expect(result[0].aliases).toContain(starter.id);
   });
 });
+
+it("retains the reviewed institutional image when a radar program is projected", () => {
+  const program = toCuratedProgram({
+    ...publication,
+    source: {
+      ...source,
+      name: "Berea College — Financial Freedom para internacionais 2027",
+    },
+  });
+  expect(program.imagem?.startsWith("/curated/institution-")).toBe(true);
+  expect(program.fontes).toEqual(source.sources);
+});

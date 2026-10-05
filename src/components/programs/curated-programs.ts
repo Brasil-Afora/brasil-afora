@@ -1,3 +1,4 @@
+import { radarPresentation } from "@/data/radar-presentation";
 import {
   currentDeadline,
   identityKey,
@@ -80,15 +81,16 @@ export const toCuratedProgram = (
   publication: CuratedPublication & { id: string }
 ): Program => {
   const r = publication.source;
+  const display = radarPresentation(r.name);
   const deadline = currentDeadline(r);
   const funding = FUNDING_LABELS[r.funding] ?? r.funding;
   return {
     id: publication.id,
-    nome: r.name,
+    nome: display?.name ?? r.name,
     verified: publication.verified,
     instituicaoResponsavel: r.organization || "Não informado",
     tipo: PROGRAM_TYPE[r.type as keyof typeof PROGRAM_TYPE] ?? "Outro",
-    resumo: r.description,
+    resumo: display?.summary ?? r.description,
     descricao: [
       masterDescription({ ...r, funding }),
       r.fields.length
@@ -105,7 +107,7 @@ export const toCuratedProgram = (
         r.levels.flatMap((level) => (LEVELS[level] ? [LEVELS[level]] : []))
       ),
     ],
-    publico: r.eligibility || "Não informado",
+    publico: display?.audience ?? (r.eligibility || "Não informado"),
     beneficios: r.type === "mentorship" ? ["Mentoria"] : [],
     beneficiosDetalhe: [funding, r.funding_details].filter(Boolean),
     modalidade: MODALITIES[r.format],
@@ -133,7 +135,7 @@ export const toCuratedProgram = (
       : [],
     linkOficial: r.official_url,
     atualizadoEm: dateLabel(publication.importedAt.slice(0, 10)),
-    imagem: publication.image || undefined,
+    imagem: display?.image ?? (publication.image || undefined),
     fontes: r.sources,
   };
 };

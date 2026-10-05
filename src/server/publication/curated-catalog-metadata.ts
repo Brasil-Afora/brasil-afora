@@ -1,3 +1,4 @@
+import { radarPresentation } from "@/data/radar-presentation";
 import {
   effectiveStatus,
   MASTER_STATUS_LABELS,
@@ -13,7 +14,10 @@ import { curatedPublicationSchema } from "./curated-projection";
 export const getCuratedCatalogMetadata = (value: unknown) => {
   const parsed = curatedPublicationSchema.safeParse(value);
   if (!parsed.success) {
-    return {};
+    return {} as {
+      locations?: ReturnType<typeof resolveInternationalLocations>;
+      modality?: string;
+    };
   }
   const { source, verified, program } = parsed.data;
   const today = new Intl.DateTimeFormat("sv-SE", {
@@ -27,8 +31,20 @@ export const getCuratedCatalogMetadata = (value: unknown) => {
   const locations = ["remote", "online"].includes(source.format)
     ? []
     : physicalLocations;
-  const presentation = mapMasterToLegacy(source, parsed.data.image, today);
+  const display = radarPresentation(source.name);
+  const presentation = mapMasterToLegacy(
+    display
+      ? { ...source, name: display.name, description: display.summary }
+      : source,
+    display?.image ?? parsed.data.image,
+    today
+  );
+  if (display) {
+    presentation.international.ageRange = display.audience;
+    presentation.national.ageRange = display.audience;
+  }
   return {
+    ...(display ? { name: display.name, image: display.image } : {}),
     curatedInternational:
       source.scope === "international" ? presentation.international : undefined,
     curatedNational:

@@ -1,4 +1,5 @@
 import { eq, inArray } from "drizzle-orm";
+import { radarPresentation } from "@/data/radar-presentation";
 import { db } from "@/db/client";
 import { publicationVersions } from "@/db/schema/ingestion";
 import { getCuratedCatalogMetadata } from "./curated-catalog-metadata";
@@ -47,6 +48,16 @@ export const getCuratedPublications = async () => {
   }
   return [...latest.values()].flatMap((v) => {
     const parsed = curatedPublicationSchema.safeParse(v.payload.curated_master);
-    return parsed.success ? [{ id: v.editionId, ...parsed.data }] : [];
+    return parsed.success
+      ? [
+          {
+            id: v.editionId,
+            ...parsed.data,
+            image:
+              radarPresentation(parsed.data.source.name)?.image ??
+              parsed.data.image,
+          },
+        ]
+      : [];
   });
 };
