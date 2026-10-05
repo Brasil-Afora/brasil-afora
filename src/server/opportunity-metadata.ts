@@ -3,6 +3,14 @@ import {
   getVerifiedNationalOpportunityById,
 } from "@/data/verified-opportunities";
 
+/**
+ * Page title shaped like the searches people make for an opportunity
+ * ("bolsa X inscrições"), so the result matches the query. Shared links keep
+ * the plain name (`openGraph.title`).
+ */
+export const searchTitle = (name: string): string =>
+  `${name}: inscrições, prazo e requisitos`;
+
 export interface OpportunityMetadata {
   description: string;
   title: string;

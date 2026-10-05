@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import InternacionalInfo from "@/components/international-opportunities/internacional-info";
 import { getVerifiedLocations } from "@/server/geo/opportunity-locations";
-import { getOpportunityMetadata } from "@/server/opportunity-metadata";
+import { getInternationalOpportunityForPage } from "@/server/opportunity-detail";
+import {
+  getOpportunityMetadata,
+  searchTitle,
+} from "@/server/opportunity-metadata";
 
 export async function generateMetadata(
   props: PageProps<"/oportunidades/internacionais/[id]">
@@ -21,7 +25,7 @@ export async function generateMetadata(
       title: metadata.title,
       url,
     },
-    title: metadata.title,
+    title: searchTitle(metadata.title),
   };
 }
 
@@ -36,6 +40,7 @@ export default async function InternationalOpportunityDetailsPage(
   return (
     <InternacionalInfo
       id={id}
+      initialOpportunity={await getInternationalOpportunityForPage(id)}
       verifiedLocations={getVerifiedLocations().international[id]}
     />
   );

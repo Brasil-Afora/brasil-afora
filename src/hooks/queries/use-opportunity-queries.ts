@@ -14,7 +14,9 @@ import {
   getNationalFavorites,
   getNationalOpportunities,
   getNationalOpportunityById,
+  type InternationalOpportunity,
   type InternationalOpportunityInput,
+  type NationalOpportunity,
   type NationalOpportunityInput,
   removeInternationalFavorite,
   removeNationalFavorite,
@@ -47,19 +49,28 @@ export const useNationalOpportunitiesQuery = ({
   });
 };
 
-export const useInternationalOpportunityByIdQuery = (id: string) => {
+/** `initialData` is the record the server already read for the page. */
+export const useInternationalOpportunityByIdQuery = (
+  id: string,
+  initialData?: InternationalOpportunity
+) => {
   return useQuery({
     queryKey: opportunityQueryKeys.internationalById(id),
     queryFn: () => getInternationalOpportunityById(id),
     enabled: id.length > 0,
+    initialData,
   });
 };
 
-export const useNationalOpportunityByIdQuery = (id: string) => {
+export const useNationalOpportunityByIdQuery = (
+  id: string,
+  initialData?: NationalOpportunity
+) => {
   return useQuery({
     queryKey: opportunityQueryKeys.nationalById(id),
     queryFn: () => getNationalOpportunityById(id),
     enabled: id.length > 0,
+    initialData,
   });
 };
 

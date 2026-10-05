@@ -13,6 +13,7 @@ import type { OpportunityLocation } from "@/lib/geo";
 import {
   addNationalFavorite,
   getNationalFavorites,
+  type NationalOpportunity,
   removeNationalFavorite,
 } from "@/lib/opportunities-api";
 import NacionalConfirmationPopup from "./nacional-confirmation-popup";
@@ -21,13 +22,22 @@ const NACIONAL_ROUTE_PREFIX = "/oportunidades/nacionais";
 
 interface NacionalInfoProps {
   id: string;
+  /** The record read on the server, so the page renders with its content. */
+  initialOpportunity?: NationalOpportunity;
   /** Locations of a verified opportunity, resolved on the server. */
   verifiedLocations?: OpportunityLocation[];
 }
 
-const NacionalInfo = ({ id, verifiedLocations }: NacionalInfoProps) => {
+const NacionalInfo = ({
+  id,
+  initialOpportunity,
+  verifiedLocations,
+}: NacionalInfoProps) => {
   const isVerifiedOpportunity = isVerifiedNationalOpportunityId(id);
-  const opportunityQuery = useNationalOpportunityByIdQuery(id);
+  const opportunityQuery = useNationalOpportunityByIdQuery(
+    id,
+    initialOpportunity
+  );
   const opportunity = opportunityQuery.data ?? null;
 
   // Verified records are saved in the site's own data, not in the catalog

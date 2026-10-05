@@ -6,7 +6,7 @@ import { type CostProfile, getCostProfile } from "@/lib/cost-profile";
 import type { MasterStatus } from "@/lib/curated-import/master";
 import type { OpportunityLocation } from "@/lib/geo";
 
-interface OpportunityRecord {
+export interface OpportunityRecord {
   ageRange: string;
   applicationDeadline: string | Date | null;
   applicationFee: string;
@@ -44,7 +44,7 @@ interface OpportunityRecord {
   verified?: boolean;
 }
 
-interface NationalOpportunityRecord {
+export interface NationalOpportunityRecord {
   about: string;
   ageRange: string;
   applicationDeadline: string | Date | null;
@@ -105,7 +105,7 @@ export interface StructuredSemanticField {
   value: unknown;
 }
 
-interface StructuredOpportunityRecord {
+export interface StructuredOpportunityRecord {
   age_rules: StructuredAgeRule[];
   application_deadline_date: string | null;
   application_link_status: string;
@@ -136,7 +136,7 @@ interface StructuredOpportunityRecord {
   verified?: boolean;
 }
 
-type StructuredActionability = Pick<
+export type StructuredActionability = Pick<
   StructuredOpportunityRecord,
   | "application_link_status"
   | "application_url"
@@ -276,7 +276,7 @@ const SHORT_DESCRIPTION_MAX_LENGTH = 220;
 const DEFAULT_OPPORTUNITY_IMAGE_URL =
   "https://dummyimage.com/1200x630/0f172a/f8fafc&text=Oportunidade";
 const ISO_DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
-const STRUCTURED_OPPORTUNITIES_ENABLED =
+export const STRUCTURED_OPPORTUNITIES_ENABLED =
   process.env.NEXT_PUBLIC_STRUCTURED_OPPORTUNITIES === "true";
 const OPPORTUNITY_TYPE_LABELS: Record<string, string> = {
   academic_mobility: "Mobilidade acadêmica",
@@ -1057,9 +1057,7 @@ export const getInternationalOpportunityById = async (
       const structured = await fetchFromApi<{
         data: StructuredOpportunityRecord;
       }>(`/api/v1/opportunities/${id}`);
-      return structured.data.collection === "international"
-        ? mapStructuredInternationalOpportunity(structured.data)
-        : null;
+      return resolveStructuredInternationalOpportunity(structured.data);
     } catch (error) {
       if (error instanceof ApiRequestError && error.status === 404) {
         return null;
@@ -1073,15 +1071,33 @@ export const getInternationalOpportunityById = async (
     ),
     fetchStructuredActionabilityById(id),
   ]);
-  if (!data.opportunity) {
+  return resolveInternationalOpportunity(data.opportunity, actionability);
+};
+
+/**
+ * Turns what the detail endpoints return into the page model. Shared by the
+ * browser fetch above and the server render of the detail page, so both show
+ * the same record.
+ */
+export const resolveInternationalOpportunity = (
+  record: OpportunityRecord | null,
+  actionability: StructuredActionability | null
+): InternationalOpportunity | null => {
+  if (!record) {
     return null;
   }
-
   return mapInternationalOpportunity(
-    data.opportunity,
+    record,
     actionability?.collection === "international" ? actionability : null
   );
 };
+
+export const resolveStructuredInternationalOpportunity = (
+  record: StructuredOpportunityRecord
+): InternationalOpportunity | null =>
+  record.collection === "international"
+    ? mapStructuredInternationalOpportunity(record)
+    : null;
 
 export const getNationalOpportunities = async (): Promise<
   NationalOpportunity[]
@@ -1115,9 +1131,7 @@ export const getNationalOpportunityById = async (
       const structured = await fetchFromApi<{
         data: StructuredOpportunityRecord;
       }>(`/api/v1/opportunities/${id}`);
-      return structured.data.collection === "national"
-        ? mapStructuredNationalOpportunity(structured.data)
-        : null;
+      return resolveStructuredNationalOpportunity(structured.data);
     } catch (error) {
       if (error instanceof ApiRequestError && error.status === 404) {
         return null;
@@ -1131,16 +1145,29 @@ export const getNationalOpportunityById = async (
     }>(`/api/national-opportunities/${id}`),
     fetchStructuredActionabilityById(id),
   ]);
+  return resolveNationalOpportunity(data.nationalOpportunity, actionability);
+};
 
-  if (!data.nationalOpportunity) {
+/** National counterpart of `resolveInternationalOpportunity`. */
+export const resolveNationalOpportunity = (
+  record: NationalOpportunityRecord | null,
+  actionability: StructuredActionability | null
+): NationalOpportunity | null => {
+  if (!record) {
     return null;
   }
-
   return mapNationalOpportunity(
-    data.nationalOpportunity,
+    record,
     actionability?.collection === "national" ? actionability : null
   );
 };
+
+export const resolveStructuredNationalOpportunity = (
+  record: StructuredOpportunityRecord
+): NationalOpportunity | null =>
+  record.collection === "national"
+    ? mapStructuredNationalOpportunity(record)
+    : null;
 
 export const createInternationalOpportunity = async (
   payload: InternationalOpportunityInput

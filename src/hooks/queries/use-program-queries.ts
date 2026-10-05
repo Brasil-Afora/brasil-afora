@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import type { Program } from "@/components/programs/types";
 
 export const programQueryKeys = { list: () => ["programs", "list"] as const };
-export const useProgramsQuery = () =>
+/** `initialData` is the list the server already read for the page. */
+export const useProgramsQuery = (initialData?: Program[]) =>
   useQuery({
     queryKey: programQueryKeys.list(),
     queryFn: async (): Promise<Program[]> => {
@@ -13,4 +14,5 @@ export const useProgramsQuery = () =>
       }
       return response.json();
     },
+    initialData,
   });

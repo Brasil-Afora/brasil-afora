@@ -2,9 +2,19 @@
 import Link from "next/link";
 import { useProgramsQuery } from "@/hooks/queries/use-program-queries";
 import ProgramDetail from "./program-detail";
+import type { Program } from "./types";
 
-export default function ProgramDetailLoader({ id }: { id: string }) {
-  const query = useProgramsQuery();
+interface ProgramDetailLoaderProps {
+  id: string;
+  /** The list read on the server, so the page renders with its content. */
+  initialPrograms?: Program[];
+}
+
+export default function ProgramDetailLoader({
+  id,
+  initialPrograms,
+}: ProgramDetailLoaderProps) {
+  const query = useProgramsQuery(initialPrograms);
   if (query.isPending) {
     return (
       <p className="mx-auto max-w-6xl px-6 py-20 text-white" role="status">

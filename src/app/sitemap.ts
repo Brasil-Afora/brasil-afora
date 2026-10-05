@@ -3,6 +3,7 @@ import {
   getPrograms,
   PROGRAMS_PATH,
 } from "@/components/programs/program-model";
+import type { Program } from "@/components/programs/types";
 import {
   VERIFIED_OPPORTUNITIES_DATE,
   verifiedInternationalOpportunities,
@@ -77,11 +78,28 @@ const getCatalogPages = async (): Promise<CatalogPages> => {
   }
 };
 
+/**
+ * The programs the catalog shows, curated publications included; closed
+ * rounds are left out because their pages answer 404. Falls back to the
+ * site's own list when the database can't be read.
+ */
+const getProgramPages = async (): Promise<Program[]> => {
+  try {
+    const { getVisiblePrograms } = await import("@/server/programs");
+    return await getVisiblePrograms();
+  } catch {
+    return getPrograms();
+  }
+};
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = getSiteUrl();
   const lastModified = new Date();
   const verifiedAt = new Date(VERIFIED_OPPORTUNITIES_DATE);
-  const catalog = await getCatalogPages();
+  const [catalog, programs] = await Promise.all([
+    getCatalogPages(),
+    getProgramPages(),
+  ]);
 
   const opportunityEntry = (
     path: string,
@@ -124,7 +142,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    ...getPrograms().map((program) => ({
+    ...programs.map((program) => ({
       url: `${siteUrl}${PROGRAMS_PATH}/${program.id}`,
       lastModified,
       changeFrequency: "weekly" as const,
