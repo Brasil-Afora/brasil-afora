@@ -1,7 +1,9 @@
 import { eq, inArray } from "drizzle-orm";
 import { radarPresentation } from "@/data/radar-presentation";
+import { applySourceClosure } from "@/data/source-closures";
 import { db } from "@/db/client";
 import { publicationVersions } from "@/db/schema/ingestion";
+import { MASTER_STATUS_LABELS } from "@/lib/curated-import/master";
 import { getCuratedCatalogMetadata } from "./curated-catalog-metadata";
 import { curatedPublicationSchema } from "./curated-projection";
 
@@ -29,11 +31,47 @@ export const enrichCuratedRecords = async <
     const version = row.publicationVersionId
       ? byId.get(row.publicationVersionId)
       : undefined;
+    const metadata = getCuratedCatalogMetadata(
+      version?.payload.curated_master,
+      version?.editionId
+    );
     return {
       ...row,
-      ...getCuratedCatalogMetadata(version?.payload.curated_master),
+      ...metadata,
+      ...currentStatusFields(row, metadata),
     };
   });
+};
+
+const STATUS_LABELS = new Set<string>(Object.values(MASTER_STATUS_LABELS));
+
+/**
+ * The row froze the round's status text at import; once the round closes the
+ * current status must replace it, or a closed detail page still says "open".
+ */
+const currentStatusFields = (
+  row: {
+    applicationProcess?: string | null;
+    publicationVersionId: string | null;
+  },
+  metadata: ReturnType<typeof getCuratedCatalogMetadata>
+) => {
+  if (!("curatedStatus" in metadata)) {
+    return {};
+  }
+  const current = metadata.curatedInternational ?? metadata.curatedNational;
+  if (!current) {
+    return {};
+  }
+  const process = metadata.curatedInternational?.applicationProcess;
+  return {
+    lifecycleStatus: current.lifecycleStatus,
+    ...(process &&
+    row.applicationProcess &&
+    STATUS_LABELS.has(row.applicationProcess)
+      ? { applicationProcess: process }
+      : {}),
+  };
 };
 export const getCuratedPublications = async () => {
   const versions = await db
@@ -56,6 +94,7 @@ export const getCuratedPublications = async () => {
             image:
               radarPresentation(parsed.data.source.name)?.image ??
               parsed.data.image,
+            source: applySourceClosure(v.editionId, parsed.data.source),
           },
         ]
       : [];

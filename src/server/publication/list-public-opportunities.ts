@@ -304,7 +304,10 @@ export const listPublicOpportunities = async (
       return [];
     }
     const { modality: _curatedModality, ...metadata } =
-      getCuratedCatalogMetadata(version.payload.curated_master);
+      getCuratedCatalogMetadata(
+        version.payload.curated_master,
+        version.editionId
+      );
     return [
       {
         ...applyOperationalAvailability(
@@ -316,6 +319,10 @@ export const listPublicOpportunities = async (
           )
         ),
         ...metadata,
+        // The stored projection froze the lifecycle at import time.
+        ...("curatedStatus" in metadata && metadata.curatedStatus === "closed"
+          ? { lifecycle: "closed" as const, can_apply: false }
+          : {}),
       },
     ];
   });

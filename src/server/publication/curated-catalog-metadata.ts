@@ -1,4 +1,5 @@
 import { radarPresentation } from "@/data/radar-presentation";
+import { applySourceClosure } from "@/data/source-closures";
 import {
   effectiveStatus,
   MASTER_STATUS_LABELS,
@@ -11,7 +12,7 @@ import {
 import { curatedPublicationSchema } from "./curated-projection";
 
 /** Metadata is derived only from a validated immutable curated publication. */
-export const getCuratedCatalogMetadata = (value: unknown) => {
+export const getCuratedCatalogMetadata = (value: unknown, id?: string) => {
   const parsed = curatedPublicationSchema.safeParse(value);
   if (!parsed.success) {
     return {} as {
@@ -19,7 +20,8 @@ export const getCuratedCatalogMetadata = (value: unknown) => {
       modality?: string;
     };
   }
-  const { source, verified, program } = parsed.data;
+  const { verified, program } = parsed.data;
+  const source = applySourceClosure(id, parsed.data.source);
   const today = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "America/Sao_Paulo",
   }).format(new Date());
