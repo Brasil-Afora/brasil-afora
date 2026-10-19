@@ -9,6 +9,7 @@ import {
   verifiedInternationalOpportunities,
   verifiedNationalOpportunities,
 } from "@/data/verified-opportunities";
+import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
 
 // Catalog records are added and edited between deploys, so the sitemap is
 // built per request instead of frozen at build time.
@@ -45,34 +46,67 @@ const getSiteUrl = (): string => {
   }
 };
 
+interface CatalogRow {
+  applicationDeadline: string | null;
+  curatedStatus?: string;
+  id: string;
+  updatedAt: Date;
+}
+
+/** The catalog's own rule: closed and past-deadline rounds are not listed. */
+const isListed = (row: CatalogRow, now: Date): boolean =>
+  isCatalogOpportunityVisible(
+    {
+      curatedStatus: row.curatedStatus,
+      prazoInscricao:
+        row.applicationDeadline?.split("-").reverse().join("/") ?? "",
+    },
+    now
+  );
+
 /**
- * Every catalog record has its own detail page. Returns empty lists when the
- * database can't be read, so the sitemap still serves the static and verified
- * pages instead of failing.
+ * Every listed catalog record has its own detail page. Returns empty lists
+ * when the database can't be read, so the sitemap still serves the static and
+ * verified pages instead of failing.
  */
-const getCatalogPages = async (): Promise<CatalogPages> => {
+const getCatalogPages = async (now: Date): Promise<CatalogPages> => {
   try {
-    const [{ db }, { opportunities }, { nationalOpportunities }] =
-      await Promise.all([
-        import("@/db/client"),
-        import("@/db/schema/opportunities"),
-        import("@/db/schema/national-opportunities"),
-      ]);
+    const [
+      { db },
+      { opportunities },
+      { nationalOpportunities },
+      { enrichCuratedRecords },
+    ] = await Promise.all([
+      import("@/db/client"),
+      import("@/db/schema/opportunities"),
+      import("@/db/schema/national-opportunities"),
+      import("@/server/publication/curated-catalog"),
+    ]);
     const [international, national] = await Promise.all([
       db
         .select({
           id: opportunities.id,
           updatedAt: opportunities.updatedAt,
+          applicationDeadline: opportunities.applicationDeadline,
+          publicationVersionId: opportunities.publicationVersionId,
         })
-        .from(opportunities),
+        .from(opportunities)
+        .then(enrichCuratedRecords),
       db
         .select({
           id: nationalOpportunities.id,
           updatedAt: nationalOpportunities.updatedAt,
+          applicationDeadline: nationalOpportunities.applicationDeadline,
+          publicationVersionId: nationalOpportunities.publicationVersionId,
         })
-        .from(nationalOpportunities),
+        .from(nationalOpportunities)
+        .then(enrichCuratedRecords),
     ]);
-    return { international, national };
+    const listed = (rows: CatalogRow[]): OpportunityPage[] =>
+      rows
+        .filter((row) => isListed(row, now))
+        .map(({ id, updatedAt }) => ({ id, updatedAt }));
+    return { international: listed(international), national: listed(national) };
   } catch {
     return { international: [], national: [] };
   }
@@ -97,7 +131,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
   const verifiedAt = new Date(VERIFIED_OPPORTUNITIES_DATE);
   const [catalog, programs] = await Promise.all([
-    getCatalogPages(),
+    getCatalogPages(lastModified),
     getProgramPages(),
   ]);
 
@@ -148,18 +182,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),
-    ...verifiedInternationalOpportunities.map((opportunity) =>
-      opportunityEntry(INTERNATIONAL_PATH, {
-        id: opportunity.id,
-        updatedAt: verifiedAt,
-      })
-    ),
-    ...verifiedNationalOpportunities.map((opportunity) =>
-      opportunityEntry(NATIONAL_PATH, {
-        id: opportunity.id,
-        updatedAt: verifiedAt,
-      })
-    ),
+    ...verifiedInternationalOpportunities
+      .filter((opportunity) =>
+        isCatalogOpportunityVisible(opportunity, lastModified)
+      )
+      .map((opportunity) =>
+        opportunityEntry(INTERNATIONAL_PATH, {
+          id: opportunity.id,
+          updatedAt: verifiedAt,
+        })
+      ),
+    ...verifiedNationalOpportunities
+      .filter((opportunity) =>
+        isCatalogOpportunityVisible(opportunity, lastModified)
+      )
+      .map((opportunity) =>
+        opportunityEntry(NATIONAL_PATH, {
+          id: opportunity.id,
+          updatedAt: verifiedAt,
+        })
+      ),
     ...catalog.international.map((page) =>
       opportunityEntry(INTERNATIONAL_PATH, page)
     ),

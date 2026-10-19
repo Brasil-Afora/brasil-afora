@@ -13,6 +13,7 @@ import {
   useInternationalOpportunitiesQuery,
   useNationalOpportunitiesQuery,
 } from "@/hooks/queries/use-opportunity-queries";
+import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
 import CatalogCover from "./catalog-cover";
 import {
   type CatalogItem,
@@ -57,27 +58,26 @@ const useSimilarItems = ({
     const now = new Date();
     const items: { item: CatalogItem; type: string }[] =
       scope === "international"
-        ? [
-            ...verifiedInternationalOpportunities,
-            ...(international.data ?? []),
-          ].map((raw) => ({
-            item: toInternationalItem(
-              raw,
-              isVerifiedInternationalOpportunityId(raw.id),
-              now
-            ),
-            type: raw.tipo,
-          }))
-        : [...verifiedNationalOpportunities, ...(national.data ?? [])].map(
-            (raw) => ({
+        ? [...verifiedInternationalOpportunities, ...(international.data ?? [])]
+            .filter((raw) => isCatalogOpportunityVisible(raw, now))
+            .map((raw) => ({
+              item: toInternationalItem(
+                raw,
+                isVerifiedInternationalOpportunityId(raw.id),
+                now
+              ),
+              type: raw.tipo,
+            }))
+        : [...verifiedNationalOpportunities, ...(national.data ?? [])]
+            .filter((raw) => isCatalogOpportunityVisible(raw, now))
+            .map((raw) => ({
               item: toNationalItem(
                 raw,
                 isVerifiedNationalOpportunityId(raw.id),
                 now
               ),
               type: raw.tipo,
-            })
-          );
+            }));
 
     const seen = new Set<string>();
     const wantedType = normalize(type);
