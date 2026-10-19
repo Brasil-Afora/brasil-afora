@@ -1,0 +1,36 @@
+Copyright (c) 2026 Brasil Afora and its contributors. All rights reserved.
+
+This repository is public so its source can be read and reviewed. It is not
+open source, and no license to use it is granted.
+
+Without prior written permission from Brasil Afora, you may not copy,
+modify, redistribute, or deploy this software, in whole or in part. The
+same applies to the opportunity catalog and its research data (including
+the contents of src/data/), which may not be extracted, republished, or
+used to build another service.
+
+Viewing the source and forking it on GitHub, as GitHub's Terms of Service
+allow, are permitted. Nothing else is.
+
+Third-party materials included here, such as photographs listed in
+src/data/curated-image-credits.json, remain under their own licenses.
+
+---
+
+Copyright (c) 2026 Brasil Afora e seus colaboradores. Todos os direitos
+reservados.
+
+Este repositório é público para que o código possa ser lido e revisado. Ele
+não é de código aberto, e nenhuma licença de uso é concedida.
+
+Sem autorização prévia e por escrito do Brasil Afora, é proibido copiar,
+modificar, redistribuir ou publicar este software, no todo ou em parte. O
+mesmo vale para o catálogo de oportunidades e seus dados de pesquisa
+(incluindo o conteúdo de src/data/), que não podem ser extraídos,
+republicados ou usados para criar outro serviço.
+
+Visualizar o código e criar um fork no GitHub, como permitem os Termos de
+Serviço do GitHub, é permitido. Nada além disso.
+
+Materiais de terceiros incluídos aqui, como as fotografias listadas em
+src/data/curated-image-credits.json, seguem suas próprias licenças.
