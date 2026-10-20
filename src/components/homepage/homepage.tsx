@@ -37,8 +37,8 @@ const Homepage = async () => {
     <div className="overflow-x-clip bg-navy-950 font-reading text-slate-100">
       <CatalogExpiryRefresh />
       <HomeHero verifiedEntries={verifiedEntries} />
-      <HomeHighlights closing={highlights.closing} fresh={highlights.fresh} />
       <FeaturedOpportunities opportunities={featured} />
+      <HomeHighlights closing={highlights.closing} fresh={highlights.fresh} />
 
       <div className="mx-auto grid w-full max-w-[84rem] gap-8 px-5 pb-14 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10">
         <HomeWhy />

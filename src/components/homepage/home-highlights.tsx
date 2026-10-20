@@ -182,7 +182,7 @@ const HomeHighlights = ({
   return (
     <section
       aria-labelledby="novidades-titulo"
-      className="mx-auto w-full max-w-[84rem] px-5 pt-10 sm:px-8 lg:pt-11"
+      className="mx-auto w-full max-w-[84rem] px-5 pb-16 sm:px-8"
     >
       <h2 className="sr-only" id="novidades-titulo">
         Novidades e prazos do catálogo
