@@ -1,5 +1,6 @@
 import { footerCopy } from "@/lib/copy/pt-br";
 import { getVerifiedDestinations } from "@/server/geo/opportunity-locations";
+import { getHomeHighlights } from "@/server/home-highlights";
 import { getCuratedHomepage } from "@/server/publication/curated-home";
 import CatalogExpiryRefresh from "./catalog-expiry-refresh";
 import FeaturedOpportunities from "./featured-opportunities";
@@ -9,6 +10,7 @@ import {
   getVerifiedSearchEntries,
 } from "./home-data";
 import HomeHero from "./home-hero";
+import HomeHighlights from "./home-highlights";
 import HomeMapTeaser from "./home-map-teaser";
 import HomeWhy from "./home-why";
 
@@ -21,7 +23,10 @@ const creditLinkClassName =
   "underline decoration-navy-600 underline-offset-2 transition-colors hover:text-slate-200";
 
 const Homepage = async () => {
-  const curated = await getCuratedHomepage();
+  const [curated, highlights] = await Promise.all([
+    getCuratedHomepage(),
+    getHomeHighlights(),
+  ]);
   const featured = curated?.featured ?? getFeaturedOpportunities();
   const verifiedEntries =
     curated?.entries ?? getVerifiedSearchEntries(featured);
@@ -32,6 +37,7 @@ const Homepage = async () => {
     <div className="overflow-x-clip bg-navy-950 font-reading text-slate-100">
       <CatalogExpiryRefresh />
       <HomeHero verifiedEntries={verifiedEntries} />
+      <HomeHighlights closing={highlights.closing} fresh={highlights.fresh} />
       <FeaturedOpportunities opportunities={featured} />
 
       <div className="mx-auto grid w-full max-w-[84rem] gap-8 px-5 pb-14 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10">
