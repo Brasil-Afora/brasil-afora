@@ -187,18 +187,22 @@ const HomeHighlights = ({
       <h2 className="sr-only" id="novidades-titulo">
         Novidades e prazos do catálogo
       </h2>
-      <HighlightBlock
-        description="Oportunidades que entraram no catálogo nas últimas três semanas, das mais recentes para as mais antigas."
-        emptyText="Nenhuma oportunidade nova nas últimas três semanas."
-        items={fresh}
-        title="Novas oportunidades"
-      />
-      <HighlightBlock
-        description="Inscrições que se encerram nos próximos 21 dias, do prazo mais próximo ao mais distante."
-        emptyText="Nenhum prazo se encerra nos próximos 21 dias."
-        items={closing}
-        title="Prestes a fechar"
-      />
+      {fresh.length > 0 && (
+        <HighlightBlock
+          description="Oportunidades que entraram no catálogo nas últimas duas semanas, das mais recentes para as mais antigas."
+          emptyText="Nenhuma oportunidade nova nas últimas três semanas."
+          items={fresh}
+          title="Novas oportunidades"
+        />
+      )}
+      {closing.length > 0 && (
+        <HighlightBlock
+          description="Inscrições que se encerram nos próximos 21 dias, do prazo mais próximo ao mais distante."
+          emptyText="Nenhum prazo se encerra nos próximos 21 dias."
+          items={closing}
+          title="Prestes a fechar"
+        />
+      )}
     </section>
   );
 };

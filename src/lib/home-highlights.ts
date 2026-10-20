@@ -2,7 +2,7 @@ import type { HomeCardOpportunity } from "@/components/homepage/opportunity-card
 import { getBrasiliaDaysUntil } from "@/lib/date-utils";
 
 /** How far back "Novas oportunidades" reaches. */
-export const NEW_WINDOW_DAYS = 21;
+export const NEW_WINDOW_DAYS = 14;
 /** Same urgency window the catalog and the featured cards use. */
 export const CLOSING_WINDOW_DAYS = 21;
 

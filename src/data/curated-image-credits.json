@@ -4513,14 +4513,14 @@
   {
     "index": 347,
     "name": "Wellcome: concurso de fotografia sobre saúde",
-    "image": "/curated/institution-12a0c53f1d26afe17f.jpg",
-    "source": "https://wellcome.org/engagement-and-advocacy/engaging-people/wellcome-photography-prize",
-    "original": "https://cms.wellcome.org/sites/default/files/styles/image_full/public/2025-05/wpp-2025-top25-discoveryresearch-Georgie%20Wileman-3076x2050.jpg?itok=hZ888kS2",
+    "image": "/curated/photo-40a34e460ab50790.jpg",
+    "source": "https://wellcome.org/",
+    "original": "https://cms.wellcome.org/sites/default/files/styles/image_full/public/wellcome-windows.png?itok=F7hYgyBV",
     "author": "Instituição ou programa responsável",
     "license": "Fonte institucional; direitos do titular",
     "licenseUrl": "",
-    "note": "Imagem oficial do programa ou da instituição responsável, identificada na fonte indicada.",
-    "changes": "Redimensionamento e recorte para o cartão.",
+    "note": "Imagem oficial da Wellcome (logo da instituição na fachada), da página inicial wellcome.org, consultada em 20/10/2026.",
+    "changes": "Conversão para JPEG.",
     "kind": "photo"
   },
   {

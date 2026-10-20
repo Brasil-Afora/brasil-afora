@@ -34,15 +34,15 @@ describe("selectHighlights", () => {
   it("lists items added within the window, newest first, flagged as new", () => {
     const { fresh } = selectHighlights(
       [
-        item("old", { addedOn: "01/09/2026" }),
-        item("edge", { addedOn: "29/09/2026" }),
+        item("old", { addedOn: "03/10/2026" }),
+        item("edge", { addedOn: "06/10/2026" }),
         item("recent", { addedOn: "18/10/2026" }),
         item("today", { addedOn: "20/10/2026" }),
         item("undated"),
       ],
       NOW
     );
-    expect(NEW_WINDOW_DAYS).toBe(21);
+    expect(NEW_WINDOW_DAYS).toBe(14);
     expect(fresh.map((x) => x.id)).toEqual(["today", "recent", "edge"]);
     expect(fresh.every((x) => x.flag === "Nova")).toBe(true);
   });
@@ -50,9 +50,9 @@ describe("selectHighlights", () => {
   it("breaks ties between same-day additions by the nearest deadline", () => {
     const { fresh } = selectHighlights(
       [
-        item("later", { addedOn: "03/10/2026", daysLeft: 40 }),
-        item("rolling", { addedOn: "03/10/2026" }),
-        item("sooner", { addedOn: "03/10/2026", daysLeft: 5 }),
+        item("later", { addedOn: "15/10/2026", daysLeft: 40 }),
+        item("rolling", { addedOn: "15/10/2026" }),
+        item("sooner", { addedOn: "15/10/2026", daysLeft: 5 }),
       ],
       NOW
     );
