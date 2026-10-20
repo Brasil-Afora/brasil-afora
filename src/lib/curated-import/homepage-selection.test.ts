@@ -40,12 +40,16 @@ it("removes unavailable picks and each pick after its own cutoff", () => {
     selectHomepageOpportunities(eligible, "2026-10-17").map((item) => item.name)
   ).toEqual([
     "Yale Young Global Scholars (YYGS)",
+    "Notre Dame Leadership Seminars 2027",
     "Feira Brasileira de Ciências e Engenharia — FEBRACE",
     "Yenching Academy — Master's Fellowship",
   ]);
   expect(
     selectHomepageOpportunities(eligible, "2026-11-30").map((item) => item.name)
-  ).toEqual(["Yale Young Global Scholars (YYGS)"]);
+  ).toEqual([
+    "Yale Young Global Scholars (YYGS)",
+    "Notre Dame Leadership Seminars 2027",
+  ]);
   expect(
     selectHomepageOpportunities(
       eligible.map((item) => ({ ...item, daysLeft: -1 })),

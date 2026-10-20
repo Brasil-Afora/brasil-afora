@@ -1,6 +1,6 @@
 import type { FeaturedOpportunity } from "@/components/homepage/home-data";
 
-// Editorial review: 2026-09-25. Order follows the education stage, from high
+// Editorial review: 2026-09-25; Notre Dame replaced the closed Aspire pick on 2026-10-20. Order follows the education stage, from high
 // school to a master's, and each pick weighs funding and Brazilian access.
 export const HOMEPAGE_SELECTION = [
   {
@@ -10,16 +10,16 @@ export const HOMEPAGE_SELECTION = [
     actionableUntil: "2027-01-06",
   },
   {
+    name: "Notre Dame Leadership Seminars 2027",
+    reason:
+      "Seminário de liderança de 10 dias em Notre Dame para quem está no penúltimo ano do ensino médio; a universidade paga ensino, moradia e alimentação. Até 20/01/2027.",
+    actionableUntil: "2027-01-20",
+  },
+  {
     name: "Feira Brasileira de Ciências e Engenharia — FEBRACE",
     reason:
       "Feira nacional de ciências para alunos do 8º ano ao ensino médio e técnico. Submissão gratuita até 20/10, às 18h; finalistas se apresentam em março.",
     actionableUntil: "2026-10-20",
-  },
-  {
-    name: "Aspire Leaders Program — Cohort 4 de 2026 (Brasil)",
-    reason:
-      "Seis semanas de liderança online e gratuita para universitários e recém-formados de 18 a 29 anos, de primeira geração ou baixa renda. Até 16/10.",
-    actionableUntil: "2026-10-16",
   },
   {
     name: "Yenching Academy — Master's Fellowship",
