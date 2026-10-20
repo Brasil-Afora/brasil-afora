@@ -251,6 +251,18 @@ const byDeadline = (a: CatalogItem, b: CatalogItem): number =>
 const byName = (a: CatalogItem, b: CatalogItem): number =>
   a.name.localeCompare(b.name, "pt-BR");
 
+/**
+ * Listings the default order shows last, whatever their deadline: their only
+ * available picture makes a poor first impression at the top of the catalog.
+ */
+const SHOWN_LAST = new Set([
+  // Wellcome: concurso de fotografia sobre saúde
+  "979f8709-e683-4e66-a6ce-70190cb94112",
+]);
+
+const byShownLast = (a: CatalogItem, b: CatalogItem): number =>
+  Number(SHOWN_LAST.has(a.id)) - Number(SHOWN_LAST.has(b.id));
+
 export const sortCatalogItems = (
   items: CatalogItem[],
   sort: CatalogSort
@@ -263,6 +275,9 @@ export const sortCatalogItems = (
     return sorted.sort(byDeadline);
   }
   return sorted.sort(
-    (a, b) => Number(b.verified) - Number(a.verified) || byDeadline(a, b)
+    (a, b) =>
+      byShownLast(a, b) ||
+      Number(b.verified) - Number(a.verified) ||
+      byDeadline(a, b)
   );
 };
