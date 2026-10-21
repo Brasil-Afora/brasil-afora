@@ -10,6 +10,7 @@ import {
   verifiedNationalOpportunities,
 } from "@/data/verified-opportunities";
 import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
+import { opportunityPathSegment } from "@/lib/opportunity-path";
 
 // Catalog records are added and edited between deploys, so the sitemap is
 // built per request instead of frozen at build time.
@@ -22,6 +23,7 @@ const NATIONAL_PATH = "/oportunidades/nacionais";
 
 interface OpportunityPage {
   id: string;
+  name: string;
   updatedAt: Date;
 }
 
@@ -50,6 +52,7 @@ interface CatalogRow {
   applicationDeadline: string | null;
   curatedStatus?: string;
   id: string;
+  name: string;
   updatedAt: Date;
 }
 
@@ -86,6 +89,7 @@ const getCatalogPages = async (now: Date): Promise<CatalogPages> => {
       db
         .select({
           id: opportunities.id,
+          name: opportunities.name,
           updatedAt: opportunities.updatedAt,
           applicationDeadline: opportunities.applicationDeadline,
           publicationVersionId: opportunities.publicationVersionId,
@@ -95,6 +99,7 @@ const getCatalogPages = async (now: Date): Promise<CatalogPages> => {
       db
         .select({
           id: nationalOpportunities.id,
+          name: nationalOpportunities.name,
           updatedAt: nationalOpportunities.updatedAt,
           applicationDeadline: nationalOpportunities.applicationDeadline,
           publicationVersionId: nationalOpportunities.publicationVersionId,
@@ -105,7 +110,7 @@ const getCatalogPages = async (now: Date): Promise<CatalogPages> => {
     const listed = (rows: CatalogRow[]): OpportunityPage[] =>
       rows
         .filter((row) => isListed(row, now))
-        .map(({ id, updatedAt }) => ({ id, updatedAt }));
+        .map(({ id, name, updatedAt }) => ({ id, name, updatedAt }));
     return { international: listed(international), national: listed(national) };
   } catch {
     return { international: [], national: [] };
@@ -139,7 +144,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     path: string,
     page: OpportunityPage
   ): MetadataRoute.Sitemap[number] => ({
-    url: `${siteUrl}${path}/${page.id}`,
+    url: `${siteUrl}${path}/${opportunityPathSegment(page.id, page.name)}`,
     lastModified: page.updatedAt,
     changeFrequency: "weekly",
     priority: 0.7,
@@ -189,6 +194,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .map((opportunity) =>
         opportunityEntry(INTERNATIONAL_PATH, {
           id: opportunity.id,
+          name: opportunity.nome,
           updatedAt: verifiedAt,
         })
       ),
@@ -199,6 +205,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .map((opportunity) =>
         opportunityEntry(NATIONAL_PATH, {
           id: opportunity.id,
+          name: opportunity.nome,
           updatedAt: verifiedAt,
         })
       ),

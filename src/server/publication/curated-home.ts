@@ -1,5 +1,4 @@
 import {
-  CATALOG_PATHS,
   type FeaturedOpportunity,
   normalizeSearchText,
   type SearchEntry,
@@ -15,6 +14,7 @@ import {
 } from "@/lib/curated-import/master";
 import { getBrasiliaDaysUntil } from "@/lib/date-utils";
 import type { MapDestination } from "@/lib/geo";
+import { opportunityPath } from "@/lib/opportunity-path";
 import { getCuratedPublications } from "./curated-catalog";
 import { getCuratedCatalogMetadata } from "./curated-catalog-metadata";
 
@@ -50,7 +50,8 @@ export const getCuratedHomepage = async () => {
     ) {
       continue;
     }
-    const href = `${CATALOG_PATHS[scope]}/${id}`;
+    const displayName = radarPresentation(source.name)?.name ?? source.name;
+    const href = opportunityPath(scope, id, displayName);
     const text = normalizeSearchText(
       [
         source.name,
@@ -62,7 +63,7 @@ export const getCuratedHomepage = async () => {
     );
     entries.push({
       id: `${scope}:${id}`,
-      name: radarPresentation(source.name)?.name ?? source.name,
+      name: displayName,
       href,
       scope,
       verified,
@@ -81,7 +82,7 @@ export const getCuratedHomepage = async () => {
       destinations.push({
         ...location,
         country: source.country,
-        name: radarPresentation(source.name)?.name ?? source.name,
+        name: displayName,
         scope,
       });
     }

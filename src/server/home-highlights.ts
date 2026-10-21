@@ -1,7 +1,4 @@
-import {
-  CATALOG_PATHS,
-  normalizeSearchText,
-} from "@/components/homepage/home-data";
+import { normalizeSearchText } from "@/components/homepage/home-data";
 import { fundingTag } from "@/components/opportunities/catalog-model";
 import { PROGRAMS_PATH } from "@/components/programs/program-model";
 import type { Program } from "@/components/programs/types";
@@ -29,6 +26,7 @@ import {
   resolveInternationalOpportunity,
   resolveNationalOpportunity,
 } from "@/lib/opportunities-api";
+import { opportunityPath } from "@/lib/opportunity-path";
 import {
   resolveInternationalLocations,
   resolveNationalLocations,
@@ -69,7 +67,7 @@ const fromInternational = (
     daysLeft: getBrasiliaDaysUntil(opportunity.prazoInscricao, now),
     deadline: opportunity.prazoInscricao,
     deadlineNote: statusNote(opportunity.curatedStatus),
-    href: `${CATALOG_PATHS.international}/${opportunity.id}`,
+    href: opportunityPath("international", opportunity.id, opportunity.nome),
     id: `international:${opportunity.id}`,
     image: opportunity.imagem,
     institution: opportunity.instituicaoResponsavel,
@@ -95,7 +93,7 @@ const fromNational = (
   daysLeft: getBrasiliaDaysUntil(opportunity.prazoInscricao, now),
   deadline: opportunity.prazoInscricao,
   deadlineNote: statusNote(opportunity.curatedStatus),
-  href: `${CATALOG_PATHS.national}/${opportunity.id}`,
+  href: opportunityPath("national", opportunity.id, opportunity.nome),
   id: `national:${opportunity.id}`,
   image: opportunity.imagem,
   institution: opportunity.instituicaoResponsavel,

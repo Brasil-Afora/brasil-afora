@@ -7,6 +7,7 @@ import {
   getInternationalFavorites,
   getNationalFavorites,
 } from "@/lib/opportunities-api";
+import { opportunityPath } from "@/lib/opportunity-path";
 
 const dedupeFavoriteOpportunities = (
   items: FavoriteOpportunity[]
@@ -41,7 +42,11 @@ export const useProfileFavorites = () => {
           pais: opportunity.pais,
           prazoInscricao: opportunity.prazoInscricao,
           categoria: "internacional" as const,
-          detalhePath: `/oportunidades/internacionais/${opportunity.id}`,
+          detalhePath: opportunityPath(
+            "international",
+            opportunity.id,
+            opportunity.nome
+          ),
         })
       );
 
@@ -53,7 +58,11 @@ export const useProfileFavorites = () => {
           pais: opportunity.pais,
           prazoInscricao: opportunity.prazoInscricao,
           categoria: "nacional" as const,
-          detalhePath: `/oportunidades/nacionais/${opportunity.id}`,
+          detalhePath: opportunityPath(
+            "national",
+            opportunity.id,
+            opportunity.nome
+          ),
         })
       );
 

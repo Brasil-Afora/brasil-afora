@@ -11,6 +11,7 @@ import {
   getOpportunityLifecycleLabel,
   shouldShowDeadlineCountdown,
 } from "@/lib/opportunity-lifecycle";
+import { opportunityPath } from "@/lib/opportunity-path";
 import type { Opportunity } from "./types";
 
 interface NacionalListProps {
@@ -59,7 +60,11 @@ const NacionalList = ({ data }: NacionalListProps) => {
             return (
               <Link
                 className={`relative flex transform cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-950 bg-slate-900 shadow-2xl transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-amber-500/30 ${visibleItems.includes(index) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"}`}
-                href={`/oportunidades/nacionais/${oportunidade.id}`}
+                href={opportunityPath(
+                  "national",
+                  oportunidade.id,
+                  oportunidade.nome
+                )}
                 key={oportunidade.id}
               >
                 {timeRemaining && (

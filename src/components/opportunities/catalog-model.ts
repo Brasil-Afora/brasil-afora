@@ -14,6 +14,7 @@ import {
   getOpportunityLifecycleLabel,
   shouldShowDeadlineCountdown,
 } from "@/lib/opportunity-lifecycle";
+import { opportunityPath } from "@/lib/opportunity-path";
 
 export type CatalogScope = "international" | "national";
 
@@ -181,7 +182,7 @@ export const toInternationalItem = (
     curatedStatus: opportunity.curatedStatus,
     deadline: opportunity.prazoInscricao,
     locations: opportunity.localizacoes ?? [],
-    href: `/oportunidades/internacionais/${opportunity.id}`,
+    href: opportunityPath("international", opportunity.id, opportunity.nome),
     id: opportunity.id,
     institution: opportunity.instituicaoResponsavel,
     level,
@@ -219,7 +220,7 @@ export const toNationalItem = (
     curatedStatus: opportunity.curatedStatus,
     deadline: opportunity.prazoInscricao,
     locations: opportunity.localizacoes ?? [],
-    href: `/oportunidades/nacionais/${opportunity.id}`,
+    href: opportunityPath("national", opportunity.id, opportunity.nome),
     id: opportunity.id,
     institution: opportunity.instituicaoResponsavel,
     level: shortLevel(opportunity.nivelEnsino),

@@ -10,6 +10,7 @@ import type {
   InternationalOpportunity,
   NationalOpportunity,
 } from "@/lib/opportunities-api";
+import { opportunityPath } from "@/lib/opportunity-path";
 
 export type OpportunityScope = "international" | "national";
 
@@ -79,7 +80,7 @@ const toFeatured = (
 ): FeaturedOpportunity => ({
   daysLeft,
   deadline: opportunity.prazoInscricao,
-  href: `${CATALOG_PATHS[scope]}/${opportunity.id}`,
+  href: opportunityPath(scope, opportunity.id, opportunity.nome),
   id: opportunity.id,
   image: opportunity.imagem,
   institution: opportunity.instituicaoResponsavel,
@@ -157,7 +158,7 @@ export const toInternationalSearchEntry = (
   return {
     deadline: opportunity.prazoInscricao,
     curatedStatus: opportunity.curatedStatus,
-    href: `${CATALOG_PATHS.international}/${opportunity.id}`,
+    href: opportunityPath("international", opportunity.id, opportunity.nome),
     id: `international:${opportunity.id}`,
     kind: opportunity.tipo,
     name: opportunity.nome,
@@ -186,7 +187,7 @@ export const toNationalSearchEntry = (
   return {
     deadline: opportunity.prazoInscricao,
     curatedStatus: opportunity.curatedStatus,
-    href: `${CATALOG_PATHS.national}/${opportunity.id}`,
+    href: opportunityPath("national", opportunity.id, opportunity.nome),
     id: `national:${opportunity.id}`,
     kind: opportunity.tipo,
     name: opportunity.nome,
