@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { cache } from "react";
 import ProgramDetailLoader from "@/components/programs/program-detail-loader";
 import { PROGRAMS_PATH } from "@/components/programs/program-model";
@@ -47,8 +47,11 @@ export default async function ProgramDetailPage(
 ) {
   const { id } = await props.params;
   const programs = await readPrograms();
+  // A program leaves the list when its round closes, but search engines and
+  // shared links still point at it: send them to the catalog instead of a
+  // dead end. Temporary, because the next round brings the page back.
   if (programs && !findProgram(programs, id)) {
-    notFound();
+    redirect(PROGRAMS_PATH);
   }
   return <ProgramDetailLoader id={id} initialPrograms={programs} />;
 }
