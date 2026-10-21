@@ -81,6 +81,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  // Bing Webmaster Tools ownership; removing it unverifies the site.
+  verification: {
+    other: { "msvalidate.01": "3528B65E0DE6FA7EC721FB1AD3A53E01" },
+  },
   robots: {
     index: true,
     follow: true,
