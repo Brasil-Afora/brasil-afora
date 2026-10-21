@@ -13,7 +13,7 @@ import { useCatalogClock } from "@/hooks/use-catalog-clock";
 import useScrollReveal from "@/hooks/use-scroll-reveal";
 import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
 import { clusterByDistance } from "@/lib/cluster";
-import type { GeoPoint, MapDestination } from "@/lib/geo";
+import { countryNamesIn, type GeoPoint, type MapDestination } from "@/lib/geo";
 
 // The world crop and its window live in map-windows.ts (see the cache note
 // there before re-cropping). The SVG overlay works in lon+180 / 90-lat units,
@@ -105,13 +105,19 @@ const routeTargets = (destinations: MapDestination[]): Mark[] => {
   return [...firsts.sort(byCount), ...rest.sort(byCount)].slice(0, MAX_ROUTES);
 };
 
-/** Opportunities per country (an opportunity with two cities counts once). */
+/**
+ * Opportunities per country, by the country's usual name rather than the
+ * record's own text (an opportunity with two cities counts once; one held in
+ * two countries counts in each).
+ */
 const countByCountry = (destinations: MapDestination[]) => {
   const names = new Map<string, Set<string>>();
   for (const destination of destinations) {
-    const set = names.get(destination.country) ?? new Set<string>();
-    set.add(destination.name);
-    names.set(destination.country, set);
+    for (const country of countryNamesIn(destination.country)) {
+      const set = names.get(country) ?? new Set<string>();
+      set.add(destination.name);
+      names.set(country, set);
+    }
   }
   return [...names.entries()]
     .map(([country, set]) => [country, set.size] as const)
