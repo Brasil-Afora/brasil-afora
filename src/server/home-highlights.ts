@@ -183,16 +183,6 @@ const readNational = async (now: Date): Promise<HomeHighlight[]> => {
     );
 };
 
-const settle = async (
-  read: Promise<HomeHighlight[]>
-): Promise<HomeHighlight[]> => {
-  try {
-    return await read;
-  } catch {
-    return [];
-  }
-};
-
 /**
  * "Novas oportunidades" (joined the catalog in the last NEW_WINDOW_DAYS,
  * newest first) and "Prestes a fechar" (deadline within CLOSING_WINDOW_DAYS,
@@ -203,12 +193,10 @@ export const getHomeHighlights = async (
   now: Date = new Date()
 ): Promise<HomeHighlights> => {
   const [international, national, programs] = await Promise.all([
-    settle(readInternational(now)),
-    settle(readNational(now)),
-    settle(
-      getVisiblePrograms().then((list) =>
-        list.map((program) => fromProgram(program, now))
-      )
+    readInternational(now),
+    readNational(now),
+    getVisiblePrograms().then((list) =>
+      list.map((program) => fromProgram(program, now))
     ),
   ]);
   return selectHighlights(

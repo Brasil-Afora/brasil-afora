@@ -35,7 +35,8 @@ const describe = (text: string): string => {
 /**
  * Title and description for an opportunity's page metadata (shared links,
  * search results). Verified records come from the site's data; catalog records
- * from the database. Returns null when the record can't be found or read.
+ * from the database. Missing records return null; database failures propagate
+ * so ISR retains the last successful page.
  */
 export const getOpportunityMetadata = async (
   scope: "international" | "national",
@@ -52,33 +53,29 @@ export const getOpportunityMetadata = async (
   if (!UUID_REGEX.test(id)) {
     return null;
   }
-  try {
-    const [{ db }, { eq }] = await Promise.all([
-      import("@/db/client"),
-      import("drizzle-orm"),
-    ]);
-    if (scope === "international") {
-      const { opportunities } = await import("@/db/schema/opportunities");
-      const [row] = await db
-        .select({ name: opportunities.name, text: opportunities.description })
-        .from(opportunities)
-        .where(eq(opportunities.id, id))
-        .limit(1);
-      return row ? { description: describe(row.text), title: row.name } : null;
-    }
-    const { nationalOpportunities } = await import(
-      "@/db/schema/national-opportunities"
-    );
+  const [{ db }, { eq }] = await Promise.all([
+    import("@/db/client"),
+    import("drizzle-orm"),
+  ]);
+  if (scope === "international") {
+    const { opportunities } = await import("@/db/schema/opportunities");
     const [row] = await db
-      .select({
-        name: nationalOpportunities.name,
-        text: nationalOpportunities.about,
-      })
-      .from(nationalOpportunities)
-      .where(eq(nationalOpportunities.id, id))
+      .select({ name: opportunities.name, text: opportunities.description })
+      .from(opportunities)
+      .where(eq(opportunities.id, id))
       .limit(1);
     return row ? { description: describe(row.text), title: row.name } : null;
-  } catch {
-    return null;
   }
+  const { nationalOpportunities } = await import(
+    "@/db/schema/national-opportunities"
+  );
+  const [row] = await db
+    .select({
+      name: nationalOpportunities.name,
+      text: nationalOpportunities.about,
+    })
+    .from(nationalOpportunities)
+    .where(eq(nationalOpportunities.id, id))
+    .limit(1);
+  return row ? { description: describe(row.text), title: row.name } : null;
 };

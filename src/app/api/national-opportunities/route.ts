@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { nationalOpportunities } from "@/db/schema/national-opportunities";
 import { resolveNationalLocations } from "@/server/geo/resolve-location";
+import { PUBLIC_CATALOG_CACHE_HEADERS } from "@/server/public-catalog-cache";
 import { enrichCuratedRecords } from "@/server/publication/curated-catalog";
 import { requireAdminInRoute } from "@/server/route-auth";
 
@@ -10,14 +11,17 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const data = await db.select().from(nationalOpportunities);
-    return NextResponse.json({
-      nationalOpportunities: await enrichCuratedRecords(
-        data.map((item) => ({
-          ...item,
-          locations: resolveNationalLocations(item.cityState),
-        }))
-      ),
-    });
+    return NextResponse.json(
+      {
+        nationalOpportunities: await enrichCuratedRecords(
+          data.map((item) => ({
+            ...item,
+            locations: resolveNationalLocations(item.cityState),
+          }))
+        ),
+      },
+      { headers: PUBLIC_CATALOG_CACHE_HEADERS }
+    );
   } catch {
     return NextResponse.json(
       { message: "Failed to fetch national opportunities." },

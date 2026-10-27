@@ -1,7 +1,8 @@
 import Homepage from "@/components/homepage/homepage";
 import { siteCopy } from "@/lib/copy/pt-br";
 
-export const dynamic = "force-dynamic";
+// Reuse the public page between visits while refreshing catalog changes.
+export const revalidate = 900;
 
 const structuredData = {
   "@context": "https://schema.org",

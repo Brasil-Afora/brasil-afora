@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { readNationalOpportunityRecord } from "@/server/opportunity-detail";
+import { PUBLIC_CATALOG_CACHE_HEADERS } from "@/server/public-catalog-cache";
 import { requireAdminInRoute } from "@/server/route-auth";
 
 export const dynamic = "force-dynamic";
@@ -28,9 +29,13 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
-    return NextResponse.json({
-      nationalOpportunity: await readNationalOpportunityRecord(id),
-    });
+    const nationalOpportunity = await readNationalOpportunityRecord(id);
+    return NextResponse.json(
+      { nationalOpportunity },
+      nationalOpportunity
+        ? { headers: PUBLIC_CATALOG_CACHE_HEADERS }
+        : undefined
+    );
   } catch {
     return NextResponse.json(
       { message: "Failed to fetch national opportunity." },

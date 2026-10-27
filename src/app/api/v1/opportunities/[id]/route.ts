@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db/client";
+import { PUBLIC_CATALOG_CACHE_HEADERS } from "@/server/public-catalog-cache";
 import { getPublicOpportunityById } from "@/server/publication/list-public-opportunities";
 
 export const dynamic = "force-dynamic";
@@ -35,5 +36,10 @@ export async function GET(
       { status: 404 }
     );
   }
-  return NextResponse.json({ data: opportunity });
+  return NextResponse.json(
+    { data: opportunity },
+    {
+      headers: PUBLIC_CATALOG_CACHE_HEADERS,
+    }
+  );
 }

@@ -76,19 +76,16 @@ const asApiJson = <T>(value: unknown): T =>
 const readPublicOpportunity = async (
   id: string
 ): Promise<StructuredOpportunityRecord | null> => {
-  try {
-    const record = await getPublicOpportunityById(db, id);
-    return record ? asApiJson<StructuredOpportunityRecord>(record) : null;
-  } catch {
-    return null;
-  }
+  const record = await getPublicOpportunityById(db, id);
+  return record ? asApiJson<StructuredOpportunityRecord>(record) : null;
 };
 
 /**
  * The opportunity a detail page shows, read on the server so the page ships
  * with its content instead of a loading skeleton (search engines index the
  * first HTML). Mirrors `getInternationalOpportunityById` in the browser.
- * Undefined when it can't be read here; the page then fetches it as before.
+ * Missing records return undefined; infrastructure errors propagate so ISR
+ * keeps the last successful render.
  */
 export const getInternationalOpportunityForPage = async (
   id: string
@@ -100,26 +97,22 @@ export const getInternationalOpportunityForPage = async (
   if (!UUID_REGEX.test(id)) {
     return;
   }
-  try {
-    if (STRUCTURED_OPPORTUNITIES_ENABLED) {
-      const structured = await readPublicOpportunity(id);
-      return structured
-        ? (resolveStructuredInternationalOpportunity(structured) ?? undefined)
-        : undefined;
-    }
-    const [record, actionability] = await Promise.all([
-      readInternationalOpportunityRecord(id),
-      readPublicOpportunity(id),
-    ]);
-    return (
-      resolveInternationalOpportunity(
-        record ? asApiJson<OpportunityRecord>(record) : null,
-        actionability
-      ) ?? undefined
-    );
-  } catch {
-    return;
+  if (STRUCTURED_OPPORTUNITIES_ENABLED) {
+    const structured = await readPublicOpportunity(id);
+    return structured
+      ? (resolveStructuredInternationalOpportunity(structured) ?? undefined)
+      : undefined;
   }
+  const [record, actionability] = await Promise.all([
+    readInternationalOpportunityRecord(id),
+    readPublicOpportunity(id),
+  ]);
+  return (
+    resolveInternationalOpportunity(
+      record ? asApiJson<OpportunityRecord>(record) : null,
+      actionability
+    ) ?? undefined
+  );
 };
 
 /** National counterpart of `getInternationalOpportunityForPage`. */
@@ -133,24 +126,20 @@ export const getNationalOpportunityForPage = async (
   if (!UUID_REGEX.test(id)) {
     return;
   }
-  try {
-    if (STRUCTURED_OPPORTUNITIES_ENABLED) {
-      const structured = await readPublicOpportunity(id);
-      return structured
-        ? (resolveStructuredNationalOpportunity(structured) ?? undefined)
-        : undefined;
-    }
-    const [record, actionability] = await Promise.all([
-      readNationalOpportunityRecord(id),
-      readPublicOpportunity(id),
-    ]);
-    return (
-      resolveNationalOpportunity(
-        record ? asApiJson<NationalOpportunityRecord>(record) : null,
-        actionability
-      ) ?? undefined
-    );
-  } catch {
-    return;
+  if (STRUCTURED_OPPORTUNITIES_ENABLED) {
+    const structured = await readPublicOpportunity(id);
+    return structured
+      ? (resolveStructuredNationalOpportunity(structured) ?? undefined)
+      : undefined;
   }
+  const [record, actionability] = await Promise.all([
+    readNationalOpportunityRecord(id),
+    readPublicOpportunity(id),
+  ]);
+  return (
+    resolveNationalOpportunity(
+      record ? asApiJson<NationalOpportunityRecord>(record) : null,
+      actionability
+    ) ?? undefined
+  );
 };

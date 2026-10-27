@@ -8,6 +8,7 @@ import OpportunityDetailPage from "@/components/opportunities/opportunity-detail
 import { isVerifiedInternationalOpportunityId } from "@/data/verified-opportunities";
 import { opportunityQueryKeys } from "@/hooks/queries/opportunity-query-keys";
 import { useInternationalOpportunityByIdQuery } from "@/hooks/queries/use-opportunity-queries";
+import { useCatalogClock } from "@/hooks/use-catalog-clock";
 import useOpportunityFavorite from "@/hooks/use-opportunity-favorite";
 import type { OpportunityLocation } from "@/lib/geo";
 import {
@@ -22,6 +23,7 @@ const INTERNACIONAL_ROUTE_PREFIX = "/oportunidades/internacionais";
 
 interface InternacionalInfoProps {
   id: string;
+  initialNow?: string;
   /** The record read on the server, so the page renders with its content. */
   initialOpportunity?: InternationalOpportunity;
   /** Locations of a verified opportunity, resolved on the server. */
@@ -30,9 +32,11 @@ interface InternacionalInfoProps {
 
 const InternacionalInfo = ({
   id,
+  initialNow,
   initialOpportunity,
   verifiedLocations,
 }: InternacionalInfoProps) => {
+  const now = useCatalogClock(initialNow);
   const isVerifiedOpportunity = isVerifiedInternationalOpportunityId(id);
   const opportunityQuery = useInternationalOpportunityByIdQuery(
     id,
@@ -74,12 +78,8 @@ const InternacionalInfo = ({
     const withLocations = isVerifiedOpportunity
       ? { ...opportunity, localizacoes: verifiedLocations ?? [] }
       : opportunity;
-    return toInternationalDetail(
-      withLocations,
-      isVerifiedOpportunity,
-      new Date()
-    );
-  }, [isVerifiedOpportunity, opportunity, verifiedLocations]);
+    return toInternationalDetail(withLocations, isVerifiedOpportunity, now);
+  }, [isVerifiedOpportunity, now, opportunity, verifiedLocations]);
 
   return (
     <>

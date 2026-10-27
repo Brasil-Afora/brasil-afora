@@ -6,6 +6,13 @@ import { getVerifiedLocations } from "@/server/geo/opportunity-locations";
 import { searchTitle } from "@/server/opportunity-metadata";
 import { getNationalOpportunityPage } from "@/server/opportunity-page";
 
+export const revalidate = 900;
+
+// New catalog entries are rendered and cached on their first visit.
+export function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata(
   props: PageProps<"/oportunidades/nacionais/[id]">
 ): Promise<Metadata> {
@@ -45,6 +52,7 @@ export default async function NationalOpportunityDetailsPage(
   return (
     <NacionalInfo
       id={page.id}
+      initialNow={new Date().toISOString()}
       initialOpportunity={page.opportunity}
       verifiedLocations={getVerifiedLocations().national[page.id]}
     />

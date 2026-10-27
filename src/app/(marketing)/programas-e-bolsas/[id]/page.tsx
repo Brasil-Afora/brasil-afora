@@ -7,20 +7,19 @@ import type { Program } from "@/components/programs/types";
 import { searchTitle } from "@/server/opportunity-metadata";
 import { findProgram, getVisiblePrograms } from "@/server/programs";
 
-// Read per request: the list merges curated publications from the database
-// and hides programs whose round has closed.
-export const dynamic = "force-dynamic";
+// Refresh public content without rendering the same page on every visit.
+export const revalidate = 900;
+
+export function generateStaticParams() {
+  return [];
+}
 
 /**
- * Read once per request (metadata and page share it). Undefined when the list
- * can't be read; the page then fetches it in the browser as before.
+ * Metadata and page share one read. Infrastructure failures propagate so ISR
+ * retains the last successful page instead of caching a loading skeleton.
  */
-const readPrograms = cache(async (): Promise<Program[] | undefined> => {
-  try {
-    return await getVisiblePrograms();
-  } catch {
-    return;
-  }
+const readPrograms = cache(async (): Promise<Program[]> => {
+  return await getVisiblePrograms();
 });
 
 export async function generateMetadata(

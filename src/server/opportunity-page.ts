@@ -52,22 +52,18 @@ const findIdByShortId = async (
 ): Promise<string | null> => {
   const table =
     scope === "international" ? opportunities : nationalOpportunities;
-  try {
-    const [row] = await db
-      .select({ id: table.id })
-      .from(table)
-      .where(sql`${table.id}::text like ${`${shortId}%`}`)
-      .orderBy(table.id)
-      .limit(1);
-    if (row) {
-      return row.id;
-    }
-    return STRUCTURED_OPPORTUNITIES_ENABLED
-      ? await findStructuredIdByShortId(shortId)
-      : null;
-  } catch {
-    return null;
+  const [row] = await db
+    .select({ id: table.id })
+    .from(table)
+    .where(sql`${table.id}::text like ${`${shortId}%`}`)
+    .orderBy(table.id)
+    .limit(1);
+  if (row) {
+    return row.id;
   }
+  return STRUCTURED_OPPORTUNITIES_ENABLED
+    ? await findStructuredIdByShortId(shortId)
+    : null;
 };
 
 export interface OpportunityPage<T> {

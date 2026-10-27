@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { publicOpportunityFilterV1Schema } from "@/contracts/opportunity-v1";
 import { db } from "@/db/client";
+import { PUBLIC_CATALOG_CACHE_HEADERS } from "@/server/public-catalog-cache";
 import { listPublicOpportunities } from "@/server/publication/list-public-opportunities";
 
 export const dynamic = "force-dynamic";
@@ -97,5 +98,10 @@ export async function GET(request: NextRequest) {
     );
   }
   const page = await listPublicOpportunities(db, parsed.data);
-  return NextResponse.json({ data: page });
+  return NextResponse.json(
+    { data: page },
+    {
+      headers: PUBLIC_CATALOG_CACHE_HEADERS,
+    }
+  );
 }

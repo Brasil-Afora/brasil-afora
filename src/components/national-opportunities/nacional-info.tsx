@@ -8,6 +8,7 @@ import OpportunityDetailPage from "@/components/opportunities/opportunity-detail
 import { isVerifiedNationalOpportunityId } from "@/data/verified-opportunities";
 import { opportunityQueryKeys } from "@/hooks/queries/opportunity-query-keys";
 import { useNationalOpportunityByIdQuery } from "@/hooks/queries/use-opportunity-queries";
+import { useCatalogClock } from "@/hooks/use-catalog-clock";
 import useOpportunityFavorite from "@/hooks/use-opportunity-favorite";
 import type { OpportunityLocation } from "@/lib/geo";
 import {
@@ -22,6 +23,7 @@ const NACIONAL_ROUTE_PREFIX = "/oportunidades/nacionais";
 
 interface NacionalInfoProps {
   id: string;
+  initialNow?: string;
   /** The record read on the server, so the page renders with its content. */
   initialOpportunity?: NationalOpportunity;
   /** Locations of a verified opportunity, resolved on the server. */
@@ -30,9 +32,11 @@ interface NacionalInfoProps {
 
 const NacionalInfo = ({
   id,
+  initialNow,
   initialOpportunity,
   verifiedLocations,
 }: NacionalInfoProps) => {
+  const now = useCatalogClock(initialNow);
   const isVerifiedOpportunity = isVerifiedNationalOpportunityId(id);
   const opportunityQuery = useNationalOpportunityByIdQuery(
     id,
@@ -74,8 +78,8 @@ const NacionalInfo = ({
     const withLocations = isVerifiedOpportunity
       ? { ...opportunity, localizacoes: verifiedLocations ?? [] }
       : opportunity;
-    return toNationalDetail(withLocations, isVerifiedOpportunity, new Date());
-  }, [isVerifiedOpportunity, opportunity, verifiedLocations]);
+    return toNationalDetail(withLocations, isVerifiedOpportunity, now);
+  }, [isVerifiedOpportunity, now, opportunity, verifiedLocations]);
 
   return (
     <>
