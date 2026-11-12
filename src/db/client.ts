@@ -11,6 +11,9 @@ const pool =
   globalThis.__brasilAforaPgPool ??
   new Pool({
     connectionString: env.DATABASE_URL,
+    connectionTimeoutMillis: 5000,
+    idleTimeoutMillis: 30_000,
+    max: 10,
     ...(env.DATABASE_SSL_CA
       ? { ssl: { ca: env.DATABASE_SSL_CA, rejectUnauthorized: true } }
       : {}),
@@ -18,9 +21,7 @@ const pool =
 
 export const pgPool = pool;
 
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__brasilAforaPgPool = pool;
-}
+globalThis.__brasilAforaPgPool = pool;
 
 export const db = drizzle({
   client: pool,

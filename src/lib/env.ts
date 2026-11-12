@@ -37,7 +37,10 @@ const corsOrigin = (): string[] => {
 
 export const env = {
   DATABASE_SSL_CA: process.env.DATABASE_SSL_CA?.replace(/\\n/g, "\n"),
-  DATABASE_URL: requireEnv(process.env.DATABASE_URL, "DATABASE_URL"),
+  DATABASE_URL: requireEnv(
+    process.env.DATABASE_PRIVATE_URL ?? process.env.DATABASE_URL,
+    "DATABASE_URL"
+  ),
   BETTER_AUTH_URL: requireEnv(
     process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL,
     "BETTER_AUTH_URL"

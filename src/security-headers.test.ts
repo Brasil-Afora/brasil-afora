@@ -8,11 +8,19 @@ const headerMap = (isProduction: boolean): Map<string, string> =>
   new Map(buildSecurityHeaders(isProduction).map((h) => [h.key, h.value]));
 
 describe("security headers", () => {
-  it("registers headers for all routes", async () => {
+  it("registers headers for all routes and static asset caches", async () => {
     const routes = await nextConfig.headers?.();
-    expect(routes).toHaveLength(1);
+    expect(routes?.length).toBeGreaterThanOrEqual(1);
     expect(routes?.[0]?.source).toBe("/:path*");
     expect((routes?.[0]?.headers ?? []).length).toBeGreaterThanOrEqual(5);
+    expect(routes?.map((route) => route.source)).toEqual(
+      expect.arrayContaining([
+        "/map-tiles/:path*",
+        "/curated/:path*",
+        "/home/:path*",
+        "/catalog/:path*",
+      ])
+    );
   });
 
   it("sets a non-breaking Content-Security-Policy", () => {

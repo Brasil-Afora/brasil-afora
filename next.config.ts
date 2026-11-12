@@ -86,13 +86,42 @@ export const buildSecurityHeaders = (
   return headers;
 };
 
+const IMMUTABLE_STATIC_CACHE_HEADERS: SecurityHeader[] = [
+  {
+    key: "Cache-Control",
+    value: "public, max-age=31536000, immutable",
+  },
+];
+
 const nextConfig: NextConfig = {
   /* config options here */
+  output: "standalone",
   reactCompiler: true,
+  images: {
+    deviceSizes: [640, 828, 1080, 1200, 1920],
+    formats: ["image/webp"],
+    minimumCacheTTL: 2_592_000,
+  },
   headers: async () => [
     {
       headers: buildSecurityHeaders(process.env.NODE_ENV === "production"),
       source: "/:path*",
+    },
+    {
+      headers: IMMUTABLE_STATIC_CACHE_HEADERS,
+      source: "/map-tiles/:path*",
+    },
+    {
+      headers: IMMUTABLE_STATIC_CACHE_HEADERS,
+      source: "/curated/:path*",
+    },
+    {
+      headers: IMMUTABLE_STATIC_CACHE_HEADERS,
+      source: "/home/:path*",
+    },
+    {
+      headers: IMMUTABLE_STATIC_CACHE_HEADERS,
+      source: "/catalog/:path*",
     },
   ],
 };
