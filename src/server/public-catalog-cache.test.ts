@@ -123,7 +123,7 @@ describe("public catalog HTTP caching", () => {
       "public, s-maxage=300"
     );
     expect(response.headers.get("Cache-Control")).toBe(
-      "public, max-age=0, must-revalidate"
+      "public, max-age=60, s-maxage=300, stale-while-revalidate=600"
     );
     expect(response.headers.get("set-cookie")).toBeNull();
     const payload = await response.json();

@@ -13,8 +13,8 @@ import { isCatalogOpportunityVisible } from "@/lib/catalog-visibility";
 import { opportunityPathSegment } from "@/lib/opportunity-path";
 
 // Catalog records are added and edited between deploys, so the sitemap is
-// built per request instead of frozen at build time.
-export const dynamic = "force-dynamic";
+// refreshed periodically without hitting the database on every crawler visit.
+export const revalidate = 3600;
 
 const DEFAULT_SITE_URL = "https://brasil-afora.vercel.app";
 const TRAILING_SLASH_PATTERN = /\/$/;

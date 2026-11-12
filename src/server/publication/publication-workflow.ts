@@ -18,6 +18,7 @@ import {
 } from "@/db/schema/ingestion";
 import { nationalOpportunities } from "@/db/schema/national-opportunities";
 import { opportunities } from "@/db/schema/opportunities";
+import { invalidateCatalogCache } from "@/server/public-catalog-cache";
 import { publishCuratedProjection } from "./curated-projection";
 
 const DECISION_SCOPE = "publication-decision.v1";
@@ -754,6 +755,9 @@ export const deliverPendingOutbox = async (
         result.dead_lettered += 1;
       }
     }
+  }
+  if (result.delivered > 0) {
+    invalidateCatalogCache();
   }
   return result;
 };
