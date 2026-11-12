@@ -1,4 +1,5 @@
-import { eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
+import { cache } from "react";
 import { radarPresentation } from "@/data/radar-presentation";
 import { applySourceClosure } from "@/data/source-closures";
 import { db } from "@/db/client";
@@ -18,7 +19,12 @@ export const enrichCuratedRecords = async <
   );
   const versions = ids.length
     ? await db
-        .select()
+        .select({
+          editorialState: publicationVersions.editorialState,
+          editionId: publicationVersions.editionId,
+          id: publicationVersions.id,
+          payload: publicationVersions.payload,
+        })
         .from(publicationVersions)
         .where(inArray(publicationVersions.id, ids))
     : [];
@@ -73,18 +79,21 @@ const currentStatusFields = (
       : {}),
   };
 };
-export const getCuratedPublications = async () => {
+export const getCuratedPublications = cache(async () => {
   const versions = await db
-    .select()
+    .selectDistinctOn([publicationVersions.editionId], {
+      editionId: publicationVersions.editionId,
+      payload: publicationVersions.payload,
+      version: publicationVersions.version,
+    })
     .from(publicationVersions)
-    .where(eq(publicationVersions.editorialState, "published"));
-  const latest = new Map<string, (typeof versions)[number]>();
-  for (const v of versions) {
-    if (v.version > (latest.get(v.editionId)?.version ?? 0)) {
-      latest.set(v.editionId, v);
-    }
-  }
-  return [...latest.values()].flatMap((v) => {
+    .where(eq(publicationVersions.editorialState, "published"))
+    .orderBy(
+      publicationVersions.editionId,
+      desc(publicationVersions.version),
+      desc(publicationVersions.id)
+    );
+  return versions.flatMap((v) => {
     const parsed = curatedPublicationSchema.safeParse(v.payload.curated_master);
     return parsed.success
       ? [
@@ -99,4 +108,4 @@ export const getCuratedPublications = async () => {
         ]
       : [];
   });
-};
+});

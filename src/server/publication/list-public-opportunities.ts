@@ -28,21 +28,58 @@ export const getPublicOpportunityById = async (
   database: Database,
   id: string
 ): Promise<CatalogPublicOpportunity | null> => {
-  let cursor: string | undefined;
-  while (true) {
-    const page = await listPublicOpportunities(database, {
-      cursor,
-      limit: 100,
-    });
-    const opportunity = page.items.find((item) => item.id === id);
-    if (opportunity) {
-      return opportunity;
-    }
-    if (!page.next_cursor) {
-      return null;
-    }
-    cursor = page.next_cursor;
+  const versionRows = await database
+    .select()
+    .from(publicationVersions)
+    .where(eq(publicationVersions.editionId, id))
+    .orderBy(desc(publicationVersions.version), desc(publicationVersions.id));
+  const version = versionRows.find((row) => row.editorialState === "published");
+  if (!version) {
+    return null;
   }
+  const storedProjection = publicOpportunityV1Schema.safeParse(
+    version.payload.public_projection
+  );
+  if (!storedProjection.success) {
+    return null;
+  }
+  const roundRows = await database
+    .select()
+    .from(applicationRounds)
+    .where(eq(applicationRounds.editionId, version.editionId));
+  const roundIds = roundRows.map((round) => round.id);
+  const linkRows =
+    roundIds.length > 0
+      ? await database
+          .select()
+          .from(applicationLinkAssessments)
+          .where(
+            inArray(applicationLinkAssessments.applicationRoundId, roundIds)
+          )
+          .orderBy(desc(applicationLinkAssessments.createdAt))
+      : [];
+  const operationalAssessmentsByApprovedUrl = indexOperationalAssessments(
+    roundRows,
+    linkRows
+  );
+  const { modality: _curatedModality, ...metadata } = getCuratedCatalogMetadata(
+    version.payload.curated_master,
+    version.editionId
+  );
+  return {
+    ...applyOperationalAvailability(
+      storedProjection.data,
+      findOperationalAssessment(
+        operationalAssessmentsByApprovedUrl,
+        version.editionId,
+        storedProjection.data.application_url
+      )
+    ),
+    ...metadata,
+    ...("curatedStatus" in metadata && metadata.curatedStatus === "closed"
+      ? { lifecycle: "closed" as const, can_apply: false }
+      : {}),
+  };
 };
 
 const latestBy = <T, K extends string>(

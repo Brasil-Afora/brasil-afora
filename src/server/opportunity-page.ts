@@ -1,6 +1,8 @@
-import { sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { cache } from "react";
+import { publicOpportunityV1Schema } from "@/contracts/opportunity-v1";
 import { db } from "@/db/client";
+import { publicationVersions } from "@/db/schema/ingestion";
 import { nationalOpportunities } from "@/db/schema/national-opportunities";
 import { opportunities } from "@/db/schema/opportunities";
 import {
@@ -21,28 +23,28 @@ import {
   getOpportunityMetadata,
   type OpportunityMetadata,
 } from "@/server/opportunity-metadata";
-import { listPublicOpportunities } from "@/server/publication/list-public-opportunities";
-
-const PUBLIC_PAGE_SIZE = 100;
 
 const findStructuredIdByShortId = async (
   shortId: string
 ): Promise<string | null> => {
-  let cursor: string | undefined;
-  while (true) {
-    const page = await listPublicOpportunities(db, {
-      cursor,
-      limit: PUBLIC_PAGE_SIZE,
-    });
-    const match = page.items.find((item) => item.id.startsWith(shortId));
-    if (match) {
-      return match.id;
-    }
-    if (!page.next_cursor) {
-      return null;
-    }
-    cursor = page.next_cursor;
-  }
+  const rows = await db
+    .select({
+      editionId: publicationVersions.editionId,
+      payload: publicationVersions.payload,
+    })
+    .from(publicationVersions)
+    .where(
+      and(
+        eq(publicationVersions.editorialState, "published"),
+        sql`${publicationVersions.editionId}::text like ${`${shortId}%`}`
+      )
+    )
+    .orderBy(desc(publicationVersions.version), desc(publicationVersions.id));
+  const match = rows.find(
+    (row) =>
+      publicOpportunityV1Schema.safeParse(row.payload.public_projection).success
+  );
+  return match?.editionId ?? null;
 };
 
 /** The full UUID behind the id block of a slug address. */
