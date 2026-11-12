@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Program } from "@/components/programs/types";
 
-export const programQueryKeys = { list: () => ["programs", "list"] as const };
+const programQueryKeys = { list: () => ["programs", "list"] as const };
 /** `initialData` is the list the server already read for the page. */
 export const useProgramsQuery = (initialData?: Program[]) =>
   useQuery({

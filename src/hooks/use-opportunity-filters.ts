@@ -267,7 +267,7 @@ export const applyOpportunityFilters = <T extends Opportunity>(
         );
   });
 
-export const countActiveFilters = (filtros: Filters): number => {
+const countActiveFilters = (filtros: Filters): number => {
   let count = 0;
   for (const value of Object.values(filtros)) {
     if (Array.isArray(value)) {
@@ -328,4 +328,3 @@ function useOpportunityFilters<T extends Opportunity, F extends Filters>(
 }
 
 export default useOpportunityFilters;
-export type { InternationalFilters, NationalFilters };

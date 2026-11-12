@@ -3,7 +3,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-export type StorageArea = "localStorage" | "sessionStorage";
+type StorageArea = "localStorage" | "sessionStorage";
 
 /**
  * State mirrored to web storage. The first render always uses `initialValue`,

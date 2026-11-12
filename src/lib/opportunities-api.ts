@@ -83,7 +83,7 @@ export interface NationalOpportunityRecord {
   verified?: boolean;
 }
 
-export interface StructuredAgeRule {
+interface StructuredAgeRule {
   exact_age: number | null;
   maximum_age: number | null;
   maximum_inclusive: boolean;
@@ -136,7 +136,7 @@ export interface StructuredOpportunityRecord {
   verified?: boolean;
 }
 
-export type StructuredActionability = Pick<
+type StructuredActionability = Pick<
   StructuredOpportunityRecord,
   | "application_link_status"
   | "application_url"
@@ -231,50 +231,7 @@ export interface NationalOpportunity {
   verified?: boolean;
 }
 
-// Locations and timestamps are derived on the server, never entered.
-export type InternationalOpportunityInput = Omit<
-  InternationalOpportunity,
-  | "verified"
-  | "curatedStatus"
-  | "curatedStatusLabel"
-  | "program"
-  | "applicationLinkStatus"
-  | "applicationUrl"
-  | "canApply"
-  | "id"
-  | "localizacoes"
-  | "custo"
-  | "atualizadoEm"
-  | "lastVerifiedAt"
-  | "lifecycleStatus"
-  | "semanticFields"
-  | "structuredAgeRules"
->;
-export type NationalOpportunityInput = Omit<
-  NationalOpportunity,
-  | "verified"
-  | "curatedStatus"
-  | "curatedStatusLabel"
-  | "program"
-  | "applicationLinkStatus"
-  | "applicationUrl"
-  | "canApply"
-  | "id"
-  | "localizacoes"
-  | "custo"
-  | "atualizadoEm"
-  | "lastVerifiedAt"
-  | "lifecycleStatus"
-  | "semanticFields"
-  | "structuredAgeRules"
->;
-
 const SPECIFIC_REQUIREMENTS_SPLIT_REGEX = /\r?\n|;|\|/;
-const BR_DATE_IN_TEXT_REGEX = /\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/;
-const MULTISPACE_REGEX = /\s+/g;
-const SHORT_DESCRIPTION_MAX_LENGTH = 220;
-const DEFAULT_OPPORTUNITY_IMAGE_URL =
-  "https://dummyimage.com/1200x630/0f172a/f8fafc&text=Oportunidade";
 const ISO_DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 export const STRUCTURED_OPPORTUNITIES_ENABLED =
   process.env.NEXT_PUBLIC_STRUCTURED_OPPORTUNITIES === "true";
@@ -356,96 +313,6 @@ const toDateString = (value: string | Date | null): string => {
   const year = parsed.getFullYear();
 
   return `${day}/${month}/${year}`;
-};
-
-const toApiDateString = (value: string): string => {
-  const parts = value.split("/");
-  if (parts.length !== 3) {
-    return value;
-  }
-
-  const [day, month, year] = parts;
-  if (!(day && month && year)) {
-    return value;
-  }
-
-  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-};
-
-const extractFirstBrDateToken = (value: string): string | undefined => {
-  const match = BR_DATE_IN_TEXT_REGEX.exec(value);
-
-  if (!match) {
-    return undefined;
-  }
-
-  const [, day, month, year] = match;
-  if (!(day && month && year)) {
-    return undefined;
-  }
-
-  return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year}`;
-};
-
-const toApiDateIfValid = (value: string): string | undefined => {
-  const trimmedValue = value.trim();
-  if (!trimmedValue) {
-    return undefined;
-  }
-
-  const normalizedDateToken =
-    extractFirstBrDateToken(trimmedValue) ?? trimmedValue;
-  const isoLikeValue = toApiDateString(normalizedDateToken);
-  const parsedDate = new Date(isoLikeValue);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return undefined;
-  }
-
-  return isoLikeValue;
-};
-
-const toSingleLine = (value: string): string => {
-  return value.replace(MULTISPACE_REGEX, " ").trim();
-};
-
-const toOptionalSingleLine = (value: string): string | undefined => {
-  const normalizedValue = toSingleLine(value);
-  if (!normalizedValue) {
-    return undefined;
-  }
-
-  return normalizedValue;
-};
-
-const toShortDescription = (value: string): string => {
-  const normalized = toSingleLine(value);
-  if (!normalized) {
-    return "";
-  }
-
-  if (normalized.length <= SHORT_DESCRIPTION_MAX_LENGTH) {
-    return normalized;
-  }
-
-  const truncated = normalized.slice(0, SHORT_DESCRIPTION_MAX_LENGTH);
-  const safeCutoffThreshold = Math.floor(SHORT_DESCRIPTION_MAX_LENGTH * 0.6);
-  const lastSpaceIndex = truncated.lastIndexOf(" ");
-
-  if (lastSpaceIndex > safeCutoffThreshold) {
-    return `${truncated.slice(0, lastSpaceIndex)}...`;
-  }
-
-  return `${truncated}...`;
-};
-
-const normalizeOutboundImage = (value: string): string => {
-  const trimmedValue = value.trim();
-  if (trimmedValue) {
-    return trimmedValue;
-  }
-
-  return DEFAULT_OPPORTUNITY_IMAGE_URL;
 };
 
 const splitSpecificRequirements = (value: string | undefined): string[] => {
@@ -930,14 +797,11 @@ const fetchStructuredActionabilityIndex = async (
 
 const sendToApi = async (
   path: string,
-  method: "POST" | "PUT" | "DELETE",
-  body?: unknown
+  method: "POST" | "DELETE"
 ): Promise<void> => {
   const response = await fetch(path, {
     method,
     credentials: "include",
-    headers: body ? { "Content-Type": "application/json" } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
   });
 
   if (!response.ok) {
@@ -962,67 +826,6 @@ const sendToApi = async (
 
     throw new ApiRequestError(errorMessage, response.status);
   }
-};
-
-const mapInternationalInputToApi = (payload: InternationalOpportunityInput) => {
-  const applicationDeadline = toApiDateIfValid(payload.prazoInscricao);
-  const contact = toOptionalSingleLine(payload.contato);
-
-  return {
-    name: payload.nome,
-    image: normalizeOutboundImage(payload.imagem),
-    country: payload.pais,
-    city: payload.cidade,
-    responsibleInstitution: payload.instituicaoResponsavel,
-    type: payload.tipo,
-    description: payload.descricao,
-    educationLevel: payload.nivelEnsino,
-    ageRange: payload.faixaEtaria,
-    languageRequirements: payload.requisitosIdioma,
-    specificRequirements: payload.requisitosEspecificos,
-    applicationFee: payload.taxaAplicacao,
-    scholarshipType: payload.tipoBolsa,
-    scholarshipCoverage: payload.coberturaBolsa,
-    extraCosts: payload.custosExtras,
-    duration: payload.duracao,
-    ...(applicationDeadline ? { applicationDeadline } : {}),
-    selectionSteps: payload.etapasSelecao,
-    applicationProcess: payload.processoInscricao,
-    officialLink: payload.linkOficial,
-    ...(contact ? { contact } : {}),
-  };
-};
-
-const mapNationalInputToApi = (payload: NationalOpportunityInput) => {
-  const about = payload.sobre.trim();
-  const shortDescriptionSource = about || payload.requisitos || payload.nome;
-  const applicationDeadline = toApiDateIfValid(payload.prazoInscricao);
-  const contact = toOptionalSingleLine(payload.contato);
-
-  return {
-    name: payload.nome,
-    image: normalizeOutboundImage(payload.imagem),
-    country: payload.pais,
-    type: payload.tipo,
-    educationLevel: payload.nivelEnsino,
-    modality: payload.modalidade,
-    ...(applicationDeadline ? { applicationDeadline } : {}),
-    about,
-    shortDescription: toShortDescription(shortDescriptionSource),
-    duration: payload.duracao,
-    cityState: payload.cidadeEstado,
-    ageRange: payload.faixaEtaria,
-    requirements: payload.requisitos,
-    specificRequirements: payload.requisitosEspecificos.join("; "),
-    responsibleInstitution: payload.instituicaoResponsavel,
-    applicationFee: payload.taxaAplicacao,
-    benefits: payload.beneficios,
-    costs: payload.custos,
-    extraCosts: payload.custosExtras,
-    selectionSteps: payload.etapasSelecao,
-    officialLink: payload.linkOficial,
-    ...(contact ? { contact } : {}),
-  };
 };
 
 export const getInternationalOpportunities = async (): Promise<
@@ -1168,58 +971,6 @@ export const resolveStructuredNationalOpportunity = (
   record.collection === "national"
     ? mapStructuredNationalOpportunity(record)
     : null;
-
-export const createInternationalOpportunity = async (
-  payload: InternationalOpportunityInput
-): Promise<void> => {
-  await sendToApi(
-    "/api/opportunities",
-    "POST",
-    mapInternationalInputToApi(payload)
-  );
-};
-
-export const updateInternationalOpportunity = async (
-  id: string,
-  payload: InternationalOpportunityInput
-): Promise<void> => {
-  await sendToApi(
-    `/api/opportunities/${id}`,
-    "PUT",
-    mapInternationalInputToApi(payload)
-  );
-};
-
-export const deleteInternationalOpportunity = async (
-  id: string
-): Promise<void> => {
-  await sendToApi(`/api/opportunities/${id}`, "DELETE");
-};
-
-export const createNationalOpportunity = async (
-  payload: NationalOpportunityInput
-): Promise<void> => {
-  await sendToApi(
-    "/api/national-opportunities",
-    "POST",
-    mapNationalInputToApi(payload)
-  );
-};
-
-export const updateNationalOpportunity = async (
-  id: string,
-  payload: NationalOpportunityInput
-): Promise<void> => {
-  await sendToApi(
-    `/api/national-opportunities/${id}`,
-    "PUT",
-    mapNationalInputToApi(payload)
-  );
-};
-
-export const deleteNationalOpportunity = async (id: string): Promise<void> => {
-  await sendToApi(`/api/national-opportunities/${id}`, "DELETE");
-};
 
 export const getInternationalFavorites = async (): Promise<
   InternationalOpportunity[]

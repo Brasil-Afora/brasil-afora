@@ -3,11 +3,8 @@ import { describe, expect, it } from "vitest";
 
 const PUBLIC_RENDERING_FILES = [
   "../components/international-opportunities/internacional-info.tsx",
-  "../components/international-opportunities/internacional-list.tsx",
   "../components/national-opportunities/nacional-info.tsx",
-  "../components/national-opportunities/nacional-list.tsx",
   "../components/opportunities/catalog-items.tsx",
-  "../components/opportunities/types.ts",
   "./opportunities-api.ts",
   "../server/publication/publication-workflow.ts",
 ] as const;

@@ -1,47 +1,6 @@
 import { countdownCopy } from "@/lib/copy/pt-br";
 import { PT_BR_TIME_ZONE } from "@/lib/locale/pt-br";
 
-export function getDaysRemaining(deadlineString: string): number | null {
-  if (typeof deadlineString !== "string" || deadlineString.length < 10) {
-    return null;
-  }
-
-  const parts = deadlineString.split("/");
-  if (parts.length !== 3) {
-    return null;
-  }
-
-  const day = Number.parseInt(parts[0], 10);
-  const month = Number.parseInt(parts[1], 10) - 1;
-  const year = Number.parseInt(parts[2], 10);
-
-  if (Number.isNaN(day) || Number.isNaN(month) || Number.isNaN(year)) {
-    return null;
-  }
-
-  const deadline = new Date(year, month, day);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const timeDiff = deadline.getTime() - today.getTime();
-  return Math.ceil(timeDiff / (1000 * 3600 * 24));
-}
-
-export function getTimeRemaining(deadlineString: string): string | null {
-  const daysRemaining = getDaysRemaining(deadlineString);
-  if (daysRemaining === null) {
-    return null;
-  }
-
-  if (daysRemaining > 0) {
-    return countdownCopy.daysToGo(daysRemaining);
-  }
-  if (daysRemaining === 0) {
-    return countdownCopy.endsToday;
-  }
-  return countdownCopy.closed;
-}
-
 const MS_PER_DAY = 86_400_000;
 const BR_DATE_REGEX = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
 const ISO_DATE_REGEX = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -110,26 +69,4 @@ export function formatIsoDateBr(isoDate: string): string {
 export function isOpportunityDeadlineOpen(deadlineString: string): boolean {
   const daysRemaining = getBrasiliaDaysUntil(deadlineString);
   return daysRemaining !== null && daysRemaining >= 0;
-}
-
-export function getTimeRemainingBadgeClass(deadlineString: string): string {
-  const daysRemaining = getDaysRemaining(deadlineString);
-
-  if (daysRemaining === null) {
-    return "bg-slate-700 text-white";
-  }
-
-  if (daysRemaining <= 5) {
-    return "bg-red-500 text-white";
-  }
-
-  if (daysRemaining <= 20) {
-    return "bg-orange-500 text-black";
-  }
-
-  if (daysRemaining <= 30) {
-    return "bg-yellow-400 text-black";
-  }
-
-  return "bg-emerald-500 text-black";
 }

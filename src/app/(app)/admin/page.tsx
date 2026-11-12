@@ -1,8 +1,7 @@
-import AdminPage from "@/components/admin/admin-page";
+import { redirect } from "next/navigation";
 import { requireAdminSession } from "@/server/session";
 
 export default async function AdminRoutePage() {
   await requireAdminSession("/perfil");
-
-  return <AdminPage />;
+  redirect("/admin/review");
 }

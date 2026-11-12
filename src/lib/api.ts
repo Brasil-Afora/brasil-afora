@@ -1,9 +1,0 @@
-export async function apiFetch<T>(path: string): Promise<T> {
-  const response = await fetch(path, {
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
-  }
-  return response.json() as Promise<T>;
-}

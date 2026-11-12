@@ -14,39 +14,11 @@ interface BaseFilters {
   tipo: string[];
 }
 
-interface InternationalFilters extends BaseFilters {
-  pais: string[];
-  requisitosIdioma: string[];
-  tipoBolsa: string[];
-}
-
-interface NationalFilters extends BaseFilters {
-  modalidade: string[];
-}
-
-const OPPORTUNITY_TYPE_SPLIT_REGEX = /\s*[;,|]\s*|\s+\/\s+|\s+e\s+/i;
 const AGE_RANGE_REGEX =
   /^\s*(?:idades?\s+(?:entre|de)\s+|ages?\s+)?(\d{1,2})\s*(?:-|–|—|a|to)\s*(\d{1,2})(?:\s*(?:anos?|years?))?\s*$/i;
 const MINIMUM_AGE_REGEX =
   /^\s*(?:a partir de\s+|at least\s+)?(\d{1,2})\s*(?:\+|anos?\s+ou\s+mais|years?\s+(?:or|and)\s+older)\s*$/i;
 const EXACT_AGE_REGEX = /^\s*(\d{1,2})(?:\s*(?:anos?|years?))?\s*$/i;
-
-const splitOpportunityTypes = (tipo: string): string[] =>
-  tipo
-    .split(OPPORTUNITY_TYPE_SPLIT_REGEX)
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-const matchesSelectedTypes = (
-  opportunityType: string,
-  selectedTypes: string[]
-): boolean => {
-  const normalizedSelected = selectedTypes.map((type) => type.toLowerCase());
-  const parsedTypes = splitOpportunityTypes(opportunityType).map((type) =>
-    type.toLowerCase()
-  );
-  return parsedTypes.some((type) => normalizedSelected.includes(type));
-};
 
 const isAgeInRange = (faixaEtaria: string, age: number): boolean => {
   const range = AGE_RANGE_REGEX.exec(faixaEtaria);
@@ -174,68 +146,6 @@ export const applyBaseFilters = <T extends Opportunity>(
   if (filtros.taxaAplicacao.length > 0) {
     result = result.filter((op) =>
       matchesApplicationFee(op, filtros.taxaAplicacao)
-    );
-  }
-
-  return result;
-};
-
-export const applyInternationalFilters = (
-  data: InternationalOpportunity[],
-  filtros: InternationalFilters
-): InternationalOpportunity[] => {
-  let result = applyBaseFilters(data, filtros);
-
-  if (filtros.pais.length > 0) {
-    result = result.filter((op) =>
-      filtros.pais.some((pais) =>
-        op.pais.toLowerCase().includes(pais.toLowerCase())
-      )
-    );
-  }
-
-  if (filtros.requisitosIdioma.length > 0) {
-    result = result.filter((op) =>
-      filtros.requisitosIdioma.some((idioma) =>
-        op.requisitosIdioma.toLowerCase().includes(idioma.toLowerCase())
-      )
-    );
-  }
-
-  if (filtros.tipoBolsa.length > 0) {
-    result = result.filter((op) =>
-      filtros.tipoBolsa.some((tipo) =>
-        op.tipoBolsa.toLowerCase().includes(tipo.toLowerCase())
-      )
-    );
-  }
-
-  if (filtros.tipo.length > 0) {
-    result = result.filter((op) => matchesSelectedTypes(op.tipo, filtros.tipo));
-  }
-
-  return result;
-};
-
-export const applyNationalFilters = (
-  data: NationalOpportunity[],
-  filtros: NationalFilters
-): NationalOpportunity[] => {
-  let result = applyBaseFilters(data, filtros);
-
-  if (filtros.tipo.length > 0) {
-    result = result.filter((op) =>
-      filtros.tipo.some((tipo) =>
-        op.tipo.toLowerCase().includes(tipo.toLowerCase())
-      )
-    );
-  }
-
-  if (filtros.modalidade.length > 0) {
-    result = result.filter((op) =>
-      filtros.modalidade.some((modalidade) =>
-        op.modalidade.toLowerCase().includes(modalidade.toLowerCase())
-      )
     );
   }
 

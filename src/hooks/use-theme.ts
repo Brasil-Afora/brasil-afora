@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export type Theme = "dark" | "light";
 
-export const THEME_STORAGE_KEY = "ba-theme";
+const THEME_STORAGE_KEY = "ba-theme";
 const THEME_COOKIE_MAX_AGE = 31_536_000;
 const THEME_COOKIE_REGEX = /(?:^|; )ba-theme=(dark|light)/;
 
