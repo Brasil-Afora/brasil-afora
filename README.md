@@ -40,34 +40,32 @@ The app follows a three-layer architecture: UI (components and hooks) → BFF (A
 
 ## Environment variables
 
-Copy `.env.example` to `.env` and fill in the values:
+Copy `.env.example` to `.env` and fill in the required values:
 
 ```bash
+# Required at startup (all environments)
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/brasil_afora
 BETTER_AUTH_URL=http://localhost:3000
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 CORS_ORIGIN=http://localhost:3000
-BETTER_AUTH_SECRET=change-me-in-production
-
-# Optional: Google OAuth
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
+BETTER_AUTH_SECRET=change-me-generate-with-openssl-rand-hex-32
+RESEND_API_KEY=re_example
+RESEND_FROM_EMAIL=Brasil Afora <noreply@example.org>
+GOOGLE_CLIENT_ID=replace-with-google-client-id
+GOOGLE_CLIENT_SECRET=replace-with-google-client-secret
 ```
 
 Notes:
 
-- `DATABASE_URL` is required for Drizzle and runtime DB access.
-- `BETTER_AUTH_SECRET` must be a secure secret outside local development.
-- Google login is enabled only when both Google variables are set.
-- `CORS_ORIGIN` is **required in production** (startup throws when it is
-  missing); in development it defaults to `http://localhost:3000`.
-- API rate limiting is in-memory by default. Production with multiple
-  instances needs `UPSTASH_REDIS_REST_URL` +
-  `UPSTASH_REDIS_REST_TOKEN` (or Vercel KV equivalents).
-- Service tokens (`INGESTION_API_TOKEN`, `MAINTENANCE_WORKER_TOKEN`,
-  `OUTBOX_WORKER_TOKEN`) need at least 32 characters.
-- See `.env.example` and `docs/SECURITY_HEADERS.md` for the full list,
-  rate limit overrides, and the production checklist.
+- **Required at startup (`src/lib/env.ts`):** `DATABASE_URL` (or `DATABASE_PRIVATE_URL` at runtime), `BETTER_AUTH_URL` (falls back to `NEXT_PUBLIC_APP_URL`), `BETTER_AUTH_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET`. All of these throw on startup if missing or blank — including the Google OAuth variables, since Google login is unconditionally enabled in `src/lib/auth.ts` (use non-empty placeholder values locally if you are not testing Google sign-in).
+- **Database (`src/db/client.ts`, `drizzle.config.ts`):** Runtime connections prefer `DATABASE_PRIVATE_URL` over `DATABASE_URL`, and support an optional `DATABASE_SSL_CA` PEM certificate (`\n`-escaped). Drizzle CLI commands (`db:generate`, `db:migrate`, `db:studio`) and database scripts read `DATABASE_URL` directly.
+- **Public URL (`NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_BACKEND_URL`):** `NEXT_PUBLIC_APP_URL` sets the client auth base URL (falling back to `NEXT_PUBLIC_BACKEND_URL`, then `http://localhost:3000`) and the canonical URL for metadata, `robots.txt`, and `sitemap.xml` (falling back to `https://brasil-afora.vercel.app`).
+- **CORS (`CORS_ORIGIN`):** Comma-separated list of trusted browser origins. **Required in production** (`NODE_ENV=production`); defaults to `http://localhost:3000` in development.
+- **Feature flags:** Set `NEXT_PUBLIC_STRUCTURED_OPPORTUNITIES=true` to enable structured opportunity reads.
+- **Service tokens (optional):** `INGESTION_API_TOKEN`, `MAINTENANCE_WORKER_TOKEN`, and `OUTBOX_WORKER_TOKEN` allow bearer-token auth for automation routes (otherwise admin session auth is required). Whenever set, each must be at least 32 characters or the route returns `503`.
+- **Rate limiting:** In-memory by default. Multi-instance production deployments need `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` (or `KV_REST_API_URL` + `KV_REST_API_TOKEN`). Limits can be tuned with `RATE_LIMIT_AUTH_MAX`, `RATE_LIMIT_AUTH_WINDOW_MS`, `RATE_LIMIT_INGESTION_MAX`, `RATE_LIMIT_INGESTION_WINDOW_MS`, `RATE_LIMIT_DEFAULT_MAX`, and `RATE_LIMIT_DEFAULT_WINDOW_MS`.
+- **Scripts & tests:** `bun run local:bootstrap-reviewer` requires `LOCAL_REVIEWER_EMAIL` (must end in `.local`) and `LOCAL_REVIEWER_PASSWORD` (min 12 chars) against a local database. Cross-language tests in `bun run test` require `BRASIL_AFORA_PYTHON_REPO` and `BRASIL_AFORA_PYTHON`.
+- See `.env.example` and `docs/SECURITY_HEADERS.md` for the full list and production checklist.
 
 ## Local setup
 
