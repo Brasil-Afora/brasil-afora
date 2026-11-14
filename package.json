@@ -10,8 +10,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "test": "vitest run && node --test src/data/showcase-opportunities.test.mjs",
+    "start": "bun .next/standalone/server.js",
+    "test": "vitest run && bun --test src/data/showcase-opportunities.test.mjs",
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "biome check",
