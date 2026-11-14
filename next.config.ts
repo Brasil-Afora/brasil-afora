@@ -96,6 +96,12 @@ const IMMUTABLE_STATIC_CACHE_HEADERS: SecurityHeader[] = [
 const nextConfig: NextConfig = {
   /* config options here */
   output: "standalone",
+  // Next.js standalone file tracing misses libvips shared libraries loaded via
+  // dlopen inside @img/sharp-libvips-*; include sharp and @img so runtime
+  // image optimization works in standalone deployments.
+  outputFileTracingIncludes: {
+    "/*": ["node_modules/sharp/**/*", "node_modules/@img/**/*"],
+  },
   reactCompiler: true,
   images: {
     deviceSizes: [640, 828, 1080, 1200, 1920],
