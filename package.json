@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build-assets": "rm -rf .next/standalone/public .next/standalone/.next/static && mkdir -p .next/standalone/.next && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "start": "bun .next/standalone/server.js",
     "test": "vitest run && bun --test src/data/showcase-opportunities.test.mjs",
     "test:watch": "vitest",
